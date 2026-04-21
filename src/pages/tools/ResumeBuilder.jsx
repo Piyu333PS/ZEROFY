@@ -573,6 +573,15 @@ function TemplateExecutive({ resume, formData }) {
    MAIN COMPONENT
 ══════════════════════════════════════════════════════════ */
 export default function ResumeBuilder() {
+  // 🚧 COMING SOON — remove this block to re-enable
+  return (
+    <div style={{ minHeight: '60vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '40px 20px', fontFamily: 'Inter, sans-serif' }}>
+      <div style={{ fontSize: 48, marginBottom: 16 }}>🚀</div>
+      <h2 style={{ fontSize: 28, fontWeight: 700, margin: '0 0 10px', background: 'linear-gradient(135deg,#6C63FF,#8B5CF6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Coming Soon</h2>
+      <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 15, maxWidth: 320, lineHeight: 1.6 }}>AI Resume Builder bahut jald aane wala hai! Abhi hum ise aur behtar bana rahe hain. 🙏</p>
+    </div>
+  )
+
   const { token, status, loading, register, login, logout, fetchStatus } = useAuth()
   const [step, setStep] = useState(1)
   const [authMode, setAuthMode] = useState('register')

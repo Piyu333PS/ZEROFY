@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import HomePage from './pages/HomePage'
+import PricingPage from './pages/PricingPage'
 import { useBackButton } from './hooks/useBackButton'
 
 // PDF Tools
@@ -124,6 +125,9 @@ function AppInner() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/all-tools" element={<HomePage />} />
+
+          {/* Pricing */}
+          <Route path="/pricing" element={<PricingPage />} />
 
           {/* PDF */}
           <Route path="/tools/merge-pdf" element={<MergePDF />} />

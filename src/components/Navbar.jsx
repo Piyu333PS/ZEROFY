@@ -84,6 +84,9 @@ export default function Navbar() {
           {/* Nav Links — Desktop */}
           <div className={styles.navLinks}>
             <Link to="/" className={`${styles.navLink} ${isHome ? styles.active : ''}`}>All Tools</Link>
+            <Link to="/pricing" style={{ color: '#A78BFA', fontWeight: 700, textDecoration: 'none', fontSize: 14 }}>
+              ⚡ Go Pro
+            </Link>
           </div>
 
           {/* Mobile — Search icon + Hamburger */}
@@ -146,6 +149,10 @@ export default function Navbar() {
             </Link>
             <Link to="/all-tools" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>
               <span>🔧</span> All Tools
+            </Link>
+            <Link to="/pricing" className={styles.mobileLink} onClick={() => setMenuOpen(false)}
+              style={{ color: '#A78BFA', fontWeight: 700 }}>
+              <span>⚡</span> Go Pro
             </Link>
           </div>
         )}
