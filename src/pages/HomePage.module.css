@@ -43,22 +43,99 @@
 }
 
 .heroBadge {
-  display: inline-flex;
+  display: flex;
+  justify-content: center;
   align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  color: var(--accent2);
-  background: var(--accent-glow2);
-  border: 1px solid rgba(59,130,246,0.3);
-  padding: 6px 18px;
-  border-radius: 100px;
-  margin-bottom: 28px;
-  animation: fadeUp 0.4s ease both;
+  margin-bottom: 32px;
   position: relative;
   z-index: 1;
+}
+
+/* Logo ring wrapper */
+.logoRingWrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 160px;
+  height: 160px;
+}
+
+/* Outer dashed spinning ring */
+.logoRingOuter {
+  position: absolute;
+  inset: -18px;
+  border-radius: 50%;
+  border: 1px dashed rgba(0, 229, 255, 0.25);
+  animation: spinRingOuter 14s linear infinite reverse;
+}
+
+/* Inner conic gradient spinning ring */
+.logoRing {
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  background: conic-gradient(
+    from 0deg,
+    rgba(0, 229, 255, 0.8),
+    rgba(180, 79, 255, 0.8),
+    rgba(0, 229, 255, 0)
+  ) border-box;
+  -webkit-mask:
+    linear-gradient(#fff 0 0) padding-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: destination-out;
+  mask-composite: exclude;
+  animation: spinRing 4s linear infinite;
+}
+
+@keyframes spinRing {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes spinRingOuter {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* Hero logo image */
+.heroLogoImg {
+  width: 140px;
+  height: 140px;
+  object-fit: contain;
+  position: relative;
+  z-index: 2;
+  filter:
+    drop-shadow(0 0 24px rgba(0, 229, 255, 0.75))
+    drop-shadow(0 0 55px rgba(180, 79, 255, 0.55))
+    drop-shadow(0 0 4px rgba(255, 255, 255, 0.3));
+  animation: logoPulse 3.5s ease-in-out infinite;
+  transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+.heroLogoImg:hover {
+  transform: scale(1.08) rotate(-4deg);
+  filter:
+    drop-shadow(0 0 36px rgba(0, 229, 255, 0.95))
+    drop-shadow(0 0 80px rgba(180, 79, 255, 0.75))
+    drop-shadow(0 0 6px rgba(255, 255, 255, 0.5));
+}
+
+@keyframes logoPulse {
+  0%, 100% {
+    filter:
+      drop-shadow(0 0 24px rgba(0, 229, 255, 0.75))
+      drop-shadow(0 0 55px rgba(180, 79, 255, 0.55));
+    transform: scale(1);
+  }
+  50% {
+    filter:
+      drop-shadow(0 0 40px rgba(0, 229, 255, 0.95))
+      drop-shadow(0 0 90px rgba(180, 79, 255, 0.75));
+    transform: scale(1.04);
+  }
 }
 
 .heroTitle {

@@ -59,7 +59,15 @@ export default function HomePage() {
         <div className={styles.heroGlow} />
         <div className="page-wrapper">
           <div className={styles.heroBadge}>
-            <img src={logoImg} alt="Zerofy" style={{ height: 44, width: 'auto', objectFit: 'contain' }} />
+            <div className={styles.logoRingWrap}>
+              <div className={styles.logoRing} />
+              <div className={styles.logoRingOuter} />
+              <img
+                src={logoImg}
+                alt="Zerofy"
+                className={styles.heroLogoImg}
+              />
+            </div>
           </div>
           <h1 className={`${styles.heroTitle} fade-up`}>
             Zero Limits.<br />
