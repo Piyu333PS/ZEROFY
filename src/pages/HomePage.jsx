@@ -40,7 +40,6 @@ function ToolCard({ tool }) {
   )
 }
 
-// Status filter options
 const STATUS_TABS = [
   { id: 'live',   label: '✅ Live Tools' },
   { id: 'coming', label: '🕐 Coming Soon' },
@@ -50,7 +49,7 @@ const STATUS_TABS = [
 export default function HomePage() {
   const [activecat, setActivecat]       = useState('all')
   const [search, setSearch]             = useState('')
-  const [statusFilter, setStatusFilter] = useState('live') // default: sirf ready tools
+  const [statusFilter, setStatusFilter] = useState('live')
 
   const filtered = TOOLS.filter(t => {
     const matchCat    = activecat === 'all' || t.cat === activecat
@@ -63,12 +62,8 @@ export default function HomePage() {
     return matchCat && matchSearch && matchStatus
   })
 
-  // Coming soon count (for badge on tab)
   const comingSoonCount = TOOLS.filter(t => t.status !== 'ready').length
-
   const popularTools = TOOLS.filter(t => POPULAR_TOOLS.includes(t.id))
-
-  // Search mode mein status filter ignore karo — sab dikhao
   const isSearching = search.length > 0
 
   const displayTools = isSearching
@@ -95,13 +90,13 @@ export default function HomePage() {
             <span className={styles.accent}>Infinite Tools.</span>
           </h1>
           <p className={`${styles.heroSub} fade-up-1`}>
-            PDF, Video, Audio, Image — sab kuch ek jagah.<br />
-            Fast, free, aur bilkul aasaan. No signup.
+            PDF, Video, Audio, Image — everything in one place.<br />
+            Fast, free, and super easy to use.
           </p>
           <div className={`${styles.heroSearch} fade-up-2`}>
             <span className={styles.heroSearchIcon}>🔍</span>
             <input
-              placeholder="Koi bhi tool dhundho... jaise 'PDF compress' ya 'MP3 cut'"
+              placeholder="Search any tool... like 'PDF compress' or 'MP3 cut'"
               value={search}
               onChange={e => setSearch(e.target.value)}
               className={styles.heroSearchInput}
@@ -112,15 +107,15 @@ export default function HomePage() {
             <div className={styles.statDivider} />
             <div className={styles.stat}><strong>100%</strong> Free</div>
             <div className={styles.statDivider} />
-            <div className={styles.stat}><strong>No</strong> Signup</div>
-            <div className={styles.statDivider} />
             <div className={styles.stat}><strong>Privacy</strong> First</div>
+            <div className={styles.statDivider} />
+            <div className={styles.stat}><strong>No</strong> Limits</div>
           </div>
         </div>
       </section>
 
       <div className="page-wrapper">
-        {/* Popular Tools — sirf default view mein */}
+        {/* Popular Tools */}
         {!isSearching && activecat === 'all' && statusFilter === 'live' && (
           <section className={styles.section}>
             <h2 className={styles.sectionTitle}>
@@ -160,7 +155,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Status Filter Tabs — search mode mein nahi dikhenge */}
+        {/* Status Filter Tabs */}
         {!isSearching && (
           <section className={styles.statusTabsSection}>
             <div className={styles.statusTabs}>
@@ -184,7 +179,7 @@ export default function HomePage() {
         <section className={styles.section}>
           {isSearching && (
             <p className={styles.searchResult}>
-              "{search}" ke liye {displayTools.length} tools mile
+              {displayTools.length} tools found for "{search}"
             </p>
           )}
 
@@ -195,24 +190,23 @@ export default function HomePage() {
           ) : (
             <div className={styles.noResults}>
               <div className={styles.noResultsIcon}>🔍</div>
-              <div>Koi tool nahi mila</div>
+              <div>No tools found</div>
               <div style={{ fontSize: 14, color: 'var(--text3)', marginTop: 8 }}>
-                {isSearching ? 'Alag keywords try karo' : 'Doosra filter try karo'}
+                {isSearching ? 'Try different keywords' : 'Try a different filter'}
               </div>
             </div>
           )}
 
-          {/* Coming Soon nudge — sirf live filter mein */}
           {!isSearching && statusFilter === 'live' && (
             <div className={styles.comingSoonNudge}>
               <span>🚀</span>
               <span>
-                <strong>{comingSoonCount} aur tools</strong> aa rahe hain —{' '}
+                <strong>{comingSoonCount} more tools</strong> are coming —{' '}
                 <button
                   className={styles.nudgeLink}
                   onClick={() => setStatusFilter('coming')}
                 >
-                  Coming Soon dekho →
+                  View Coming Soon →
                 </button>
               </span>
             </div>

@@ -1,7 +1,9 @@
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
+import { useState, useEffect } from 'react'
 import Navbar from './components/Navbar'
 import HomePage from './pages/HomePage'
 import PricingPage from './pages/PricingPage'
+import SplashScreen from './components/SplashScreen'
 import { useBackButton } from './hooks/useBackButton'
 
 // PDF Tools
@@ -73,7 +75,7 @@ function ComingSoon({ name }) {
       <div style={{ fontSize: 56, marginBottom: 20 }}>🚧</div>
       <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 24, marginBottom: 10, color: 'var(--text)' }}>{name}</h2>
       <p style={{ color: 'var(--text2)', marginBottom: 28, fontSize: 14 }}>
-        Ye tool jald aa raha hai! Hum ise develop kar rahe hain.
+        This tool is coming soon! We are working on it.
       </p>
       <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
         <button onClick={() => window.history.back()} style={{
@@ -94,7 +96,7 @@ function Footer() {
   return (
     <footer style={{
       background: 'var(--bg2)',
-      borderTop: '1px solid rgba(59,130,246,0.12)',
+      borderTop: '1px solid var(--nav-border)',
       padding: '36px 24px',
       textAlign: 'center',
       marginTop: 'auto'
@@ -102,10 +104,11 @@ function Footer() {
       <div style={{ maxWidth: 1280, margin: '0 auto' }}>
         <div style={{
           fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 800, marginBottom: 6,
+          letterSpacing: '3px',
           background: 'linear-gradient(135deg, #60A5FA 0%, #A78BFA 100%)',
           WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text'
         }}>
-          ⚡ Zerofy
+          ZEROFY
         </div>
         <p style={{ color: 'var(--text3)', fontSize: 13, marginBottom: 4 }}>
           Zero Limits. Infinite Tools.
@@ -118,19 +121,16 @@ function Footer() {
   )
 }
 
-// Inner component so hooks can use router context
-function AppInner() {
+function AppInner({ theme, toggleTheme }) {
   useBackButton()
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <Navbar />
+      <Navbar theme={theme} toggleTheme={toggleTheme} />
       <main style={{ flex: 1 }}>
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/all-tools" element={<HomePage />} />
-
-          {/* Pricing */}
           <Route path="/pricing" element={<PricingPage />} />
 
           {/* PDF */}
@@ -232,9 +232,24 @@ function AppInner() {
 }
 
 export default function App() {
+  const [showSplash, setShowSplash] = useState(true)
+
+  // Theme: 'dark' or 'light'
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem('zerofy-theme') || 'dark'
+  })
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme)
+    localStorage.setItem('zerofy-theme', theme)
+  }, [theme])
+
+  const toggleTheme = () => setTheme(t => t === 'dark' ? 'light' : 'dark')
+
   return (
     <BrowserRouter>
-      <AppInner />
+      {showSplash && <SplashScreen onDone={() => setShowSplash(false)} />}
+      <AppInner theme={theme} toggleTheme={toggleTheme} />
     </BrowserRouter>
   )
 }

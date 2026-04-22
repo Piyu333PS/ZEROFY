@@ -1,22 +1,17 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { TOOLS } from '../tools/toolsData'
 import styles from './Navbar.module.css'
-import logoImg from '../assets/logo.png'
 
-export default function Navbar() {
+export default function Navbar({ theme, toggleTheme }) {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState([])
   const [menuOpen, setMenuOpen] = useState(false)
-  const [searchOpen, setSearchOpen] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
-  const inputRef = useRef(null)
 
-  // Close menu on route change
   useEffect(() => {
     setMenuOpen(false)
-    setSearchOpen(false)
     setQuery('')
     setResults([])
   }, [location.pathname])
@@ -38,30 +33,28 @@ export default function Navbar() {
   }
 
   const goTo = (route) => {
-    setQuery(''); setResults([]); setSearchOpen(false)
+    setQuery(''); setResults([])
     navigate(route)
   }
-
-  const isHome = location.pathname === '/' || location.pathname === '/all-tools'
 
   return (
     <>
       <nav className={styles.nav}>
         <div className={styles.inner}>
 
-          {/* Logo */}
+          {/* Logo — ZEROFY text only */}
           <Link to="/" className={styles.logo}>
-            <img src={logoImg} alt="Zerofy" style={{ height: 36, width: 'auto', objectFit: 'contain', display: 'block' }} />
+            <span className={styles.logoText}>ZEROFY</span>
           </Link>
 
-          {/* Search — Desktop */}
+          {/* Search — Desktop only */}
           <div className={styles.searchWrap}>
             <svg className={styles.searchIcon} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
               <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
             </svg>
             <input
               className={styles.searchInput}
-              placeholder="Koi bhi tool dhundho..."
+              placeholder="Search any tool..."
               value={query}
               onChange={handleSearch}
               onBlur={() => setTimeout(() => setResults([]), 200)}
@@ -81,22 +74,20 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* Nav Links — Desktop */}
+          {/* Desktop Nav */}
           <div className={styles.navLinks}>
-            <Link to="/" className={`${styles.navLink} ${isHome ? styles.active : ''}`}>All Tools</Link>
-            <Link to="/pricing" style={{ color: '#A78BFA', fontWeight: 700, textDecoration: 'none', fontSize: 14 }}>
-              ⚡ Go Pro
-            </Link>
+            <Link to="/pricing" className={styles.proLink}>⚡ Go Pro</Link>
+            <button className={styles.themeBtn} onClick={toggleTheme} aria-label="Toggle theme">
+              {theme === 'dark' ? '☀️' : '🌙'}
+            </button>
           </div>
 
-          {/* Mobile — Search icon + Hamburger */}
+          {/* Mobile — theme toggle + hamburger (NO search icon) */}
           <div className={styles.mobileActions}>
-            <button className={styles.iconBtn} onClick={() => { setSearchOpen(s => !s); setMenuOpen(false) }} aria-label="Search">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-              </svg>
+            <button className={styles.themeBtn} onClick={toggleTheme} aria-label="Toggle theme">
+              {theme === 'dark' ? '☀️' : '🌙'}
             </button>
-            <button className={styles.iconBtn} onClick={() => { setMenuOpen(m => !m); setSearchOpen(false) }} aria-label="Menu">
+            <button className={styles.iconBtn} onClick={() => setMenuOpen(m => !m)} aria-label="Menu">
               {menuOpen
                 ? <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 : <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
@@ -106,52 +97,10 @@ export default function Navbar() {
 
         </div>
 
-        {/* Mobile Search Bar */}
-        {searchOpen && (
-          <div className={styles.mobileSearch}>
-            <div className={styles.mobileSearchInner}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" style={{ opacity: 0.5, flexShrink: 0 }}>
-                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-              </svg>
-              <input
-                ref={inputRef}
-                autoFocus
-                className={styles.mobileSearchInput}
-                placeholder="Tool search karo..."
-                value={query}
-                onChange={handleSearch}
-              />
-              {query && (
-                <button onClick={() => { setQuery(''); setResults([]) }} className={styles.clearBtn}>✕</button>
-              )}
-            </div>
-            {results.length > 0 && (
-              <div className={styles.mobileResults}>
-                {results.map(t => (
-                  <div key={t.id} className={styles.dropItem} onClick={() => goTo(t.route)}>
-                    <span className={styles.dropIcon}>{t.icon}</span>
-                    <div>
-                      <div className={styles.dropName}>{t.name}</div>
-                      <div className={styles.dropDesc}>{t.desc}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Mobile Menu */}
+        {/* Mobile Menu — only Go Pro */}
         {menuOpen && (
           <div className={styles.mobileMenu}>
-            <Link to="/" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>
-              <span>🏠</span> Home
-            </Link>
-            <Link to="/all-tools" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>
-              <span>🔧</span> All Tools
-            </Link>
-            <Link to="/pricing" className={styles.mobileLink} onClick={() => setMenuOpen(false)}
-              style={{ color: '#A78BFA', fontWeight: 700 }}>
+            <Link to="/pricing" className={styles.mobileProLink} onClick={() => setMenuOpen(false)}>
               <span>⚡</span> Go Pro
             </Link>
           </div>
