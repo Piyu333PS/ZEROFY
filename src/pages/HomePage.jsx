@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { CATEGORIES, TOOLS, POPULAR_TOOLS } from '../tools/toolsData'
 import styles from './HomePage.module.css'
-import logoImg from '../assets/logo.png'
+import ZerofyLogoAnimation from '../components/ZerofyLogoAnimation'
 
 function ToolCard({ tool }) {
   const isReady = tool.status === 'ready'
@@ -40,17 +40,46 @@ function ToolCard({ tool }) {
   )
 }
 
+// Status filter options
+const STATUS_TABS = [
+  { id: 'live',   label: '✅ Live Tools' },
+  { id: 'coming', label: '🕐 Coming Soon' },
+  { id: 'all',    label: 'All' },
+]
+
 export default function HomePage() {
-  const [activecat, setActivecat] = useState('all')
-  const [search, setSearch] = useState('')
+  const [activecat, setActivecat]       = useState('all')
+  const [search, setSearch]             = useState('')
+  const [statusFilter, setStatusFilter] = useState('live') // default: sirf ready tools
 
   const filtered = TOOLS.filter(t => {
-    const matchCat = activecat === 'all' || t.cat === activecat
+    const matchCat    = activecat === 'all' || t.cat === activecat
     const matchSearch = !search || t.name.toLowerCase().includes(search.toLowerCase()) || t.desc.toLowerCase().includes(search.toLowerCase())
-    return matchCat && matchSearch
+    const matchStatus =
+      statusFilter === 'all'    ? true :
+      statusFilter === 'live'   ? t.status === 'ready' :
+      statusFilter === 'coming' ? t.status !== 'ready' :
+      true
+    return matchCat && matchSearch && matchStatus
   })
 
+  // Coming soon count (for badge on tab)
+  const comingSoonCount = TOOLS.filter(t => t.status !== 'ready').length
+
   const popularTools = TOOLS.filter(t => POPULAR_TOOLS.includes(t.id))
+
+  // Search mode mein status filter ignore karo — sab dikhao
+  const isSearching = search.length > 0
+
+  const displayTools = isSearching
+    ? TOOLS.filter(t => {
+        const matchCat = activecat === 'all' || t.cat === activecat
+        return matchCat && (
+          t.name.toLowerCase().includes(search.toLowerCase()) ||
+          t.desc.toLowerCase().includes(search.toLowerCase())
+        )
+      })
+    : filtered
 
   return (
     <div className={styles.page}>
@@ -59,15 +88,7 @@ export default function HomePage() {
         <div className={styles.heroGlow} />
         <div className="page-wrapper">
           <div className={styles.heroBadge}>
-            <div className={styles.logoRingWrap}>
-              <div className={styles.logoRing} />
-              <div className={styles.logoRingOuter} />
-              <img
-                src={logoImg}
-                alt="Zerofy"
-                className={styles.heroLogoImg}
-              />
-            </div>
+            <ZerofyLogoAnimation />
           </div>
           <h1 className={`${styles.heroTitle} fade-up`}>
             Zero Limits.<br />
@@ -99,8 +120,8 @@ export default function HomePage() {
       </section>
 
       <div className="page-wrapper">
-        {/* Popular Tools */}
-        {!search && activecat === 'all' && (
+        {/* Popular Tools — sirf default view mein */}
+        {!isSearching && activecat === 'all' && statusFilter === 'live' && (
           <section className={styles.section}>
             <h2 className={styles.sectionTitle}>
               <span className={styles.fire}>🔥</span> Popular Tools
@@ -117,7 +138,7 @@ export default function HomePage() {
           </section>
         )}
 
-        {/* Categories */}
+        {/* Category Tabs */}
         <section className={styles.section}>
           <div className={styles.catTabs}>
             <button
@@ -139,22 +160,61 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* Status Filter Tabs — search mode mein nahi dikhenge */}
+        {!isSearching && (
+          <section className={styles.statusTabsSection}>
+            <div className={styles.statusTabs}>
+              {STATUS_TABS.map(s => (
+                <button
+                  key={s.id}
+                  className={`${styles.statusTab} ${statusFilter === s.id ? styles.statusActive : ''}`}
+                  onClick={() => setStatusFilter(s.id)}
+                >
+                  {s.label}
+                  {s.id === 'coming' && (
+                    <span className={styles.statusBadge}>{comingSoonCount}</span>
+                  )}
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* Tools Grid */}
         <section className={styles.section}>
-          {search && (
+          {isSearching && (
             <p className={styles.searchResult}>
-              "{search}" ke liye {filtered.length} tools mile
+              "{search}" ke liye {displayTools.length} tools mile
             </p>
           )}
-          {filtered.length > 0 ? (
+
+          {displayTools.length > 0 ? (
             <div className={styles.toolsGrid}>
-              {filtered.map(t => <ToolCard key={t.id} tool={t} />)}
+              {displayTools.map(t => <ToolCard key={t.id} tool={t} />)}
             </div>
           ) : (
             <div className={styles.noResults}>
               <div className={styles.noResultsIcon}>🔍</div>
               <div>Koi tool nahi mila</div>
-              <div style={{ fontSize: 14, color: 'var(--text3)', marginTop: 8 }}>Alag keywords try karo</div>
+              <div style={{ fontSize: 14, color: 'var(--text3)', marginTop: 8 }}>
+                {isSearching ? 'Alag keywords try karo' : 'Doosra filter try karo'}
+              </div>
+            </div>
+          )}
+
+          {/* Coming Soon nudge — sirf live filter mein */}
+          {!isSearching && statusFilter === 'live' && (
+            <div className={styles.comingSoonNudge}>
+              <span>🚀</span>
+              <span>
+                <strong>{comingSoonCount} aur tools</strong> aa rahe hain —{' '}
+                <button
+                  className={styles.nudgeLink}
+                  onClick={() => setStatusFilter('coming')}
+                >
+                  Coming Soon dekho →
+                </button>
+              </span>
             </div>
           )}
         </section>

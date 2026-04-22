@@ -59,91 +59,22 @@
   background: none;
   border: none;
   padding: 0;
+  overflow: visible;
 }
 
-/* Logo ring wrapper */
-.logoRingWrap {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 160px;
-  height: 160px;
+/* Scale animation down on tablets */
+@media (max-width: 900px) and (min-width: 701px) {
+  .heroBadge { height: 330px; overflow: hidden; }
+  .heroBadge > div { transform: scale(0.78); transform-origin: top center; position: absolute; top: 0; }
 }
 
-/* Outer dashed spinning ring */
-.logoRingOuter {
-  position: absolute;
-  inset: -18px;
-  border-radius: 50%;
-  border: 1px dashed rgba(0, 229, 255, 0.3);
-  animation: spinRingOuter 14s linear infinite reverse;
+/* Scale animation down on mobile */
+@media (max-width: 700px) {
+  .heroBadge { height: 220px; overflow: hidden; }
+  .heroBadge > div { transform: scale(0.52); transform-origin: top center; position: absolute; top: 0; }
 }
 
-/* Inner conic gradient spinning ring */
-.logoRing {
-  position: absolute;
-  inset: -8px;
-  border-radius: 50%;
-  border: 2px solid transparent;
-  background: conic-gradient(
-    from 0deg,
-    rgba(0, 229, 255, 0.8),
-    rgba(180, 79, 255, 0.8),
-    rgba(0, 229, 255, 0)
-  ) border-box;
-  -webkit-mask:
-    linear-gradient(#fff 0 0) padding-box,
-    linear-gradient(#fff 0 0);
-  -webkit-mask-composite: destination-out;
-  mask-composite: exclude;
-  animation: spinRing 4s linear infinite;
-}
-
-@keyframes spinRing {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
-}
-
-@keyframes spinRingOuter {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
-}
-
-/* Hero logo image - fully transparent, no box */
-.heroLogoImg {
-  width: 140px;
-  height: 140px;
-  object-fit: contain;
-  position: relative;
-  z-index: 2;
-  background: transparent !important;
-  filter:
-    drop-shadow(0 0 28px rgba(0, 229, 255, 0.8))
-    drop-shadow(0 0 60px rgba(180, 79, 255, 0.6))
-    drop-shadow(0 0 5px rgba(255, 255, 255, 0.4));
-  animation: logoPulse 3.5s ease-in-out infinite;
-  transition: transform 0.3s ease;
-}
-
-.heroLogoImg:hover {
-  transform: scale(1.08) rotate(-4deg);
-}
-
-@keyframes logoPulse {
-  0%, 100% {
-    filter:
-      drop-shadow(0 0 28px rgba(0, 229, 255, 0.8))
-      drop-shadow(0 0 60px rgba(180, 79, 255, 0.6));
-    transform: scale(1);
-  }
-  50% {
-    filter:
-      drop-shadow(0 0 45px rgba(0, 229, 255, 1))
-      drop-shadow(0 0 95px rgba(180, 79, 255, 0.85));
-    transform: scale(1.05);
-  }
-}
+/* Logo ring styles removed — replaced by ZerofyLogoAnimation component */
 
 .heroTitle {
   font-family: var(--font-display);
@@ -485,6 +416,89 @@
 
 .noResults { text-align: center; padding: 60px; color: var(--text2); font-size: 16px; }
 .noResultsIcon { font-size: 40px; margin-bottom: 12px; }
+
+/* ── Status Filter Tabs (Live / Coming Soon / All) ── */
+.statusTabsSection { margin-bottom: 4px; }
+
+.statusTabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+
+.statusTab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 16px;
+  border-radius: 100px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text2);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.18s;
+  font-family: var(--font-body);
+}
+
+.statusTab:hover {
+  border-color: rgba(99,102,241,0.4);
+  color: var(--text);
+  background: rgba(99,102,241,0.06);
+}
+
+.statusActive {
+  background: rgba(99,102,241,0.12);
+  border-color: rgba(99,102,241,0.5) !important;
+  color: #818CF8 !important;
+}
+
+.statusBadge {
+  background: rgba(99,102,241,0.2);
+  color: #818CF8;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 1px 7px;
+  border-radius: 20px;
+  line-height: 1.6;
+}
+
+.statusActive .statusBadge {
+  background: rgba(99,102,241,0.3);
+}
+
+/* ── Coming Soon Nudge ── */
+.comingSoonNudge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 28px;
+  padding: 14px 18px;
+  background: rgba(99,102,241,0.05);
+  border: 1px dashed rgba(99,102,241,0.22);
+  border-radius: 12px;
+  color: var(--text2);
+  font-size: 14px;
+}
+
+.nudgeLink {
+  background: none;
+  border: none;
+  color: #818CF8;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  font-family: var(--font-body);
+  transition: opacity 0.15s;
+}
+
+.nudgeLink:hover {
+  opacity: 0.75;
+  text-decoration: underline;
+}
 
 @media (max-width: 768px) {
   .hero { padding: 52px 0 44px; }

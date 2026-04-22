@@ -1,0 +1,229 @@
+/* ZerofyLogoAnimation.module.css
+   Desktop: 640×420px  — exactly matches the HTML
+   Mobile:  scales down responsively via transform
+*/
+
+/* ── STAGE — same 640×420 as HTML ── */
+.stage {
+  position: relative;
+  width: 640px;
+  height: 420px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Outfit', sans-serif;
+  flex-shrink: 0;
+}
+
+/* Mobile: scale the whole stage down */
+@media (max-width: 700px) {
+  .stage {
+    width: 340px;
+    height: 223px;
+    transform-origin: top center;
+  }
+  /* scale inner content so it fits 340px container */
+  .stage > * {
+    transform-origin: center center;
+  }
+  /* We use a wrapper scale trick — see heroBadge override below */
+}
+
+/* ── ORBIT RINGS ── */
+.orbitRing {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px dashed rgba(255,255,255,0.05);
+  top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+}
+.or1 {
+  width: 170px; height: 170px;
+  animation: orbitSpin 50s linear infinite;
+}
+.or2 {
+  width: 250px; height: 250px;
+  animation: orbitSpin 80s linear infinite reverse;
+}
+@keyframes orbitSpin {
+  to { transform: translate(-50%,-50%) rotate(360deg); }
+}
+
+.orbitDot {
+  position: absolute;
+  border-radius: 50%;
+  top: 50%; left: 50%;
+}
+
+/* ── CONNECTOR SVG ── */
+.connSvg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+}
+
+/* ── INPUT / OUTPUT ── */
+.fInput {
+  position: absolute;
+  left: 28px; top: 50%;
+  transform: translateY(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  opacity: 0;
+  pointer-events: none;
+}
+.fOutput {
+  position: absolute;
+  right: 28px; top: 50%;
+  transform: translateY(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.fBubble {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 14px 18px;
+  border-radius: 18px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.09);
+  min-width: 110px;
+  transition: border-color 0.3s;
+}
+.fIcon  { font-size: 32px; line-height: 1; }
+.fLabel {
+  font-size: 10px; font-weight: 500; letter-spacing: 1px;
+  text-transform: uppercase; color: rgba(220,220,255,0.55);
+}
+.fValue {
+  font-size: 14px; font-weight: 600; color: #e8e8f8;
+  text-align: center; line-height: 1.3;
+}
+.fTag {
+  font-size: 9px; font-weight: 400; letter-spacing: 1.5px;
+  text-transform: uppercase; color: rgba(180,180,220,0.35);
+}
+
+/* ── TOOL STRIP ── */
+.toolStrip {
+  position: absolute;
+  top: 28px; left: 50%;
+  transform: translateX(-50%);
+  display: flex; align-items: center; gap: 8px;
+  opacity: 0;
+  pointer-events: none;
+  white-space: nowrap;
+}
+.stripIcon { font-size: 16px; }
+.stripName {
+  font-size: 13px; font-weight: 600; color: #d8d8f0; letter-spacing: 0.5px;
+}
+.stripCat {
+  font-size: 9px; font-weight: 400; color: rgba(180,180,220,0.4);
+  letter-spacing: 2px; text-transform: uppercase;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 6px; padding: 2px 7px;
+}
+
+/* ── PARTICLE ── */
+.particle {
+  position: absolute;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  pointer-events: none;
+  opacity: 0;
+  z-index: 20;
+}
+
+/* ── CENTER LOGO ── */
+.logoWrap {
+  position: absolute;
+  z-index: 30;
+  left: 50%; top: 50%;
+  transform: translate(-50%,-50%);
+  display: flex; flex-direction: column; align-items: center;
+}
+
+.logoCircle {
+  position: relative;
+  width: 130px; height: 130px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* spinning arc — exact from HTML */
+.logoCircle::before {
+  content: '';
+  position: absolute; inset: 0; border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0%,
+    rgba(0,210,200,0.9) 18%,
+    rgba(110,80,240,0.7) 45%,
+    transparent 55%,
+    transparent 100%
+  );
+  animation: arcSpin 3s linear infinite;
+  mask: radial-gradient(circle, transparent 62%, black 64%);
+  -webkit-mask: radial-gradient(circle, transparent 62%, black 64%);
+}
+@keyframes arcSpin { to { transform: rotate(360deg); } }
+
+.logoInner {
+  width: 108px; height: 108px; border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #1c1a30, #0e0d1c);
+  border: 1px solid rgba(255,255,255,0.07);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
+  animation: logoGlow 4s ease-in-out infinite;
+  transition: box-shadow 0.15s;
+}
+@keyframes logoGlow {
+  0%,100% { box-shadow: 0 0 30px rgba(0,180,170,0.08); }
+  50%      { box-shadow: 0 0 60px rgba(0,210,200,0.18); }
+}
+
+.infSvg {
+  width: 52px; height: 26px; overflow: visible;
+}
+.infPath {
+  fill: none;
+  stroke: url(#zla-g);
+  stroke-width: 3.2;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 5px rgba(0,210,200,0.7));
+  stroke-dasharray: 190;
+  stroke-dashoffset: 190;
+  animation: drawInf 3s ease-in-out infinite;
+}
+@keyframes drawInf {
+  0%   { stroke-dashoffset: 190; opacity: .5; }
+  45%  { stroke-dashoffset: 0;   opacity: 1;  }
+  75%  { stroke-dashoffset: 0;   opacity: 1;  }
+  100% { stroke-dashoffset:-190; opacity: .5; }
+}
+
+.logoText {
+  font-size: 11px; font-weight: 600; letter-spacing: 4px; text-transform: uppercase;
+  background: linear-gradient(90deg,#00d2c8,#a78bfa);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+
+/* ── BOTTOM PILL ── */
+.btmPill {
+  position: absolute;
+  bottom: 26px; left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,210,200,0.09);
+  border: 1px solid rgba(0,210,200,0.2);
+  border-radius: 20px; padding: 5px 16px;
+  font-size: 9.5px; font-weight: 500; letter-spacing: 2px;
+  color: rgba(0,210,200,0.75); text-transform: uppercase;
+  white-space: nowrap;
+  opacity: 0;
+  animation: fadeIn 1s ease 1s forwards;
+}
+@keyframes fadeIn { to { opacity: 1; } }
