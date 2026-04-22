@@ -8,7 +8,6 @@
   overflow: hidden;
 }
 
-/* Animated gradient orbs */
 .heroGlow {
   position: absolute;
   top: -80px;
@@ -62,19 +61,35 @@
   overflow: visible;
 }
 
-/* Scale animation down on tablets */
+/* Desktop: full animation height */
+@media (min-width: 701px) {
+  .heroBadge {
+    height: 420px;
+  }
+}
+
+/* Tablet: scale down */
 @media (max-width: 900px) and (min-width: 701px) {
-  .heroBadge { height: 330px; overflow: hidden; }
-  .heroBadge > div { transform: scale(0.78); transform-origin: top center; position: absolute; top: 0; }
+  .heroBadge {
+    height: 330px;
+    overflow: hidden;
+  }
+  .heroBadge > div {
+    transform: scale(0.78);
+    transform-origin: top center;
+    position: absolute;
+    top: 0;
+  }
 }
 
-/* Scale animation down on mobile */
+/* Mobile: show clean logo only, no overflow/clipping tricks needed */
 @media (max-width: 700px) {
-  .heroBadge { height: 220px; overflow: hidden; }
-  .heroBadge > div { transform: scale(0.52); transform-origin: top center; position: absolute; top: 0; }
+  .heroBadge {
+    height: auto;
+    overflow: visible;
+    margin-bottom: 24px;
+  }
 }
-
-/* Logo ring styles removed — replaced by ZerofyLogoAnimation component */
 
 .heroTitle {
   font-family: var(--font-display);
@@ -300,7 +315,6 @@
 .toolCard:not(.coming):hover .readyArrow { opacity: 1; transform: translate(2px,-2px); }
 .toolCard:not(.coming):hover .toolIcon   { transform: scale(1.15); }
 
-/* Top gradient line on hover */
 .toolCard:not(.coming)::after {
   content: '';
   position: absolute;
@@ -312,7 +326,6 @@
 }
 .toolCard:not(.coming):hover::after { opacity: 1; }
 
-/* Coming soon */
 .toolCard.coming {
   cursor: default;
   border-style: dashed;
@@ -417,7 +430,7 @@
 .noResults { text-align: center; padding: 60px; color: var(--text2); font-size: 16px; }
 .noResultsIcon { font-size: 40px; margin-bottom: 12px; }
 
-/* ── Status Filter Tabs (Live / Coming Soon / All) ── */
+/* ── Status Filter Tabs ── */
 .statusTabsSection { margin-bottom: 4px; }
 
 .statusTabs {
@@ -501,7 +514,7 @@
 }
 
 @media (max-width: 768px) {
-  .hero { padding: 52px 0 44px; }
+  .hero { padding: 40px 0 36px; }
   .heroTitle { letter-spacing: -1px; }
   .toolsGrid   { grid-template-columns: repeat(2, 1fr); }
   .popularGrid { grid-template-columns: repeat(2, 1fr); }

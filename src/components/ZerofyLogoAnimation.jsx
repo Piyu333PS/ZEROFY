@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import styles from './ZerofyLogoAnimation.module.css'
 
 const stories = [
@@ -16,7 +16,42 @@ const stories = [
   { name:'Word Counter',     cat:'TEXT',       icon:'📊', inIcon:'✍️', inLabel:'TEXT',    inValue:'paste text',  inTag:'enter text',  outIcon:'📊', outLabel:'STATS',   outValue:'342 words',    outTag:'counted ✓',     color:'#818cf8', particle:'#818cf8' },
 ]
 
+// Mobile-only: just the animated logo circle, no input/output panels
+function MobileLogo() {
+  return (
+    <div className={styles.mobileLogoWrap}>
+      <div className={styles.mobileLogoCircle}>
+        <div className={styles.mobileLogoInner}>
+          <svg className={styles.infSvg} viewBox="0 0 80 38">
+            <defs>
+              <linearGradient id="zla-g-m" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%"   stopColor="#00d2c8"/>
+                <stop offset="50%"  stopColor="#7c6ef5"/>
+                <stop offset="100%" stopColor="#00d2c8"/>
+              </linearGradient>
+            </defs>
+            <path className={styles.infPath}
+              d="M40,19 C40,19 34,7 24,7 C14,7 7,13 7,19 C7,25 14,31 24,31 C34,31 40,19 40,19 C40,19 46,7 56,7 C66,7 73,13 73,19 C73,25 66,31 56,31 C46,31 40,19 40,19 Z"
+            />
+          </svg>
+          <span className={styles.logoText}>ZEROFY</span>
+        </div>
+      </div>
+      <div className={styles.mobileBtmPill}>70+ Tools · 100% Free</div>
+    </div>
+  )
+}
+
 export default function ZerofyLogoAnimation() {
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth <= 700)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
+
   const connSvgRef   = useRef(null)
   const particleRef  = useRef(null)
   const logoInnerRef = useRef(null)
@@ -40,6 +75,8 @@ export default function ZerofyLogoAnimation() {
   const idxRef       = useRef(0)
 
   useEffect(() => {
+    if (isMobile) return // don't run animation on mobile
+
     const SW = 640, SH = 420
     const CX = SW/2, CY = SH/2
     const IX = 95,      IY = CY
@@ -99,7 +136,6 @@ export default function ZerofyLogoAnimation() {
       function tick(now){
         const t=Math.min((now-start)/TOTAL,1)
 
-        // Phase 1 — input + strip
         const p1=Math.min(t/0.12,1)
         if(fInputRef.current){
           fInputRef.current.style.opacity  =easeOut(p1)
@@ -107,7 +143,6 @@ export default function ZerofyLogoAnimation() {
         }
         if(toolStripRef.current) toolStripRef.current.style.opacity=easeOut(p1)
 
-        // Phase 2 — connector + particle
         const p2=Math.max(0,Math.min((t-0.12)/0.43,1))
         drawConnector(story.color, easeInOut(p2))
         if(p2>0&&p2<1){
@@ -124,14 +159,12 @@ export default function ZerofyLogoAnimation() {
           }
         } else if(particleRef.current) particleRef.current.style.opacity='0'
 
-        // Phase 3 — output
         const p3=Math.max(0,Math.min((t-0.5)/0.15,1))
         if(fOutputRef.current){
           fOutputRef.current.style.opacity  =easeOut(p3)
           fOutputRef.current.style.transform=`translateY(calc(-50% + ${(1-easeOut(p3))*14}px))`
         }
 
-        // Phase 4 — fade out
         if(t>0.82){
           const f=1-(t-0.82)/0.18
           if(fInputRef.current)   fInputRef.current.style.opacity  =f
@@ -158,32 +191,32 @@ export default function ZerofyLogoAnimation() {
 
     const t=setTimeout(()=>animateStory(stories[0]),800)
     return ()=>{ clearTimeout(t); if(animRef.current) cancelAnimationFrame(animRef.current) }
-  },[])
+  },[isMobile])
 
   const or1Dots = [...Array(5)].map((_,i)=>{ const a=(i/5)*Math.PI*2,r=85,s=3.5; return {x:Math.cos(a)*r-s/2,y:Math.sin(a)*r-s/2,s,c:'rgba(0,210,200,0.4)'} })
   const or2Dots = [...Array(8)].map((_,i)=>{ const a=(i/8)*Math.PI*2,r=125,s=2.5; return {x:Math.cos(a)*r-s/2,y:Math.sin(a)*r-s/2,s,c:'rgba(124,110,245,0.35)'} })
 
+  // Mobile: show only the clean logo
+  if (isMobile) return <MobileLogo />
+
+  // Desktop: full animation
   return (
     <div className={styles.stage}>
 
-      {/* Orbit ring 1 */}
       <div className={`${styles.orbitRing} ${styles.or1}`}>
         {or1Dots.map((d,i)=>(
           <div key={i} className={styles.orbitDot} style={{width:d.s,height:d.s,background:d.c,marginLeft:d.x,marginTop:d.y}}/>
         ))}
       </div>
 
-      {/* Orbit ring 2 */}
       <div className={`${styles.orbitRing} ${styles.or2}`}>
         {or2Dots.map((d,i)=>(
           <div key={i} className={styles.orbitDot} style={{width:d.s,height:d.s,background:d.c,marginLeft:d.x,marginTop:d.y}}/>
         ))}
       </div>
 
-      {/* Connector SVG — viewBox matches stage exactly */}
       <svg ref={connSvgRef} className={styles.connSvg} viewBox="0 0 640 420" preserveAspectRatio="xMidYMid meet"/>
 
-      {/* INPUT */}
       <div className={styles.fInput} ref={fInputRef}>
         <div className={styles.fBubble} ref={fInBubRef}>
           <div className={styles.fIcon}  ref={fInIconRef}>🖼️</div>
@@ -193,7 +226,6 @@ export default function ZerofyLogoAnimation() {
         <div className={styles.fTag} ref={fInTagRef}>DROP FILE</div>
       </div>
 
-      {/* OUTPUT */}
       <div className={styles.fOutput} ref={fOutputRef}>
         <div className={styles.fBubble} ref={fOutBubRef}>
           <div className={styles.fIcon}  ref={fOutIconRef}>📑</div>
@@ -203,17 +235,14 @@ export default function ZerofyLogoAnimation() {
         <div className={styles.fTag} ref={fOutTagRef}>READY ✓</div>
       </div>
 
-      {/* Tool strip */}
       <div className={styles.toolStrip} ref={toolStripRef}>
         <span className={styles.stripIcon} ref={sIconRef}>📑</span>
         <span className={styles.stripName} ref={sNameRef}>Image → PDF</span>
         <span className={styles.stripCat}  ref={sCatRef}>PDF</span>
       </div>
 
-      {/* Flying particle */}
       <div className={styles.particle} ref={particleRef}/>
 
-      {/* CENTER LOGO */}
       <div className={styles.logoWrap}>
         <div className={styles.logoCircle}>
           <div className={styles.logoInner} ref={logoInnerRef}>
@@ -234,7 +263,6 @@ export default function ZerofyLogoAnimation() {
         </div>
       </div>
 
-      {/* Bottom pill */}
       <div className={styles.btmPill}>70+ Tools · 100% Free</div>
     </div>
   )

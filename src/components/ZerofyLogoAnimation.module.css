@@ -1,9 +1,8 @@
 /* ZerofyLogoAnimation.module.css
-   Desktop: 640×420px  — exactly matches the HTML
-   Mobile:  scales down responsively via transform
+   Mobile-first responsive — scales cleanly on all screen sizes
 */
 
-/* ── STAGE — same 640×420 as HTML ── */
+/* ── STAGE ── */
 .stage {
   position: relative;
   width: 640px;
@@ -13,20 +12,6 @@
   justify-content: center;
   font-family: 'Outfit', sans-serif;
   flex-shrink: 0;
-}
-
-/* Mobile: scale the whole stage down */
-@media (max-width: 700px) {
-  .stage {
-    width: 340px;
-    height: 223px;
-    transform-origin: top center;
-  }
-  /* scale inner content so it fits 340px container */
-  .stage > * {
-    transform-origin: center center;
-  }
-  /* We use a wrapper scale trick — see heroBadge override below */
 }
 
 /* ── ORBIT RINGS ── */
@@ -155,7 +140,6 @@
   display: flex; align-items: center; justify-content: center;
 }
 
-/* spinning arc — exact from HTML */
 .logoCircle::before {
   content: '';
   position: absolute; inset: 0; border-radius: 50%;
@@ -210,6 +194,56 @@
   font-size: 11px; font-weight: 600; letter-spacing: 4px; text-transform: uppercase;
   background: linear-gradient(90deg,#00d2c8,#a78bfa);
   -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+
+/* ── MOBILE LOGO ONLY (no animation panels) ── */
+.mobileLogoWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 8px 0;
+}
+
+.mobileLogoCircle {
+  position: relative;
+  width: 140px; height: 140px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.mobileLogoCircle::before {
+  content: '';
+  position: absolute; inset: 0; border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0%,
+    rgba(0,210,200,0.9) 18%,
+    rgba(110,80,240,0.7) 45%,
+    transparent 55%,
+    transparent 100%
+  );
+  animation: arcSpin 3s linear infinite;
+  mask: radial-gradient(circle, transparent 62%, black 64%);
+  -webkit-mask: radial-gradient(circle, transparent 62%, black 64%);
+}
+
+.mobileLogoInner {
+  width: 116px; height: 116px; border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #1c1a30, #0e0d1c);
+  border: 1px solid rgba(255,255,255,0.07);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+  animation: logoGlow 4s ease-in-out infinite;
+  box-shadow: 0 0 40px rgba(0,210,200,0.15);
+}
+
+.mobileBtmPill {
+  background: rgba(0,210,200,0.09);
+  border: 1px solid rgba(0,210,200,0.2);
+  border-radius: 20px; padding: 6px 20px;
+  font-size: 11px; font-weight: 500; letter-spacing: 2px;
+  color: rgba(0,210,200,0.8); text-transform: uppercase;
+  white-space: nowrap;
 }
 
 /* ── BOTTOM PILL ── */
