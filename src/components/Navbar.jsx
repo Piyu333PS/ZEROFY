@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { TOOLS } from '../tools/toolsData'
 import styles from './Navbar.module.css'
+import logoImg from '../assets/logo.png'
 
 export default function Navbar() {
   const [query, setQuery] = useState('')
@@ -50,7 +51,7 @@ export default function Navbar() {
 
           {/* Logo */}
           <Link to="/" className={styles.logo}>
-            <img src="/logo.png" alt="Zerofy" style={{ height: 38, width: 'auto', objectFit: 'contain' }} />
+            <img src={logoImg} alt="Zerofy" style={{ height: 38, width: 'auto', objectFit: 'contain' }} />
           </Link>
 
           {/* Search — Desktop */}
