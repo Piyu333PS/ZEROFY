@@ -50,8 +50,7 @@ export default function Navbar() {
 
           {/* Logo */}
           <Link to="/" className={styles.logo}>
-            <span className={styles.logoIcon}>⚡</span>
-            <span>Zerofy</span>
+            <img src="/logo.png" alt="Zerofy" style={{ height: 38, width: 'auto', objectFit: 'contain' }} />
           </Link>
 
           {/* Search — Desktop */}
