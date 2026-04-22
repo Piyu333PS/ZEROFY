@@ -19,6 +19,10 @@ import WatermarkImage from './pages/tools/WatermarkImage'
 import ImageCollage from './pages/tools/ImageCollage'
 import ImageToText from './pages/tools/ImageToText'
 
+// Video Tools
+import VideoToAudio from './pages/tools/VideoToAudio'
+import VideoCutter from './pages/tools/VideoCutter'
+
 // Audio Tools
 import Mp3Trimmer from './pages/tools/Mp3Trimmer'
 import AudioRecorder from './pages/tools/AudioRecorder'
@@ -173,8 +177,8 @@ function AppInner() {
           <Route path="/tools/noise-remover" element={<ComingSoon name="Noise Remover (AI)" />} />
 
           {/* Video */}
-          <Route path="/tools/video-to-audio" element={<ComingSoon name="Video → Audio" />} />
-          <Route path="/tools/video-cutter" element={<ComingSoon name="Video Cutter" />} />
+          <Route path="/tools/video-to-audio" element={<VideoToAudio />} />
+          <Route path="/tools/video-cutter" element={<VideoCutter />} />
           <Route path="/tools/video-merger" element={<ComingSoon name="Video Merger" />} />
           <Route path="/tools/video-compressor" element={<ComingSoon name="Video Compressor" />} />
           <Route path="/tools/video-converter" element={<ComingSoon name="Video Converter" />} />

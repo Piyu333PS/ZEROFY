@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { downloadBlob } from '../../utils/download'
 import ToolLayout from '../../components/ToolLayout'
+import FileUpload from '../../components/FileUpload'
 import styles from '../ToolPage.module.css'
 
 function audioBufferToWav(buffer) {
@@ -40,8 +41,8 @@ export default function VolumeBooster() {
   const [result, setResult] = useState(null)
   const [previewUrl, setPreviewUrl] = useState(null)
 
-  const handleFile = (e) => {
-    const f = e.target.files[0]
+  const handleFile = (files) => {
+    const f = Array.isArray(files) ? files[0] : files?.target?.files?.[0]
     if (!f) return
     setFile(f)
     setResult(null)
@@ -81,14 +82,25 @@ export default function VolumeBooster() {
 
   return (
     <ToolLayout icon="🔊" name="Volume Booster" desc="Audio file ka volume badhao — 2x, 3x, 5x tak">
-      <div className={styles.controlGroup} style={{ marginBottom: 16 }}>
-        <label className={styles.controlLabel}>Audio File Upload karo</label>
-        <input type="file" accept="audio/*" onChange={handleFile} style={{ color: 'var(--text2)', fontSize: 13 }} />
-      </div>
-
-      {file && (
-        <>
-          <div className={styles.hint} style={{ marginBottom: 16 }}>📁 {file.name} ({fmtSize(file.size)})</div>
+      {!file ? (
+        <FileUpload
+          onFiles={handleFile}
+          accept={{ 'audio/*': ['.mp3', '.wav', '.ogg', '.m4a', '.aac'] }}
+          label="Audio file drag karo (MP3, WAV, OGG, M4A)"
+        />
+      ) : (
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24,
+            background: 'var(--bg3)', borderRadius: 'var(--radius)', padding: '12px 16px' }}>
+            <span style={{ fontSize: 24 }}>🔊</span>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 14, fontWeight: 500 }}>{file?.name}</div>
+              <div style={{ fontSize: 12, color: 'var(--text3)' }}>{file ? fmtSize(file.size) : ''}</div>
+            </div>
+            <button className={styles.copyBtn} onClick={() => { setFile(null); setResult(null); setPreviewUrl(null) }} style={{ margin: 0 }}>
+              Change File
+            </button>
+          </div>
           <div className={styles.controlGroup} style={{ marginBottom: 20 }}>
             <label className={styles.controlLabel}>
               Volume Boost: <strong style={{ color: 'var(--accent2)' }}>{boost}x</strong>
@@ -109,7 +121,7 @@ export default function VolumeBooster() {
           <button className={styles.actionBtn} onClick={process} disabled={processing} style={{ marginTop: 16 }}>
             {processing ? <><span className={styles.spinner} /> Processing...</> : '🔊 Volume Boost karo'}
           </button>
-        </>
+        </div>
       )}
 
       {result && (

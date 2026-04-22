@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { downloadBlob } from '../../utils/download'
 import ToolLayout from '../../components/ToolLayout'
 import FileUpload from '../../components/FileUpload'
 import styles from '../ToolPage.module.css'

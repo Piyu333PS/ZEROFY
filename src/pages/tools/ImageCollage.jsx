@@ -43,6 +43,11 @@ export default function ImageCollage() {
     setProcessing(true)
 
     const cols = lo.cols || 2, rows = lo.rows || Math.ceil(images.length / cols)
+    const total = Math.min(images.length, cols * rows)
+
+    // Edge case: no images to draw
+    if (total === 0) { setProcessing(false); return }
+
     const totalW = cols * cellW + (cols + 1) * gap
     const totalH = rows * cellH + (rows + 1) * gap
 
@@ -54,7 +59,6 @@ export default function ImageCollage() {
     ctx.fillRect(0, 0, totalW, totalH)
 
     let loaded = 0
-    const total = Math.min(images.length, cols * rows)
 
     images.slice(0, total).forEach((imgData, idx) => {
       const col = idx % cols
@@ -69,6 +73,13 @@ export default function ImageCollage() {
         const sw = cellW / scale, sh = cellH / scale
         const sx = (img.naturalWidth - sw) / 2, sy = (img.naturalHeight - sh) / 2
         ctx.drawImage(img, sx, sy, sw, sh, x, y, cellW, cellH)
+        loaded++
+        if (loaded === total) {
+          setResult(canvas.toDataURL('image/jpeg', 0.92))
+          setProcessing(false)
+        }
+      }
+      img.onerror = () => {
         loaded++
         if (loaded === total) {
           setResult(canvas.toDataURL('image/jpeg', 0.92))

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { downloadDataUrl } from '../../utils/download'
 import ToolLayout from '../../components/ToolLayout'
 import styles from '../ToolPage.module.css'
 
