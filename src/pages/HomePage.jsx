@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { CATEGORIES, TOOLS, POPULAR_TOOLS } from '../tools/toolsData'
 import styles from './HomePage.module.css'
+import logoImg from '../assets/logo.png'
 
 function ToolCard({ tool }) {
   const isReady = tool.status === 'ready'
@@ -57,7 +58,9 @@ export default function HomePage() {
       <section className={styles.hero}>
         <div className={styles.heroGlow} />
         <div className="page-wrapper">
-          <div className={styles.heroBadge}>⚡ Zerofy</div>
+          <div className={styles.heroBadge}>
+            <img src={logoImg} alt="Zerofy" style={{ height: 44, width: 'auto', objectFit: 'contain' }} />
+          </div>
           <h1 className={`${styles.heroTitle} fade-up`}>
             Zero Limits.<br />
             <span className={styles.accent}>Infinite Tools.</span>
