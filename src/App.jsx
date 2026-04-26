@@ -5,6 +5,7 @@ import HomePage from './pages/HomePage'
 import PricingPage from './pages/PricingPage'
 import SplashScreen from './components/SplashScreen'
 import { useBackButton } from './hooks/useBackButton'
+import { AuthProvider } from './context/AuthContext'
 
 // PDF Tools
 import MergePDF from './pages/tools/MergePDF'
@@ -24,6 +25,7 @@ import ImageToText from './pages/tools/ImageToText'
 // Video Tools
 import VideoToAudio from './pages/tools/VideoToAudio'
 import VideoCutter from './pages/tools/VideoCutter'
+import VideoCompressor from './pages/tools/VideoCompressor'
 
 // Audio Tools
 import Mp3Trimmer from './pages/tools/Mp3Trimmer'
@@ -32,6 +34,7 @@ import VolumeBooster from './pages/tools/VolumeBooster'
 import RingtoneMaker from './pages/tools/RingtoneMaker'
 
 // Document Tools
+import InvoiceMaker from './pages/tools/InvoiceMaker'
 import ResumeBuilder from './pages/tools/ResumeBuilder'
 import WordCounter from './pages/tools/WordCounter'
 import TextToSpeech from './pages/tools/TextToSpeech'
@@ -180,7 +183,7 @@ function AppInner({ theme, toggleTheme }) {
           <Route path="/tools/video-to-audio" element={<VideoToAudio />} />
           <Route path="/tools/video-cutter" element={<VideoCutter />} />
           <Route path="/tools/video-merger" element={<ComingSoon name="Video Merger" />} />
-          <Route path="/tools/video-compressor" element={<ComingSoon name="Video Compressor" />} />
+          <Route path="/tools/video-compressor" element={<VideoCompressor />} />
           <Route path="/tools/video-converter" element={<ComingSoon name="Video Converter" />} />
           <Route path="/tools/video-to-gif" element={<ComingSoon name="Video → GIF" />} />
           <Route path="/tools/add-subtitles" element={<ComingSoon name="Add Subtitles" />} />
@@ -190,6 +193,7 @@ function AppInner({ theme, toggleTheme }) {
           <Route path="/tools/remove-audio" element={<ComingSoon name="Remove Audio" />} />
 
           {/* Document */}
+          <Route path="/tools/invoice-maker" element={<InvoiceMaker />} />
           <Route path="/tools/resume-builder" element={<ResumeBuilder />} />
           <Route path="/tools/word-counter" element={<WordCounter />} />
           <Route path="/tools/case-converter" element={<CaseConverter />} />
@@ -234,7 +238,6 @@ function AppInner({ theme, toggleTheme }) {
 export default function App() {
   const [showSplash, setShowSplash] = useState(true)
 
-  // Theme: 'dark' or 'light'
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem('zerofy-theme') || 'dark'
   })
@@ -248,8 +251,10 @@ export default function App() {
 
   return (
     <BrowserRouter>
-      {showSplash && <SplashScreen onDone={() => setShowSplash(false)} />}
-      <AppInner theme={theme} toggleTheme={toggleTheme} />
+      <AuthProvider>
+        {showSplash && <SplashScreen onDone={() => setShowSplash(false)} />}
+        <AppInner theme={theme} toggleTheme={toggleTheme} />
+      </AuthProvider>
     </BrowserRouter>
   )
 }

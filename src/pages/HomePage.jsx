@@ -91,12 +91,12 @@ export default function HomePage() {
           </h1>
           <p className={`${styles.heroSub} fade-up-1`}>
             PDF, Video, Audio, Image — everything in one place.<br />
-            Fast, free, and super easy to use.
+            Fast, free, and incredibly easy to use.
           </p>
           <div className={`${styles.heroSearch} fade-up-2`}>
             <span className={styles.heroSearchIcon}>🔍</span>
             <input
-              placeholder="Search any tool... like 'PDF compress' or 'MP3 cut'"
+              placeholder="Search any tool... like 'compress PDF' or 'cut MP3'"
               value={search}
               onChange={e => setSearch(e.target.value)}
               className={styles.heroSearchInput}
@@ -179,7 +179,7 @@ export default function HomePage() {
         <section className={styles.section}>
           {isSearching && (
             <p className={styles.searchResult}>
-              {displayTools.length} tools found for "{search}"
+              {displayTools.length} result{displayTools.length !== 1 ? 's' : ''} for "{search}"
             </p>
           )}
 
@@ -201,7 +201,7 @@ export default function HomePage() {
             <div className={styles.comingSoonNudge}>
               <span>🚀</span>
               <span>
-                <strong>{comingSoonCount} more tools</strong> are coming —{' '}
+                <strong>{comingSoonCount} more tools</strong> are on the way —{' '}
                 <button
                   className={styles.nudgeLink}
                   onClick={() => setStatusFilter('coming')}
