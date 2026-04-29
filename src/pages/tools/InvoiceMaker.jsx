@@ -126,17 +126,17 @@ const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
 .ig-root {
-  --bg: #0A0914;
-  --card: rgba(255,255,255,0.04);
-  --card2: rgba(255,255,255,0.07);
-  --border: rgba(255,255,255,0.08);
-  --border2: rgba(255,255,255,0.16);
-  --text: #EAE8FF;
-  --text2: #9B97C8;
-  --text3: #5C587A;
-  --accent: #7C6FFF;
-  --accent-dim: rgba(124,111,255,0.15);
-  --accent-glow: rgba(124,111,255,0.4);
+  --bg: #12111F;
+  --card: #1E1C2E;
+  --card2: #252338;
+  --border: rgba(255,255,255,0.10);
+  --border2: rgba(255,255,255,0.22);
+  --text: #F0EEFF;
+  --text2: #B8B4E0;
+  --text3: #7A75A0;
+  --accent: #8B7FFF;
+  --accent-dim: rgba(139,127,255,0.18);
+  --accent-glow: rgba(139,127,255,0.35);
   --green: #34D399;
   --red: #F87171;
   --yellow: #FBBF24;
@@ -155,8 +155,10 @@ const CSS = `
 .ig-top {
   display: flex; align-items: center; justify-content: space-between;
   padding: 20px 24px 16px;
-  border-bottom: 1px solid var(--border);
+  background: #1A1830;
+  border-bottom: 1px solid rgba(139,127,255,0.2);
   gap: 12px; flex-wrap: wrap;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.3);
 }
 .ig-brand { display: flex; align-items: center; gap: 12px; }
 .ig-icon {
@@ -172,37 +174,37 @@ const CSS = `
 /* Buttons */
 .btn {
   font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 600;
-  padding: 8px 16px; border-radius: var(--r-sm); border: 1px solid var(--border2);
-  background: var(--card2); color: var(--text2); cursor: pointer; transition: all 0.15s;
+  padding: 8px 16px; border-radius: var(--r-sm); border: 1px solid rgba(255,255,255,0.18);
+  background: #252338; color: var(--text2); cursor: pointer; transition: all 0.15s;
   display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
 }
-.btn:hover { background: rgba(255,255,255,0.12); color: var(--text); }
+.btn:hover { background: #2E2B48; border-color: rgba(255,255,255,0.28); color: var(--text); }
 .btn-accent {
   background: linear-gradient(135deg, #7C6FFF, #A78BFA);
   border-color: transparent; color: #fff;
-  box-shadow: 0 4px 18px var(--accent-glow);
+  box-shadow: 0 4px 18px rgba(124,111,255,0.45);
 }
-.btn-accent:hover { opacity: 0.88; color: #fff; }
-.btn-green { background: rgba(52,211,153,0.15); border-color: rgba(52,211,153,0.3); color: var(--green); }
+.btn-accent:hover { opacity: 0.88; color: #fff; box-shadow: 0 6px 24px rgba(124,111,255,0.55); }
+.btn-green { background: rgba(52,211,153,0.15); border-color: rgba(52,211,153,0.35); color: var(--green); }
 .btn-green:hover { background: rgba(52,211,153,0.25); }
 .btn-sm { padding: 6px 12px; font-size: 12px; }
 .btn-icon { padding: 7px 8px; }
 .btn-ghost { background: transparent; border-color: transparent; color: var(--text3); }
-.btn-ghost:hover { background: var(--card2); color: var(--text); border-color: var(--border); }
+.btn-ghost:hover { background: #252338; color: var(--text); border-color: rgba(255,255,255,0.14); }
 
 /* Main layout */
-.ig-layout { display: grid; grid-template-columns: 1fr 340px; gap: 0; min-height: calc(100vh - 80px); }
-@media (max-width: 900px) { .ig-layout { grid-template-columns: 1fr; } }
+.ig-layout { display: grid; grid-template-columns: 1fr 420px; gap: 0; min-height: calc(100vh - 80px); }
+@media (max-width: 1000px) { .ig-layout { grid-template-columns: 1fr; } }
 
-.ig-left { padding: 20px 24px; border-right: 1px solid var(--border); }
-.ig-right { padding: 20px; background: rgba(0,0,0,0.15); }
+.ig-left { padding: 20px 24px; border-right: 1px solid rgba(139,127,255,0.15); }
+.ig-right { padding: 20px; background: #15132A; border-left: 1px solid rgba(139,127,255,0.1); }
 
 /* Section heading */
 .sec-label {
-  font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
-  color: var(--text3); margin-bottom: 10px; display: flex; align-items: center; gap: 6px;
+  font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+  color: #9A96C0; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;
 }
-.sec-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+.sec-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); flex-shrink: 0; box-shadow: 0 0 6px var(--accent-glow); }
 
 /* Two-col */
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -211,11 +213,13 @@ const CSS = `
 
 /* Card */
 .ig-card {
-  background: var(--card); border: 1px solid var(--border);
+  background: #1E1C2E;
+  border: 1px solid rgba(139,127,255,0.15);
   border-radius: var(--r); padding: 16px; margin-bottom: 12px;
   transition: border-color 0.2s;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.25);
 }
-.ig-card:focus-within { border-color: rgba(124,111,255,0.3); }
+.ig-card:focus-within { border-color: rgba(139,127,255,0.45); }
 
 /* Form fields */
 .field { margin-bottom: 10px; }
@@ -223,25 +227,26 @@ const CSS = `
 .lbl { font-size: 11px; font-weight: 600; color: var(--text3); letter-spacing: 0.04em; text-transform: uppercase; display: block; margin-bottom: 4px; }
 .inp {
   font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px;
-  background: var(--card2); color: var(--text); border: 1px solid var(--border);
+  background: #252338; color: var(--text); border: 1px solid rgba(255,255,255,0.14);
   border-radius: var(--r-sm); padding: 9px 12px; width: 100%; outline: none; transition: all 0.15s;
 }
-.inp:hover { border-color: var(--border2); }
-.inp:focus { border-color: var(--accent); background: rgba(124,111,255,0.08); }
-.inp::placeholder { color: var(--text3); opacity: 0.7; }
+.inp:hover { border-color: rgba(255,255,255,0.26); }
+.inp:focus { border-color: var(--accent); background: rgba(139,127,255,0.1); box-shadow: 0 0 0 3px rgba(139,127,255,0.12); }
+.inp::placeholder { color: #5A5578; opacity: 1; }
 .inp[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
 textarea.inp { resize: vertical; min-height: 60px; line-height: 1.5; }
-select.inp { cursor: pointer; }
+select.inp { cursor: pointer; color-scheme: dark; }
+select.inp option { background: #252338; color: #F0EEFF; }
 
 /* Biz pills */
 .biz-pills { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
 .biz-pill {
   font-size: 12px; font-weight: 600; padding: 5px 12px; border-radius: 20px;
-  border: 1px solid var(--border2); background: var(--card2); color: var(--text3);
+  border: 1px solid rgba(255,255,255,0.18); background: #252338; color: #B0ACC8;
   cursor: pointer; transition: all 0.15s;
 }
-.biz-pill:hover { color: var(--text); background: rgba(255,255,255,0.1); }
-.biz-pill.on { background: var(--accent-dim); border-color: rgba(124,111,255,0.4); color: var(--accent); }
+.biz-pill:hover { color: var(--text); background: #2E2B48; border-color: rgba(255,255,255,0.28); }
+.biz-pill.on { background: rgba(139,127,255,0.2); border-color: rgba(139,127,255,0.5); color: #C4BCFF; }
 
 /* Invoice number chip */
 .inv-no {
@@ -259,14 +264,17 @@ select.inp { cursor: pointer; }
 
 /* Items table */
 .items-head {
-  display: grid; grid-template-columns: 80px 1fr 80px 60px 100px 80px 32px;
-  gap: 8px; padding: 0 4px 8px; border-bottom: 1px solid var(--border);
-  font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text3);
+  display: grid; grid-template-columns: 100px 1fr 90px 60px 100px 32px;
+  gap: 8px; padding: 0 4px 8px; border-bottom: 2px solid rgba(139,127,255,0.3);
+  font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #9A96C0;
 }
 .item-row {
-  display: grid; grid-template-columns: 80px 1fr 80px 60px 100px 80px 32px;
+  display: grid; grid-template-columns: 100px 1fr 90px 60px 100px 32px;
   gap: 8px; align-items: start; margin-top: 8px; animation: fadeIn 0.2s ease;
+  padding: 6px 4px; border-bottom: 1px solid rgba(255,255,255,0.06); border-radius: 6px;
+  transition: background 0.12s;
 }
+.item-row:hover { background: rgba(139,127,255,0.06); }
 @media (max-width: 700px) {
   .items-head { display: none; }
   .item-row { grid-template-columns: 1fr 1fr; }
@@ -283,13 +291,13 @@ select.inp { cursor: pointer; }
 .type-service { background: rgba(96,165,250,0.15); color: var(--blue); }
 
 /* Totals */
-.totals { border-top: 1px solid var(--border); margin-top: 16px; padding-top: 14px; }
-.t-row { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; font-size: 13px; color: var(--text2); }
-.t-row.grand { border-top: 1px solid var(--border2); margin-top: 10px; padding-top: 12px; font-size: 20px; font-weight: 700; color: var(--text); }
-.t-row.grand span:last-child { color: var(--accent); font-family: 'JetBrains Mono', monospace; }
+.totals { border-top: 1px solid rgba(255,255,255,0.1); margin-top: 16px; padding-top: 14px; }
+.t-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; font-size: 13px; color: var(--text2); }
+.t-row.grand { background: rgba(139,127,255,0.12); border: 1px solid rgba(139,127,255,0.25); border-radius: 10px; margin-top: 12px; padding: 12px 14px; font-size: 20px; font-weight: 700; color: var(--text); }
+.t-row.grand span:last-child { color: #C4BCFF; font-family: 'JetBrains Mono', monospace; }
 .pct-inp {
-  font-family: 'JetBrains Mono', monospace; font-size: 12px; background: var(--card2);
-  border: 1px solid var(--border); border-radius: 5px; padding: 2px 6px; width: 48px;
+  font-family: 'JetBrains Mono', monospace; font-size: 12px; background: #252338;
+  border: 1px solid rgba(255,255,255,0.14); border-radius: 5px; padding: 2px 6px; width: 48px;
   color: var(--text2); outline: none; text-align: center;
 }
 .pct-inp:focus { border-color: var(--accent); }
@@ -298,55 +306,60 @@ select.inp { cursor: pointer; }
 .preview-panel { position: sticky; top: 20px; }
 .prev-box {
   background: #fff; border-radius: var(--r); overflow: hidden;
-  box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(139,127,255,0.15);
   font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; color: #1a1a2e;
   min-height: 400px;
+  width: 100%;
+  transform-origin: top left;
 }
 
 /* Template thumbs */
 .tmpl-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
 .tmpl-opt {
-  flex: 1; min-width: 64px; cursor: pointer; border: 2px solid var(--border);
-  border-radius: var(--r-sm); overflow: hidden; background: none; transition: all 0.15s;
+  flex: 1; min-width: 64px; cursor: pointer; border: 2px solid rgba(255,255,255,0.12);
+  border-radius: var(--r-sm); overflow: hidden; background: #1E1C2E; transition: all 0.15s;
   padding: 0;
 }
-.tmpl-opt.on { border-color: var(--accent); box-shadow: 0 0 12px var(--accent-glow); }
+.tmpl-opt:hover { border-color: rgba(139,127,255,0.35); background: #252338; }
+.tmpl-opt.on { border-color: var(--accent); box-shadow: 0 0 14px rgba(139,127,255,0.4); }
 .tmpl-thumb { height: 44px; display: flex; flex-direction: column; padding: 5px 6px; gap: 3px; }
 .t-bar { border-radius: 2px; height: 6px; }
-.tmpl-name { font-size: 10px; font-weight: 600; text-align: center; padding: 4px 0 3px; color: var(--text3); }
+.tmpl-name { font-size: 10px; font-weight: 600; text-align: center; padding: 4px 0 3px; color: #9A96C0; background: #15132A; border-top: 1px solid rgba(255,255,255,0.07); }
+.tmpl-opt.on .tmpl-name { color: #C4BCFF; }
 
 /* Generate area */
 .gen-area {
-  background: linear-gradient(135deg, rgba(124,111,255,0.12), rgba(167,139,250,0.08));
-  border: 1px solid rgba(124,111,255,0.25); border-radius: var(--r);
+  background: linear-gradient(135deg, rgba(139,127,255,0.16), rgba(167,139,250,0.10));
+  border: 1px solid rgba(139,127,255,0.3); border-radius: var(--r);
   padding: 20px; text-align: center; margin-bottom: 14px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
 }
-.gen-total { font-family: 'JetBrains Mono', monospace; font-size: 28px; font-weight: 700; color: var(--accent); letter-spacing: -0.02em; }
-.gen-label { font-size: 11px; color: var(--text3); margin-bottom: 12px; }
+.gen-total { font-family: 'JetBrains Mono', monospace; font-size: 28px; font-weight: 700; color: #C4BCFF; letter-spacing: -0.02em; text-shadow: 0 0 20px rgba(139,127,255,0.4); }
+.gen-label { font-size: 11px; color: #9A96C0; margin-bottom: 12px; letter-spacing: 0.06em; text-transform: uppercase; }
 
 /* Saved list */
 .saved-list { margin-top: 20px; }
 .saved-item {
   display: flex; align-items: center; justify-content: space-between;
-  background: var(--card); border: 1px solid var(--border); border-radius: var(--r-sm);
-  padding: 10px 12px; margin-bottom: 6px; gap: 8px; transition: border-color 0.15s;
+  background: #1E1C2E; border: 1px solid rgba(255,255,255,0.1); border-radius: var(--r-sm);
+  padding: 10px 12px; margin-bottom: 6px; gap: 8px; transition: all 0.15s;
 }
-.saved-item:hover { border-color: var(--border2); }
-.s-no { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #A78BFA; font-weight: 500; }
-.s-client { font-size: 11px; color: var(--text3); margin-top: 2px; }
+.saved-item:hover { border-color: rgba(139,127,255,0.3); background: #252338; }
+.s-no { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #C4BCFF; font-weight: 500; }
+.s-client { font-size: 11px; color: #7A75A0; margin-top: 2px; }
 .s-amt { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; color: var(--text); white-space: nowrap; }
 
 /* Modal */
 .modal-bg {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(6px);
+  position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(6px);
   display: flex; align-items: center; justify-content: center; z-index: 100; padding: 20px;
   animation: fadeIn 0.15s ease;
 }
 .modal {
-  background: #0D0C1A; border: 1px solid var(--border2); border-radius: 16px;
+  background: #1A1830; border: 1px solid rgba(139,127,255,0.25); border-radius: 16px;
   padding: 24px; width: 520px; max-width: 100%; max-height: 88vh; overflow-y: auto;
   animation: slideUp 0.2s ease;
-  box-shadow: 0 24px 60px rgba(0,0,0,0.6);
+  box-shadow: 0 24px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(139,127,255,0.1);
 }
 .modal-h { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
 .modal-title { font-size: 17px; font-weight: 700; }
@@ -362,19 +375,19 @@ select.inp { cursor: pointer; }
 .code-search { position: relative; }
 .code-drop {
   position: absolute; top: 100%; left: 0; right: 0; z-index: 50;
-  background: #0D0C1A; border: 1px solid var(--border2); border-radius: var(--r-sm);
+  background: #1A1830; border: 1px solid rgba(139,127,255,0.3); border-radius: var(--r-sm);
   max-height: 180px; overflow-y: auto; margin-top: 2px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
 }
 .code-opt {
-  padding: 8px 12px; cursor: pointer; border-bottom: 1px solid var(--border);
+  padding: 8px 12px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.07);
   transition: background 0.1s; display: flex; justify-content: space-between; align-items: center;
 }
 .code-opt:last-child { border-bottom: none; }
-.code-opt:hover { background: var(--card2); }
+.code-opt:hover { background: rgba(139,127,255,0.12); }
 .code-opt-main { font-size: 12px; color: var(--text); font-weight: 500; }
-.code-opt-sub { font-size: 10px; color: var(--text3); margin-top: 1px; }
-.code-badge { font-size: 10px; font-weight: 700; color: var(--accent); font-family: 'JetBrains Mono', monospace; }
+.code-opt-sub { font-size: 10px; color: #7A75A0; margin-top: 1px; }
+.code-badge { font-size: 10px; font-weight: 700; color: #C4BCFF; background: rgba(139,127,255,0.18); padding: 2px 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; }
 
 /* Print preview */
 .print-prev { padding: 28px; background: #fff; color: #1a1a2e; min-height: 500px; }
@@ -389,7 +402,7 @@ select.inp { cursor: pointer; }
 .p-t-grand { display: flex; justify-content: space-between; font-size: 15px; font-weight: 800; padding-top: 8px; border-top: 2px solid; margin-top: 6px; }
 
 /* Section divider */
-.divider { border: none; border-top: 1px solid var(--border); margin: 4px 0 14px; }
+.divider { border: none; border-top: 1px solid rgba(139,127,255,0.15); margin: 4px 0 14px; }
 
 /* Animations */
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -402,9 +415,10 @@ select.inp { cursor: pointer; }
 
 /* Scrollbar */
 .ig-root ::-webkit-scrollbar { width: 4px; height: 4px; }
-.ig-root ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 10px; }
+.ig-root ::-webkit-scrollbar-track { background: #12111F; }
+.ig-root ::-webkit-scrollbar-thumb { background: rgba(139,127,255,0.35); border-radius: 10px; }
 .code-drop ::-webkit-scrollbar { width: 4px; }
-.code-drop ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 10px; }
+.code-drop ::-webkit-scrollbar-thumb { background: rgba(139,127,255,0.3); border-radius: 10px; }
 `
 
 function useCSS() {
@@ -452,108 +466,310 @@ function CodePicker({ type, value, onSelect }) {
   )
 }
 
-/* ─── Invoice Preview ────────────────────────────────────────── */
+/* ─── Professional Invoice Preview ───────────────────────────── */
 function Preview({ inv, items, currency, discPct, taxPct, template, status }) {
   const sub = items.reduce((s, i) => s + (i.qty || 0) * (parseFloat(i.rate) || 0), 0)
   const disc = sub * (discPct / 100)
-  const tax = (sub - disc) * (taxPct / 100)
-  const total = sub - disc + tax
+  const gstTotal = items.reduce((s, i) => s + (i.qty || 0) * (parseFloat(i.rate) || 0) * ((i.gstRate || 0) / 100), 0)
+  const total = sub - disc + gstTotal
   const t = TEMPLATES.find(t => t.key === template) || TEMPLATES[0]
   const acc = t.accent
+  const accLight = acc + '14'
+  const accMid = acc + '28'
 
   const statusColors = { draft: '#818CF8', sent: '#38BDF8', paid: '#34D399', overdue: '#F87171', cancelled: '#9CA3AF' }
   const sc = statusColors[status] || statusColors.draft
 
+  const filteredItems = items.filter(i => i.desc || i.rate)
+
+  // number to words (Indian system)
+  const numToWords = (n) => {
+    const a = ['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen']
+    const b = ['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety']
+    if (n === 0) return 'Zero'
+    const h = (x) => {
+      if (x < 20) return a[x]
+      if (x < 100) return b[Math.floor(x/10)] + (x%10 ? ' ' + a[x%10] : '')
+      return a[Math.floor(x/100)] + ' Hundred' + (x%100 ? ' ' + h(x%100) : '')
+    }
+    let r = '', num = Math.floor(n)
+    if (num >= 10000000) { r += h(Math.floor(num/10000000)) + ' Crore '; num %= 10000000 }
+    if (num >= 100000)   { r += h(Math.floor(num/100000))   + ' Lakh ';  num %= 100000 }
+    if (num >= 1000)     { r += h(Math.floor(num/1000))     + ' Thousand '; num %= 1000 }
+    if (num > 0)          r += h(num)
+    return r.trim() + ' Only'
+  }
+
   return (
-    <div className="print-prev" style={{ borderTop: `4px solid ${acc}` }}>
-      {/* Header */}
-      <div className="prev-h">
-        <div>
-          <div className="prev-biz" style={{ color: acc }}>{inv.bizName || 'Your Business'}</div>
-          <div style={{ fontSize: 11, color: '#5A578A', marginTop: 4, lineHeight: 1.7 }}>
-            {inv.bizEmail && <div>{inv.bizEmail}</div>}
-            {inv.bizPhone && <div>{inv.bizPhone}</div>}
-            {inv.bizGst && <div>GSTIN: {inv.bizGst}</div>}
-            {inv.bizAddr && <div style={{ whiteSpace: 'pre-line' }}>{inv.bizAddr}</div>}
+    <div style={{
+      background: '#fff',
+      fontFamily: "'Plus Jakarta Sans', sans-serif",
+      color: '#1a1a2e',
+      position: 'relative',
+      minHeight: 700,
+    }}>
+      {/* TOP COLOR BAR */}
+      <div style={{ height: 6, background: `linear-gradient(90deg, ${acc}, ${acc}99)` }} />
+
+      {/* HEADER */}
+      <div style={{
+        display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
+        padding: '28px 32px 20px',
+        borderBottom: `1px solid ${accMid}`,
+        background: accLight,
+      }}>
+        {/* Left — Seller */}
+        <div style={{ flex: 1 }}>
+          <div style={{
+            fontSize: 22, fontWeight: 800, color: acc,
+            letterSpacing: '-0.02em', marginBottom: 6, lineHeight: 1.1
+          }}>
+            {inv.bizName || 'Your Business'}
+          </div>
+          {inv.bizAddr && (
+            <div style={{ fontSize: 10.5, color: '#5A578A', lineHeight: 1.7, whiteSpace: 'pre-line', maxWidth: 220 }}>
+              {inv.bizAddr}
+            </div>
+          )}
+          <div style={{ marginTop: 6, display: 'flex', flexDirection: 'column', gap: 2 }}>
+            {inv.bizPhone && <div style={{ fontSize: 10.5, color: '#5A578A' }}>📞 {inv.bizPhone}</div>}
+            {inv.bizEmail && <div style={{ fontSize: 10.5, color: '#5A578A' }}>✉ {inv.bizEmail}</div>}
+            {inv.bizGst   && <div style={{ fontSize: 10.5, color: '#5A578A', fontWeight: 600 }}>GSTIN: {inv.bizGst}</div>}
           </div>
         </div>
-        <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: acc, marginBottom: 4 }}>Invoice</div>
-          <div className="prev-no">{inv.no || 'INV-2026-001'}</div>
+
+        {/* Right — Invoice meta */}
+        <div style={{ textAlign: 'right', flexShrink: 0 }}>
+          <div style={{
+            fontSize: 32, fontWeight: 900, color: acc,
+            letterSpacing: '-0.03em', lineHeight: 1, marginBottom: 8,
+            textTransform: 'uppercase'
+          }}>INVOICE</div>
+          <div style={{
+            fontFamily: 'monospace', fontSize: 13, fontWeight: 700,
+            color: '#1a1a2e', marginBottom: 8, letterSpacing: '0.04em'
+          }}>{inv.no || 'INV-2026-001'}</div>
+          <div style={{ fontSize: 10, color: '#5A578A', marginBottom: 4 }}>
+            <span style={{ fontWeight: 600 }}>Date: </span>{inv.date || today()}
+          </div>
           <div style={{ marginTop: 8 }}>
-            <span style={{ background: sc + '22', color: sc, fontSize: 9, fontWeight: 700, padding: '3px 8px', borderRadius: 12, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{status}</span>
+            <span style={{
+              background: sc + '22', color: sc, fontSize: 9, fontWeight: 800,
+              padding: '4px 10px', borderRadius: 20, textTransform: 'uppercase',
+              letterSpacing: '0.1em', border: `1px solid ${sc}44`
+            }}>{status}</span>
           </div>
-          <div style={{ fontSize: 10, color: '#5A578A', marginTop: 8 }}>{inv.date || today()}</div>
         </div>
       </div>
 
-      {/* Bill to / From */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 18, background: '#f9f8ff', borderRadius: 8, padding: '12px 14px' }}>
-        <div>
-          <div style={{ fontSize: 9, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#9492C0', marginBottom: 6 }}>Bill To</div>
-          <div style={{ fontWeight: 700, fontSize: 12 }}>{inv.clientName || '—'}</div>
-          <div style={{ fontSize: 10, color: '#5A578A', marginTop: 3, lineHeight: 1.6 }}>
-            {inv.clientEmail && <div>{inv.clientEmail}</div>}
-            {inv.clientPhone && <div>{inv.clientPhone}</div>}
-            {inv.clientGst && <div>GSTIN: {inv.clientGst}</div>}
-            {inv.clientAddr && <div style={{ whiteSpace: 'pre-line' }}>{inv.clientAddr}</div>}
+      {/* BILL TO / FROM CARDS */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0, margin: '0', borderBottom: `1px solid ${accMid}` }}>
+        {/* Bill To */}
+        <div style={{ padding: '18px 32px', borderRight: `1px solid ${accMid}` }}>
+          <div style={{
+            fontSize: 9, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.14em',
+            color: acc, marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6
+          }}>
+            <div style={{ width: 18, height: 2, background: acc, borderRadius: 2 }} />
+            Bill To
           </div>
+          <div style={{ fontSize: 13, fontWeight: 800, color: '#1a1a2e', marginBottom: 4 }}>
+            {inv.clientName || '—'}
+          </div>
+          {inv.clientAddr && (
+            <div style={{ fontSize: 10.5, color: '#5A578A', lineHeight: 1.7, whiteSpace: 'pre-line', marginBottom: 4 }}>
+              {inv.clientAddr}
+            </div>
+          )}
+          {inv.clientPhone && <div style={{ fontSize: 10.5, color: '#5A578A' }}>📞 {inv.clientPhone}</div>}
+          {inv.clientEmail && <div style={{ fontSize: 10.5, color: '#5A578A' }}>✉ {inv.clientEmail}</div>}
+          {inv.clientGst   && <div style={{ fontSize: 10.5, color: '#5A578A', fontWeight: 600, marginTop: 2 }}>GSTIN: {inv.clientGst}</div>}
         </div>
-        <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: 9, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#9492C0', marginBottom: 6 }}>Currency</div>
-          <div style={{ fontWeight: 700, fontSize: 12 }}>{currency === '₹' ? 'INR – Indian Rupee' : currency}</div>
+
+        {/* Invoice Summary Box */}
+        <div style={{ padding: '18px 32px', background: accLight }}>
+          <div style={{
+            fontSize: 9, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.14em',
+            color: acc, marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6
+          }}>
+            <div style={{ width: 18, height: 2, background: acc, borderRadius: 2 }} />
+            Invoice Summary
+          </div>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
+            <tbody>
+              <tr>
+                <td style={{ padding: '3px 0', color: '#5A578A' }}>Invoice No.</td>
+                <td style={{ padding: '3px 0', textAlign: 'right', fontWeight: 700, fontFamily: 'monospace', color: '#1a1a2e' }}>{inv.no || '—'}</td>
+              </tr>
+              <tr>
+                <td style={{ padding: '3px 0', color: '#5A578A' }}>Issue Date</td>
+                <td style={{ padding: '3px 0', textAlign: 'right', fontWeight: 600, color: '#1a1a2e' }}>{inv.date || today()}</td>
+              </tr>
+              <tr>
+                <td style={{ padding: '3px 0', color: '#5A578A' }}>Currency</td>
+                <td style={{ padding: '3px 0', textAlign: 'right', fontWeight: 600, color: '#1a1a2e' }}>{currency === '₹' ? 'INR' : currency}</td>
+              </tr>
+              {discPct > 0 && (
+                <tr>
+                  <td style={{ padding: '3px 0', color: '#5A578A' }}>Discount</td>
+                  <td style={{ padding: '3px 0', textAlign: 'right', fontWeight: 600, color: '#34D399' }}>{discPct}%</td>
+                </tr>
+              )}
+              <tr style={{ borderTop: `1px solid ${accMid}` }}>
+                <td style={{ padding: '6px 0 2px', fontWeight: 800, fontSize: 12, color: '#1a1a2e' }}>Amount Due</td>
+                <td style={{ padding: '6px 0 2px', textAlign: 'right', fontWeight: 900, fontSize: 14, color: acc, fontFamily: 'monospace' }}>{fmt(total, currency)}</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
-      {/* Table */}
-      <table className="prev-tbl">
-        <thead>
-          <tr style={{ background: acc + '18' }}>
-            <th style={{ color: acc }}>#</th>
-            <th style={{ color: acc }}>Description</th>
-            <th style={{ color: acc }}>HSN/SAC</th>
-            <th style={{ color: acc, textAlign: 'center' }}>Qty</th>
-            <th style={{ color: acc, textAlign: 'right' }}>Rate</th>
-            <th style={{ color: acc, textAlign: 'right' }}>GST%</th>
-            <th style={{ color: acc, textAlign: 'right' }}>Amount</th>
-          </tr>
-        </thead>
-        <tbody>
-          {items.filter(i => i.desc || i.rate).map((it, idx) => (
-            <tr key={it.id} style={{ background: idx % 2 === 1 ? '#f9f8ff' : '#fff' }}>
-              <td style={{ color: '#9492C0' }}>{idx + 1}</td>
-              <td style={{ fontWeight: 500 }}>{it.desc || '—'}</td>
-              <td style={{ fontFamily: 'monospace', fontSize: 10, color: '#777' }}>{it.hsnSac || '—'}</td>
-              <td style={{ textAlign: 'center' }}>{it.qty}</td>
-              <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>{fmt(parseFloat(it.rate) || 0, currency)}</td>
-              <td style={{ textAlign: 'right' }}>{it.gstRate}%</td>
-              <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 700 }}>{fmt((it.qty || 0) * (parseFloat(it.rate) || 0), currency)}</td>
+      {/* ITEMS TABLE */}
+      <div style={{ padding: '24px 32px 0' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
+          <thead>
+            <tr style={{ background: acc }}>
+              <th style={{ padding: '10px 12px', textAlign: 'left', color: '#fff', fontWeight: 700, fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.1em', width: 28 }}>#</th>
+              <th style={{ padding: '10px 12px', textAlign: 'left', color: '#fff', fontWeight: 700, fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Description</th>
+              <th style={{ padding: '10px 12px', textAlign: 'center', color: '#fff', fontWeight: 700, fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.1em', width: 70 }}>HSN/SAC</th>
+              <th style={{ padding: '10px 12px', textAlign: 'center', color: '#fff', fontWeight: 700, fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.1em', width: 40 }}>Qty</th>
+              <th style={{ padding: '10px 12px', textAlign: 'right', color: '#fff', fontWeight: 700, fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.1em', width: 90 }}>Rate</th>
+              <th style={{ padding: '10px 12px', textAlign: 'center', color: '#fff', fontWeight: 700, fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.1em', width: 50 }}>GST%</th>
+              <th style={{ padding: '10px 12px', textAlign: 'center', color: '#fff', fontWeight: 700, fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.1em', width: 60 }}>GST Amt</th>
+              <th style={{ padding: '10px 12px', textAlign: 'right', color: '#fff', fontWeight: 700, fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.1em', width: 95 }}>Total</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {filteredItems.length === 0 && (
+              <tr>
+                <td colSpan={8} style={{ padding: '20px', textAlign: 'center', color: '#9492C0', fontSize: 11 }}>No items added yet</td>
+              </tr>
+            )}
+            {filteredItems.map((it, idx) => {
+              const taxable = (it.qty || 0) * (parseFloat(it.rate) || 0)
+              const gstAmt = taxable * (it.gstRate / 100)
+              const rowTotal = taxable + gstAmt
+              return (
+                <tr key={it.id} style={{
+                  background: idx % 2 === 0 ? '#fff' : accLight,
+                  borderBottom: `1px solid ${accMid}`
+                }}>
+                  <td style={{ padding: '10px 12px', color: '#9492C0', fontWeight: 600, fontSize: 10 }}>{idx + 1}</td>
+                  <td style={{ padding: '10px 12px' }}>
+                    <div style={{ fontWeight: 600, fontSize: 11, color: '#1a1a2e' }}>{it.desc || '—'}</div>
+                    <div style={{ fontSize: 9, color: '#9492C0', marginTop: 2, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                      {it.type === 'goods' ? '🟡 Goods' : '🔵 Service'}
+                    </div>
+                  </td>
+                  <td style={{ padding: '10px 12px', textAlign: 'center', fontFamily: 'monospace', fontSize: 10, color: '#6B6A9A' }}>{it.hsnSac || '—'}</td>
+                  <td style={{ padding: '10px 12px', textAlign: 'center', fontWeight: 600 }}>{it.qty}</td>
+                  <td style={{ padding: '10px 12px', textAlign: 'right', fontFamily: 'monospace', fontSize: 10.5 }}>{fmt(parseFloat(it.rate) || 0, currency)}</td>
+                  <td style={{ padding: '10px 12px', textAlign: 'center', fontSize: 10 }}>
+                    <span style={{
+                      background: acc + '18', color: acc, fontWeight: 700,
+                      padding: '2px 6px', borderRadius: 4, fontSize: 9
+                    }}>{it.gstRate}%</span>
+                  </td>
+                  <td style={{ padding: '10px 12px', textAlign: 'center', fontFamily: 'monospace', fontSize: 10, color: '#6B6A9A' }}>{fmt(gstAmt, currency)}</td>
+                  <td style={{ padding: '10px 12px', textAlign: 'right', fontFamily: 'monospace', fontWeight: 800, fontSize: 11, color: '#1a1a2e' }}>{fmt(rowTotal, currency)}</td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      </div>
 
-      {/* Totals */}
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8 }}>
-        <div className="prev-tot">
-          <div className="p-t-row"><span>Subtotal</span><span style={{ fontFamily: 'monospace' }}>{fmt(sub, currency)}</span></div>
-          {disc > 0 && <div className="p-t-row"><span>Discount ({discPct}%)</span><span style={{ fontFamily: 'monospace' }}>−{fmt(disc, currency)}</span></div>}
-          <div className="p-t-row"><span>Tax/GST ({taxPct}%)</span><span style={{ fontFamily: 'monospace' }}>{fmt(tax, currency)}</span></div>
-          <div className="p-t-grand" style={{ color: acc, borderColor: acc }}>
-            <span>Total</span><span style={{ fontFamily: 'monospace' }}>{fmt(total, currency)}</span>
+      {/* TOTALS + NOTES */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 220px', gap: 24, padding: '16px 32px 24px', alignItems: 'start' }}>
+        {/* Left — Amount words + Notes */}
+        <div>
+          <div style={{
+            background: accLight, border: `1px solid ${accMid}`,
+            borderRadius: 8, padding: '12px 14px', marginBottom: 12
+          }}>
+            <div style={{ fontSize: 9, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', color: acc, marginBottom: 4 }}>Amount in Words</div>
+            <div style={{ fontSize: 11, color: '#1a1a2e', fontWeight: 500, fontStyle: 'italic', lineHeight: 1.5 }}>
+              {currency}{numToWords(total)}
+            </div>
+          </div>
+          {inv.notes && (
+            <div style={{ background: '#fffbf0', border: '1px solid #f5e6b0', borderRadius: 8, padding: '12px 14px' }}>
+              <div style={{ fontSize: 9, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#B8860B', marginBottom: 4 }}>Notes & Payment Details</div>
+              <div style={{ fontSize: 10.5, color: '#5A578A', lineHeight: 1.7, whiteSpace: 'pre-line' }}>{inv.notes}</div>
+            </div>
+          )}
+        </div>
+
+        {/* Right — Totals breakdown */}
+        <div style={{ border: `1px solid ${accMid}`, borderRadius: 8, overflow: 'hidden' }}>
+          <div style={{ background: acc + '10', padding: '8px 14px', borderBottom: `1px solid ${accMid}` }}>
+            <div style={{ fontSize: 9, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', color: acc }}>Summary</div>
+          </div>
+          <div style={{ padding: '10px 14px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: 11, color: '#5A578A' }}>
+              <span>Subtotal</span>
+              <span style={{ fontFamily: 'monospace' }}>{fmt(sub, currency)}</span>
+            </div>
+            {disc > 0 && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: 11, color: '#34D399' }}>
+                <span>Discount ({discPct}%)</span>
+                <span style={{ fontFamily: 'monospace' }}>−{fmt(disc, currency)}</span>
+              </div>
+            )}
+            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: 11, color: '#5A578A' }}>
+              <span>GST (per HSN/SAC)</span>
+              <span style={{ fontFamily: 'monospace' }}>{fmt(gstTotal, currency)}</span>
+            </div>
+            <div style={{
+              display: 'flex', justifyContent: 'space-between', padding: '10px 14px',
+              background: acc, borderRadius: 6, marginTop: 8,
+              fontSize: 13, fontWeight: 900, color: '#fff'
+            }}>
+              <span>Total</span>
+              <span style={{ fontFamily: 'monospace' }}>{fmt(total, currency)}</span>
+            </div>
           </div>
         </div>
       </div>
 
-      {inv.notes && (
-        <div style={{ marginTop: 20, borderTop: '1px solid #e8e7ff', paddingTop: 12 }}>
-          <div style={{ fontSize: 9, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#9492C0', marginBottom: 4 }}>Notes</div>
-          <div style={{ fontSize: 10, color: '#5A578A', lineHeight: 1.6, whiteSpace: 'pre-line' }}>{inv.notes}</div>
+      {/* FOOTER */}
+      <div style={{
+        borderTop: `2px solid ${accMid}`,
+        background: accLight,
+        padding: '14px 32px',
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+      }}>
+        <div style={{ fontSize: 9, color: '#9492C0' }}>
+          This is a computer-generated invoice
         </div>
-      )}
+        <div style={{ fontSize: 9, color: '#9492C0', textAlign: 'right' }}>
+          {inv.bizName && <span style={{ fontWeight: 700, color: acc }}>{inv.bizName}</span>}
+          {inv.bizGst && <span> · GSTIN: {inv.bizGst}</span>}
+        </div>
+      </div>
 
-      <div style={{ marginTop: 24, borderTop: '1px solid #e8e7ff', paddingTop: 10, fontSize: 9, color: '#aaa', textAlign: 'center' }}>
-        Generated with Zerofy Invoice Generator · Thank you for your business!
+      {/* Bottom accent line */}
+      <div style={{ height: 4, background: `linear-gradient(90deg, ${acc}99, ${acc})` }} />
+
+      {/* ZEROFY WATERMARK */}
+      <div style={{
+        padding: '8px 32px 12px',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+        borderTop: '1px dashed #e8e5f5',
+        background: 'linear-gradient(180deg, #fafafe, #f5f3ff)',
+      }}>
+        <span style={{ fontSize: 8, color: '#aaa', letterSpacing: '0.04em', fontStyle: 'italic' }}>Created with</span>
+        <span style={{
+          fontSize: 11, fontWeight: 900, letterSpacing: '0.06em',
+          background: 'linear-gradient(90deg, #7C6FFF, #A78BFA)',
+          WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
+          fontFamily: "'Plus Jakarta Sans', sans-serif",
+        }}>ZEROFY</span>
+        <span style={{ fontSize: 8, color: '#bbb', letterSpacing: '0.01em' }}>Invoice Generator</span>
+        <span style={{ fontSize: 8, color: '#ccc' }}>·</span>
+        <a href="https://www.zerofy.co.in" style={{
+          fontSize: 8, color: '#8B7FFF', textDecoration: 'none', fontWeight: 600, letterSpacing: '0.02em'
+        }}>www.zerofy.co.in</a>
       </div>
     </div>
   )
@@ -678,8 +894,9 @@ export default function InvoiceMaker() {
 
   const sub = items.reduce((s, i) => s + (i.qty || 0) * (parseFloat(i.rate) || 0), 0)
   const disc = sub * (discPct / 100)
-  const tax = (sub - disc) * (taxPct / 100)
-  const total = sub - disc + tax
+  const gstTotal = items.reduce((s, i) => s + (i.qty||0)*(parseFloat(i.rate)||0)*((i.gstRate||0)/100), 0)
+  const tax = gstTotal
+  const total = sub - disc + gstTotal
 
   const generateInvoice = async () => {
     if (!f.bizName.trim()) { alert('Please enter your Business Name.'); return }
@@ -709,19 +926,63 @@ export default function InvoiceMaker() {
     setGenerating(false)
 
     // Auto print
-    printInvoice(inv)
+    printInvoice()
   }
 
-  const printInvoice = (inv) => {
+  const printInvoice = () => {
     const el = document.getElementById('ig-print-zone')
     if (!el) return
     const t = TEMPLATES.find(t => t.key === template) || TEMPLATES[0]
+    const acc = t.accent
     const w = window.open('', '_blank')
-    w.document.write(`<!DOCTYPE html><html><head><title>${invNo}</title>
-      <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-      <style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:'Plus Jakarta Sans',sans-serif;padding:32px;max-width:820px;margin:0 auto;-webkit-print-color-adjust:exact;print-color-adjust:exact}@media print{@page{margin:16px}}</style>
-    </head><body>${el.innerHTML}</body></html>`)
-    w.document.close(); w.focus(); setTimeout(() => w.print(), 700)
+    w.document.write(`<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>${invNo}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 210mm;
+      min-height: 297mm;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: #fff;
+      color: #1a1a2e;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+      color-adjust: exact;
+    }
+    body { padding: 0; }
+    .invoice-wrap {
+      width: 210mm;
+      min-height: 297mm;
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+    @media print {
+      @page {
+        size: A4 portrait;
+        margin: 0;
+      }
+      html, body { margin: 0; padding: 0; }
+      .invoice-wrap { page-break-after: avoid; }
+    }
+    table { border-collapse: collapse; }
+    .mono { font-family: 'Courier New', monospace; }
+  </style>
+</head>
+<body>
+  <div class="invoice-wrap">
+    ${el.innerHTML}
+  </div>
+</body>
+</html>`)
+    w.document.close()
+    w.focus()
+    setTimeout(() => w.print(), 900)
   }
 
   const statusMeta = { draft: '#818CF8', sent: '#38BDF8', paid: '#34D399', overdue: '#F87171', cancelled: '#9CA3AF' }
@@ -821,7 +1082,6 @@ export default function InvoiceMaker() {
               <div>HSN / SAC</div>
               <div style={{ textAlign: 'center' }}>Qty</div>
               <div style={{ textAlign: 'right' }}>Rate</div>
-              <div style={{ textAlign: 'right' }}>GST %</div>
               <div />
             </div>
             {items.map(it => (
@@ -837,6 +1097,12 @@ export default function InvoiceMaker() {
                 {/* Description */}
                 <div>
                   <input className="inp" value={it.desc} onChange={e => updateItem(it.id, 'desc', e.target.value)} placeholder="Item description…" />
+                  {it.hsnSac && (
+                    <div style={{ marginTop: 3, fontSize: 10, color: '#9A96C0' }}>
+                      GST: <span style={{ color: '#C4BCFF', fontWeight: 700 }}>{it.gstRate}%</span>
+                      {' '}· {it.type === 'goods' ? 'HSN' : 'SAC'}: <span style={{ color: '#C4BCFF', fontWeight: 700 }}>{it.hsnSac}</span>
+                    </div>
+                  )}
                 </div>
                 {/* HSN/SAC */}
                 <div>
@@ -861,12 +1127,6 @@ export default function InvoiceMaker() {
                     onChange={e => updateItem(it.id, 'rate', e.target.value)}
                     placeholder="0.00" style={{ textAlign: 'right' }} />
                 </div>
-                {/* GST Rate */}
-                <div>
-                  <select className="inp" value={it.gstRate} onChange={e => updateItem(it.id, 'gstRate', +e.target.value)} style={{ textAlign: 'right' }}>
-                    {GST_RATES.map(r => <option key={r} value={r}>{r}%</option>)}
-                  </select>
-                </div>
                 {/* Remove */}
                 <div style={{ paddingTop: 8 }}>
                   <button className="btn btn-icon btn-ghost btn-sm" onClick={() => removeItem(it.id)}
@@ -877,14 +1137,14 @@ export default function InvoiceMaker() {
 
             {/* Totals */}
             <div className="totals">
-              <div className="t-row"><span>Subtotal</span><span style={{ fontFamily: "'JetBrains Mono', monospace" }}>{fmt(sub, currency)}</span></div>
+              <div className="t-row"><span>Subtotal (excl. GST)</span><span style={{ fontFamily: "'JetBrains Mono', monospace" }}>{fmt(sub, currency)}</span></div>
               <div className="t-row">
                 <span>Discount <input type="number" min="0" max="100" value={discPct} onChange={e => setDiscPct(+e.target.value)} className="pct-inp" />%</span>
                 <span style={{ fontFamily: "'JetBrains Mono', monospace", color: discPct > 0 ? 'var(--green)' : 'var(--text3)' }}>−{fmt(disc, currency)}</span>
               </div>
               <div className="t-row">
-                <span>GST / Tax <input type="number" min="0" max="100" value={taxPct} onChange={e => setTaxPct(+e.target.value)} className="pct-inp" />%</span>
-                <span style={{ fontFamily: "'JetBrains Mono', monospace" }}>{fmt(tax, currency)}</span>
+                <span>GST (as per HSN/SAC)</span>
+                <span style={{ fontFamily: "'JetBrains Mono', monospace" }}>{fmt(gstTotal, currency)}</span>
               </div>
               <div className="t-row grand"><span>Total</span><span>{fmt(total, currency)}</span></div>
             </div>
