@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../context/AuthContext'
 
 export default function AuthModal({ isOpen, onClose, defaultTab = 'login' }) {
@@ -6,7 +6,8 @@ export default function AuthModal({ isOpen, onClose, defaultTab = 'login' }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPass, setShowPass] = useState(false)
-  const { login, register, loading, error, setError } = useAuth()
+  const { login, register, googleLogin, loading, error, setError } = useAuth()
+  const googleButtonRef = useRef(null)
 
   useEffect(() => {
     setTab(defaultTab)
@@ -23,6 +24,49 @@ export default function AuthModal({ isOpen, onClose, defaultTab = 'login' }) {
   useEffect(() => {
     setError(null)
   }, [tab])
+
+  // Google One Tap / GSI setup
+  useEffect(() => {
+    if (!isOpen) return
+
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
+    if (!clientId) return
+
+    const initGoogle = () => {
+      if (!window.google) return
+      window.google.accounts.id.initialize({
+        client_id: clientId,
+        callback: async (response) => {
+          const result = await googleLogin(response.credential)
+          if (result.success) onClose()
+        }
+      })
+
+      if (googleButtonRef.current) {
+        window.google.accounts.id.renderButton(googleButtonRef.current, {
+          theme: 'filled_black',
+          size: 'large',
+          width: 344,
+          text: 'continue_with',
+          shape: 'rectangular',
+        })
+      }
+    }
+
+    // Script already loaded
+    if (window.google) {
+      initGoogle()
+      return
+    }
+
+    // Load Google script
+    const script = document.createElement('script')
+    script.src = 'https://accounts.google.com/gsi/client'
+    script.async = true
+    script.defer = true
+    script.onload = initGoogle
+    document.head.appendChild(script)
+  }, [isOpen])
 
   if (!isOpen) return null
 
@@ -128,28 +172,10 @@ export default function AuthModal({ isOpen, onClose, defaultTab = 'login' }) {
             ))}
           </div>
 
-          {/* Google OAuth Button */}
-          <button
-            style={{
-              width: '100%', padding: '11px 16px',
-              borderRadius: 12, border: '1px solid var(--border2)',
-              background: 'var(--surface)', color: 'var(--text)',
-              cursor: 'pointer', fontSize: 14, fontWeight: 500,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              gap: 10, marginBottom: 16,
-              transition: 'background 0.2s'
-            }}
-            onMouseEnter={e => e.currentTarget.style.background = 'var(--bg)'}
-            onMouseLeave={e => e.currentTarget.style.background = 'var(--surface)'}
-          >
-            <svg width="18" height="18" viewBox="0 0 48 48">
-              <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-              <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-              <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-              <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.29-8.16 2.29-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-            </svg>
-            Continue with Google
-          </button>
+          {/* Google Button — rendered by Google GSI */}
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
+            <div ref={googleButtonRef} />
+          </div>
 
           {/* Divider */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
@@ -236,7 +262,7 @@ export default function AuthModal({ isOpen, onClose, defaultTab = 'login' }) {
               transition: 'opacity 0.2s, transform 0.1s'
             }}
             onMouseEnter={e => { if (!loading) e.currentTarget.style.transform = 'scale(1.01)' }}
-            onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)' }
+            onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
           >
             {loading ? '...' : tab === 'login' ? 'Login' : 'Create Account'}
           </button>

@@ -10,7 +10,6 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
 
-  // Token hai to user load karo app open hone pe
   useEffect(() => {
     if (token) {
       const saved = localStorage.getItem('zerofy-user')
@@ -72,6 +71,27 @@ export function AuthProvider({ children }) {
     }
   }
 
+  const googleLogin = async (idToken) => {
+    setLoading(true)
+    setError(null)
+    try {
+      const res = await fetch(`${API}/api/auth/google`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idToken })
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Google login failed')
+      saveSession(data)
+      return { success: true }
+    } catch (err) {
+      setError(err.message)
+      return { success: false, error: err.message }
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const logout = () => {
     setUser(null)
     setToken(null)
@@ -81,7 +101,7 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, error, login, register, logout, setError }}>
+    <AuthContext.Provider value={{ user, token, loading, error, login, register, logout, googleLogin, setError }}>
       {children}
     </AuthContext.Provider>
   )
