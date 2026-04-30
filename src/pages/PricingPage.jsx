@@ -1,94 +1,98 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 const plans = [
   {
-    id: 'free',
-    name: 'Free',
-    emoji: '🆓',
-    price: { monthly: 0, yearly: 0 },
-    desc: 'Shuruaat ke liye bilkul sahi',
-    color: 'rgba(148,163,184,0.15)',
-    border: 'rgba(148,163,184,0.2)',
+    id: 'monthly',
+    name: 'Monthly',
+    emoji: '⚡',
+    price: 19,
+    period: '/month',
+    desc: 'Billed every month. Cancel anytime.',
+    color: 'rgba(96,165,250,0.08)',
+    border: 'rgba(96,165,250,0.25)',
     badge: null,
     features: [
-      '✅ Sabhi basic tools',
-      '✅ 5 files per day',
-      '✅ Max 10MB file size',
-      '✅ Standard processing speed',
-      '❌ No watermark removal',
-      '❌ No batch processing',
-      '❌ No priority support',
+      'Unlimited invoice generation',
+      'All tools unlocked',
+      'Unlimited file processing',
+      'Max 100MB file size',
+      'No watermarks',
+      'Priority support',
     ],
-    cta: 'Abhi Use Karo',
-    ctaStyle: 'outline',
+    cta: 'Get Started',
+    ctaStyle: 'blue',
   },
   {
-    id: 'pro',
-    name: 'Pro',
-    emoji: '⚡',
-    price: { monthly: 199, yearly: 149 },
-    desc: 'Power users ke liye',
-    color: 'linear-gradient(135deg, rgba(96,165,250,0.15) 0%, rgba(167,139,250,0.15) 100%)',
+    id: 'quarterly',
+    name: 'Quarterly',
+    emoji: '🔥',
+    price: 49,
+    period: '/3 months',
+    desc: 'Save vs monthly. Billed every 3 months.',
+    color: 'linear-gradient(135deg, rgba(96,165,250,0.12) 0%, rgba(167,139,250,0.14) 100%)',
     border: 'rgba(167,139,250,0.5)',
     badge: '🔥 Most Popular',
     features: [
-      '✅ Sabhi tools unlocked',
-      '✅ Unlimited files',
-      '✅ Max 100MB file size',
-      '✅ 5x faster processing',
-      '✅ No watermarks',
-      '✅ Batch processing',
-      '✅ Priority support',
+      'Unlimited invoice generation',
+      'All tools unlocked',
+      'Unlimited file processing',
+      'Max 100MB file size',
+      'No watermarks',
+      'Priority support',
     ],
-    cta: 'Pro Shuru Karo',
+    cta: 'Get Started',
     ctaStyle: 'gradient',
   },
   {
-    id: 'team',
-    name: 'Team',
-    emoji: '👥',
-    price: { monthly: 499, yearly: 399 },
-    desc: 'Teams aur businesses ke liye',
-    color: 'rgba(251,191,36,0.08)',
+    id: 'yearly',
+    name: 'Yearly',
+    emoji: '💰',
+    price: 199,
+    period: '/year',
+    desc: 'Best value. Save over 12% vs monthly.',
+    color: 'rgba(251,191,36,0.07)',
     border: 'rgba(251,191,36,0.3)',
-    badge: null,
+    badge: '💰 Best Value',
     features: [
-      '✅ Sab kuch Pro mein',
-      '✅ 5 team members',
-      '✅ Max 500MB file size',
-      '✅ API access',
-      '✅ Custom branding',
-      '✅ Dedicated support',
-      '✅ Usage analytics',
+      'Unlimited invoice generation',
+      'All tools unlocked',
+      'Unlimited file processing',
+      'Max 100MB file size',
+      'No watermarks',
+      'Priority support',
     ],
-    cta: 'Team Plan Lo',
+    cta: 'Get Started',
     ctaStyle: 'gold',
   },
 ]
 
 const faqs = [
   {
-    q: 'Kya free plan mein credit card chahiye?',
-    a: 'Bilkul nahi! Free plan ke liye koi payment info nahi chahiye. Bas sign up karo aur use karo.',
+    q: 'Do I need a credit card to sign up?',
+    a: 'No credit card is required to create an account. You only need to pay when you choose a plan.',
   },
   {
-    q: 'Kya main kabhi bhi cancel kar sakta hoon?',
-    a: 'Haan, aap kisi bhi waqt cancel kar sakte ho. Koi hidden charges nahi hain.',
+    q: 'Can I cancel my subscription anytime?',
+    a: 'Yes, absolutely. You can cancel at any time with no questions asked and no hidden fees.',
   },
   {
-    q: 'Payment ke kaunse methods accept hote hain?',
-    a: 'Hum UPI, Credit/Debit Card, Net Banking aur Paytm accept karte hain — Razorpay ke through.',
+    q: 'What payment methods do you accept?',
+    a: 'We accept UPI, Credit/Debit Cards, Net Banking, and Paytm — all powered by Razorpay.',
   },
   {
-    q: 'Yearly plan mein kitni savings hogi?',
-    a: 'Yearly plan mein aapko approximately 25% discount milta hai monthly plan ke mukable mein.',
+    q: 'What happens after my plan expires?',
+    a: 'After your plan expires, your account moves to the free tier. You can renew anytime to restore full access.',
+  },
+  {
+    q: 'Is my payment secure?',
+    a: 'Yes. All payments are processed through Razorpay, which is PCI-DSS compliant and fully encrypted.',
   },
 ]
 
 export default function PricingPage() {
-  const [billing, setBilling] = useState('monthly')
   const [openFaq, setOpenFaq] = useState(null)
+  const navigate = useNavigate()
 
   return (
     <div style={{
@@ -102,36 +106,35 @@ export default function PricingPage() {
       {/* Hero */}
       <div style={{
         textAlign: 'center',
-        padding: '64px 24px 48px',
+        padding: '72px 24px 52px',
         position: 'relative',
         overflow: 'hidden',
       }}>
-        {/* Background glow */}
         <div style={{
           position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)',
-          width: 600, height: 300,
-          background: 'radial-gradient(ellipse at center, rgba(167,139,250,0.12) 0%, transparent 70%)',
+          width: 600, height: 320,
+          background: 'radial-gradient(ellipse at center, rgba(167,139,250,0.1) 0%, transparent 70%)',
           pointerEvents: 'none',
         }} />
 
         <div style={{
           display: 'inline-block',
-          background: 'rgba(167,139,250,0.12)',
-          border: '1px solid rgba(167,139,250,0.3)',
+          background: 'rgba(167,139,250,0.1)',
+          border: '1px solid rgba(167,139,250,0.25)',
           borderRadius: 100,
           padding: '6px 18px',
           fontSize: 13,
           color: '#A78BFA',
           fontWeight: 600,
           marginBottom: 20,
-          letterSpacing: '0.03em',
+          letterSpacing: '0.04em',
         }}>
-          ⚡ Zerofy Pricing
+          ⚡ Zerofy Pro
         </div>
 
         <h1 style={{
           fontFamily: 'var(--font-display, "Syne", sans-serif)',
-          fontSize: 'clamp(32px, 6vw, 56px)',
+          fontSize: 'clamp(32px, 6vw, 54px)',
           fontWeight: 800,
           lineHeight: 1.1,
           marginBottom: 16,
@@ -140,63 +143,18 @@ export default function PricingPage() {
           WebkitTextFillColor: 'transparent',
           backgroundClip: 'text',
         }}>
-          Simple, Transparent Pricing
+          Simple, Honest Pricing
         </h1>
 
         <p style={{
           color: 'var(--text2, #94a3b8)',
           fontSize: 17,
-          maxWidth: 480,
-          margin: '0 auto 36px',
-          lineHeight: 1.6,
+          maxWidth: 460,
+          margin: '0 auto',
+          lineHeight: 1.65,
         }}>
-          Free se shuru karo, zaroorat hone par upgrade karo. Koi surprise charges nahi.
+          One Pro plan. Three flexible billing options. No hidden fees, no surprises.
         </p>
-
-        {/* Billing Toggle */}
-        <div style={{
-          display: 'inline-flex',
-          background: 'rgba(255,255,255,0.05)',
-          border: '1px solid rgba(255,255,255,0.08)',
-          borderRadius: 100,
-          padding: 4,
-          gap: 4,
-          position: 'relative',
-        }}>
-          {['monthly', 'yearly'].map(b => (
-            <button
-              key={b}
-              onClick={() => setBilling(b)}
-              style={{
-                padding: '8px 22px',
-                borderRadius: 100,
-                border: 'none',
-                cursor: 'pointer',
-                fontSize: 14,
-                fontWeight: 600,
-                transition: 'all 0.2s',
-                background: billing === b
-                  ? 'linear-gradient(135deg, #60A5FA, #A78BFA)'
-                  : 'transparent',
-                color: billing === b ? '#fff' : 'var(--text2, #94a3b8)',
-              }}
-            >
-              {b === 'monthly' ? 'Monthly' : 'Yearly'}
-              {b === 'yearly' && (
-                <span style={{
-                  marginLeft: 6,
-                  background: 'rgba(255,255,255,0.2)',
-                  borderRadius: 100,
-                  padding: '2px 7px',
-                  fontSize: 11,
-                  fontWeight: 700,
-                }}>
-                  -25%
-                </span>
-              )}
-            </button>
-          ))}
-        </div>
       </div>
 
       {/* Plans Grid */}
@@ -204,7 +162,7 @@ export default function PricingPage() {
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
         gap: 20,
-        maxWidth: 1000,
+        maxWidth: 980,
         margin: '0 auto',
         padding: '0 24px',
       }}>
@@ -215,37 +173,36 @@ export default function PricingPage() {
               background: plan.color,
               border: `1px solid ${plan.border}`,
               borderRadius: 20,
-              padding: '32px 28px',
+              padding: '36px 28px',
               position: 'relative',
               transition: 'transform 0.2s, box-shadow 0.2s',
-              boxShadow: plan.id === 'pro'
-                ? '0 0 40px rgba(167,139,250,0.15)'
+              boxShadow: plan.id === 'quarterly'
+                ? '0 0 40px rgba(167,139,250,0.12)'
                 : 'none',
             }}
             onMouseEnter={e => {
               e.currentTarget.style.transform = 'translateY(-4px)'
-              e.currentTarget.style.boxShadow = plan.id === 'pro'
-                ? '0 8px 50px rgba(167,139,250,0.25)'
-                : '0 8px 30px rgba(0,0,0,0.3)'
+              e.currentTarget.style.boxShadow = plan.id === 'quarterly'
+                ? '0 12px 50px rgba(167,139,250,0.22)'
+                : '0 8px 32px rgba(0,0,0,0.3)'
             }}
             onMouseLeave={e => {
               e.currentTarget.style.transform = 'translateY(0)'
-              e.currentTarget.style.boxShadow = plan.id === 'pro'
-                ? '0 0 40px rgba(167,139,250,0.15)'
+              e.currentTarget.style.boxShadow = plan.id === 'quarterly'
+                ? '0 0 40px rgba(167,139,250,0.12)'
                 : 'none'
             }}
           >
-            {/* Badge */}
             {plan.badge && (
               <div style={{
                 position: 'absolute',
-                top: -12,
-                left: '50%',
+                top: -13, left: '50%',
                 transform: 'translateX(-50%)',
-                background: 'linear-gradient(135deg, #60A5FA, #A78BFA)',
+                background: plan.id === 'quarterly'
+                  ? 'linear-gradient(135deg, #60A5FA, #A78BFA)'
+                  : 'linear-gradient(135deg, #f59e0b, #fbbf24)',
                 color: '#fff',
-                fontSize: 12,
-                fontWeight: 700,
+                fontSize: 12, fontWeight: 700,
                 padding: '4px 16px',
                 borderRadius: 100,
                 whiteSpace: 'nowrap',
@@ -255,64 +212,54 @@ export default function PricingPage() {
               </div>
             )}
 
-            {/* Plan header */}
-            <div style={{ marginBottom: 20 }}>
-              <div style={{ fontSize: 36, marginBottom: 8 }}>{plan.emoji}</div>
+            <div style={{ marginBottom: 24 }}>
+              <div style={{ fontSize: 34, marginBottom: 10 }}>{plan.emoji}</div>
               <div style={{
                 fontFamily: 'var(--font-display, "Syne", sans-serif)',
-                fontSize: 22,
-                fontWeight: 800,
-                marginBottom: 4,
+                fontSize: 22, fontWeight: 800, marginBottom: 6,
               }}>
                 {plan.name}
               </div>
-              <div style={{ color: 'var(--text2, #94a3b8)', fontSize: 13 }}>{plan.desc}</div>
+              <div style={{ color: 'var(--text2, #94a3b8)', fontSize: 13, lineHeight: 1.5 }}>
+                {plan.desc}
+              </div>
             </div>
 
-            {/* Price */}
             <div style={{ marginBottom: 28 }}>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
                 <span style={{
                   fontFamily: 'var(--font-display, "Syne", sans-serif)',
-                  fontSize: 42,
-                  fontWeight: 800,
-                  lineHeight: 1,
+                  fontSize: 46, fontWeight: 800, lineHeight: 1,
                 }}>
-                  {plan.price[billing] === 0 ? 'Free' : `₹${plan.price[billing]}`}
+                  ₹{plan.price}
                 </span>
-                {plan.price[billing] > 0 && (
-                  <span style={{ color: 'var(--text2, #94a3b8)', fontSize: 14 }}>
-                    /{billing === 'monthly' ? 'mo' : 'mo'}
-                  </span>
-                )}
+                <span style={{ color: 'var(--text2, #94a3b8)', fontSize: 14 }}>
+                  {plan.period}
+                </span>
               </div>
-              {plan.price[billing] > 0 && billing === 'yearly' && (
-                <div style={{ color: '#A78BFA', fontSize: 12, marginTop: 4, fontWeight: 500 }}>
-                  Billed yearly · ₹{plan.price[billing] * 12}/yr
-                </div>
-              )}
             </div>
 
-            {/* CTA Button */}
             <button
+              onClick={() => navigate('/tools/invoice-maker')}
               style={{
                 width: '100%',
                 padding: '13px 0',
                 borderRadius: 12,
-                border: plan.ctaStyle === 'outline'
-                  ? '1px solid rgba(255,255,255,0.15)'
-                  : 'none',
+                border: 'none',
                 cursor: 'pointer',
                 fontWeight: 700,
                 fontSize: 15,
-                marginBottom: 24,
+                marginBottom: 26,
                 transition: 'opacity 0.2s, transform 0.15s',
                 background: plan.ctaStyle === 'gradient'
                   ? 'linear-gradient(135deg, #60A5FA, #A78BFA)'
                   : plan.ctaStyle === 'gold'
                     ? 'linear-gradient(135deg, #f59e0b, #fbbf24)'
-                    : 'rgba(255,255,255,0.07)',
-                color: plan.ctaStyle === 'outline' ? 'var(--text2, #94a3b8)' : '#fff',
+                    : 'rgba(96,165,250,0.15)',
+                color: plan.ctaStyle === 'blue' ? '#60A5FA' : '#fff',
+                boxShadow: plan.ctaStyle === 'gradient'
+                  ? '0 4px 18px rgba(139,127,255,0.35)'
+                  : 'none',
               }}
               onMouseEnter={e => { e.currentTarget.style.opacity = '0.85'; e.currentTarget.style.transform = 'scale(0.98)' }}
               onMouseLeave={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.transform = 'scale(1)' }}
@@ -320,14 +267,27 @@ export default function PricingPage() {
               {plan.cta}
             </button>
 
-            {/* Features */}
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 11 }}>
               {plan.features.map((f, i) => (
                 <li key={i} style={{
                   fontSize: 14,
-                  color: f.startsWith('❌') ? 'var(--text3, #475569)' : 'var(--text2, #94a3b8)',
+                  color: 'var(--text2, #94a3b8)',
                   lineHeight: 1.4,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 9,
                 }}>
+                  <span style={{
+                    width: 18, height: 18, borderRadius: '50%', flexShrink: 0,
+                    background: plan.id === 'quarterly'
+                      ? 'rgba(167,139,250,0.2)'
+                      : plan.id === 'yearly'
+                        ? 'rgba(251,191,36,0.15)'
+                        : 'rgba(96,165,250,0.15)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 11, color: plan.id === 'quarterly' ? '#A78BFA' : plan.id === 'yearly' ? '#fbbf24' : '#60A5FA',
+                    fontWeight: 700,
+                  }}>✓</span>
                   {f}
                 </li>
               ))}
@@ -336,54 +296,59 @@ export default function PricingPage() {
         ))}
       </div>
 
-      {/* FAQ Section */}
+      {/* Trust strip */}
+      <div style={{
+        display: 'flex', justifyContent: 'center', gap: 36, flexWrap: 'wrap',
+        margin: '48px auto 0', padding: '0 24px', maxWidth: 700,
+      }}>
+        {[
+          { icon: '🔒', text: 'Secure payments via Razorpay' },
+          { icon: '↩️', text: 'Cancel anytime' },
+          { icon: '🇮🇳', text: 'UPI, Cards & Net Banking accepted' },
+        ].map((item, i) => (
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#64748b', fontSize: 13 }}>
+            <span>{item.icon}</span>
+            <span>{item.text}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* FAQ */}
       <div style={{ maxWidth: 640, margin: '64px auto 0', padding: '0 24px' }}>
         <h2 style={{
           fontFamily: 'var(--font-display, "Syne", sans-serif)',
-          fontSize: 28,
-          fontWeight: 800,
-          textAlign: 'center',
-          marginBottom: 32,
+          fontSize: 28, fontWeight: 800,
+          textAlign: 'center', marginBottom: 32,
         }}>
-          Aksar Pooche Jaane Wale Sawaal
+          Frequently Asked Questions
         </h2>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {faqs.map((faq, i) => (
             <div
               key={i}
               style={{
                 background: 'rgba(255,255,255,0.03)',
-                border: '1px solid rgba(255,255,255,0.07)',
+                border: `1px solid ${openFaq === i ? 'rgba(167,139,250,0.3)' : 'rgba(255,255,255,0.07)'}`,
                 borderRadius: 14,
                 overflow: 'hidden',
                 transition: 'border-color 0.2s',
-                borderColor: openFaq === i ? 'rgba(167,139,250,0.3)' : 'rgba(255,255,255,0.07)',
               }}
             >
               <button
                 onClick={() => setOpenFaq(openFaq === i ? null : i)}
                 style={{
-                  width: '100%',
-                  padding: '16px 20px',
-                  background: 'none',
-                  border: 'none',
+                  width: '100%', padding: '16px 20px',
+                  background: 'none', border: 'none',
                   color: 'var(--text, #f1f5f9)',
-                  fontSize: 15,
-                  fontWeight: 600,
-                  textAlign: 'left',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  gap: 12,
+                  fontSize: 15, fontWeight: 600,
+                  textAlign: 'left', cursor: 'pointer',
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12,
                 }}
               >
                 <span>{faq.q}</span>
                 <span style={{
-                  fontSize: 18,
-                  color: '#A78BFA',
-                  flexShrink: 0,
+                  fontSize: 18, color: '#A78BFA', flexShrink: 0,
                   transform: openFaq === i ? 'rotate(45deg)' : 'rotate(0)',
                   transition: 'transform 0.2s',
                 }}>+</span>
@@ -392,8 +357,7 @@ export default function PricingPage() {
                 <div style={{
                   padding: '0 20px 16px',
                   color: 'var(--text2, #94a3b8)',
-                  fontSize: 14,
-                  lineHeight: 1.6,
+                  fontSize: 14, lineHeight: 1.65,
                 }}>
                   {faq.a}
                 </div>
@@ -403,32 +367,23 @@ export default function PricingPage() {
         </div>
       </div>
 
-      {/* Bottom CTA */}
-      <div style={{
-        textAlign: 'center',
-        marginTop: 64,
-        padding: '0 24px',
-      }}>
-        <p style={{ color: 'var(--text2, #94a3b8)', fontSize: 14, marginBottom: 16 }}>
-          Koi sawaal hai? Hum yahan hain!
+      {/* Bottom */}
+      <div style={{ textAlign: 'center', marginTop: 56, padding: '0 24px' }}>
+        <p style={{ color: '#475569', fontSize: 13, marginBottom: 16 }}>
+          Have a question? We are here to help.
         </p>
         <Link to="/" style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: 8,
-          color: '#A78BFA',
-          textDecoration: 'none',
-          fontSize: 14,
-          fontWeight: 600,
+          display: 'inline-flex', alignItems: 'center', gap: 8,
+          color: '#A78BFA', textDecoration: 'none',
+          fontSize: 14, fontWeight: 600,
           border: '1px solid rgba(167,139,250,0.3)',
-          borderRadius: 100,
-          padding: '10px 22px',
+          borderRadius: 100, padding: '10px 22px',
           transition: 'background 0.2s',
         }}
           onMouseEnter={e => e.currentTarget.style.background = 'rgba(167,139,250,0.08)'}
           onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
         >
-          ← Wapas Tools Par Jao
+          ← Back to Tools
         </Link>
       </div>
     </div>
