@@ -84,6 +84,16 @@ export default function Navbar({ theme, toggleTheme }) {
     setShowDropdown(false)
   }, [location.pathname])
 
+  // ?login=true se automatically login modal open ho
+  useEffect(() => {
+    const params = new URLSearchParams(location.search)
+    if (params.get('login') === 'true' && !user) {
+      setAuthTab('login')
+      setShowAuth(true)
+      window.history.replaceState({}, '', location.pathname)
+    }
+  }, [location.search, user])
+
   const handleSearch = (e) => {
     const q = e.target.value
     setQuery(q)

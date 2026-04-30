@@ -1,4 +1,6 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
+import { useAuth } from '../../context/AuthContext'
+import AuthModal from '../../components/AuthModal'
 
 /* ─── Utilities ──────────────────────────────────────────────── */
 const uid = () => Math.random().toString(36).slice(2, 9)
@@ -834,6 +836,233 @@ function BizModal({ businesses, onSave, onClose }) {
   )
 }
 
+/* ─── Upgrade Payment Flow (Razorpay inline) ─────────────────── */
+const UPGRADE_PLANS = [
+  { id: 'monthly',   label: '₹19/month',   desc: 'Monthly',   amount: 19,  badge: null,          days: 30 },
+  { id: 'quarterly', label: '₹49/quarter', desc: 'Quarterly', amount: 49,  badge: '🔥 Popular',  days: 90 },
+  { id: 'yearly',    label: '₹199/year',   desc: 'Yearly',    amount: 199, badge: '💰 Best Value', days: 365 },
+]
+
+function UpgradePaymentFlow({ token, API, onSuccess, onClose }) {
+  const [selected, setSelected] = useState('quarterly')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [coupon, setCoupon] = useState('')
+  const [couponStatus, setCouponStatus] = useState(null) // { valid, desc, finalAmount, discountAmount }
+  const [couponLoading, setCouponLoading] = useState(false)
+
+  const selectedPlan = UPGRADE_PLANS.find(p => p.id === selected)
+
+  const validateCoupon = async () => {
+    if (!coupon.trim()) return
+    setCouponLoading(true)
+    setCouponStatus(null)
+    try {
+      const res = await fetch(`${API}/api/payment/validate-coupon`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ couponCode: coupon, planId: selected })
+      })
+      const data = await res.json()
+      if (res.ok) setCouponStatus({ valid: true, desc: data.desc, finalAmount: data.finalAmount, discountAmount: data.discountAmount })
+      else setCouponStatus({ valid: false, desc: data.error || 'Invalid coupon' })
+    } catch {
+      setCouponStatus({ valid: false, desc: 'Network error' })
+    } finally {
+      setCouponLoading(false)
+    }
+  }
+
+  // Reset coupon when plan changes
+  useEffect(() => { setCouponStatus(null); setCoupon('') }, [selected])
+
+  const handlePayment = async () => {
+    setLoading(true)
+    setError('')
+    try {
+      // 1. Create order on backend
+      const orderRes = await fetch(`${API}/api/payment/create-order`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ planId: selected, couponCode: coupon || undefined })
+      })
+      const orderData = await orderRes.json()
+      if (!orderRes.ok) throw new Error(orderData.error || 'Order create karne mein error')
+
+      // 2. Load Razorpay script if not loaded
+      if (!window.Razorpay) {
+        await new Promise((resolve, reject) => {
+          const s = document.createElement('script')
+          s.src = 'https://checkout.razorpay.com/v1/checkout.js'
+          s.onload = resolve
+          s.onerror = () => reject(new Error('Razorpay load nahi hua'))
+          document.head.appendChild(s)
+        })
+      }
+
+      // 3. Open Razorpay checkout
+      const rzp = new window.Razorpay({
+        key: orderData.keyId,
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: 'Zerofy Pro',
+        description: orderData.planName,
+        order_id: orderData.orderId,
+        theme: { color: '#8B7FFF' },
+        handler: async (response) => {
+          // 4. Verify payment on backend
+          const verifyRes = await fetch(`${API}/api/payment/verify`, {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              planId: selected,
+            })
+          })
+          const verifyData = await verifyRes.json()
+          if (verifyRes.ok && verifyData.success) {
+            onSuccess()
+          } else {
+            setError('Payment verify nahi hua. Support se contact karo.')
+          }
+        },
+        modal: { ondismiss: () => setLoading(false) }
+      })
+      rzp.on('payment.failed', (r) => {
+        setError(r.error?.description || 'Payment fail ho gayi. Dobara try karo.')
+        setLoading(false)
+      })
+      rzp.open()
+    } catch (err) {
+      setError(err.message || 'Kuch gadbad hui. Dobara try karo.')
+      setLoading(false)
+    }
+  }
+
+  const displayAmount = couponStatus?.valid
+    ? (couponStatus.finalAmount / 100).toFixed(0)
+    : selectedPlan?.amount
+
+  return (
+    <div style={{ textAlign: 'left' }}>
+      {/* Plan Cards */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
+        {UPGRADE_PLANS.map(plan => (
+          <button
+            key={plan.id}
+            onClick={() => setSelected(plan.id)}
+            style={{
+              padding: '12px 16px', borderRadius: 12, cursor: 'pointer',
+              border: selected === plan.id ? '2px solid rgba(167,139,250,0.7)' : '1px solid rgba(255,255,255,0.1)',
+              background: selected === plan.id
+                ? 'linear-gradient(135deg, rgba(96,165,250,0.15), rgba(167,139,250,0.18))'
+                : 'rgba(255,255,255,0.03)',
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              transition: 'all 0.15s',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div style={{
+                width: 16, height: 16, borderRadius: '50%',
+                border: `2px solid ${selected === plan.id ? '#A78BFA' : 'rgba(255,255,255,0.25)'}`,
+                background: selected === plan.id ? '#A78BFA' : 'transparent',
+                flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                {selected === plan.id && <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#fff' }} />}
+              </div>
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 600, color: '#f1f5f9' }}>{plan.desc}</div>
+                {plan.badge && <div style={{ fontSize: 10, color: '#A78BFA', fontWeight: 700 }}>{plan.badge}</div>}
+              </div>
+            </div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: '#60A5FA', flexShrink: 0 }}>{plan.label}</div>
+          </button>
+        ))}
+      </div>
+
+      {/* Coupon code */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+        <input
+          className="inp"
+          placeholder="Coupon code (optional)"
+          value={coupon}
+          onChange={e => { setCoupon(e.target.value.toUpperCase()); setCouponStatus(null) }}
+          style={{ fontSize: 13, flex: 1 }}
+        />
+        <button
+          onClick={validateCoupon}
+          disabled={couponLoading || !coupon.trim()}
+          style={{
+            padding: '9px 14px', borderRadius: 8, border: '1px solid rgba(167,139,250,0.4)',
+            background: 'rgba(167,139,250,0.12)', color: '#C4BCFF',
+            fontSize: 12, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap',
+            opacity: couponLoading || !coupon.trim() ? 0.5 : 1,
+          }}
+        >
+          {couponLoading ? '...' : 'Apply'}
+        </button>
+      </div>
+      {couponStatus && (
+        <div style={{
+          marginBottom: 12, padding: '8px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600,
+          background: couponStatus.valid ? 'rgba(52,211,153,0.1)' : 'rgba(248,113,113,0.1)',
+          border: `1px solid ${couponStatus.valid ? 'rgba(52,211,153,0.3)' : 'rgba(248,113,113,0.3)'}`,
+          color: couponStatus.valid ? '#34D399' : '#F87171',
+        }}>
+          {couponStatus.valid
+            ? `✅ ${couponStatus.desc} — Aap ₹${(couponStatus.discountAmount / 100).toFixed(0)} bachao!`
+            : `❌ ${couponStatus.desc}`}
+        </div>
+      )}
+
+      {/* Error */}
+      {error && (
+        <div style={{
+          marginBottom: 12, padding: '10px 12px', borderRadius: 8, fontSize: 12,
+          background: 'rgba(248,113,113,0.1)', border: '1px solid rgba(248,113,113,0.3)', color: '#F87171',
+        }}>
+          ⚠️ {error}
+        </div>
+      )}
+
+      {/* Pay button */}
+      <button
+        onClick={handlePayment}
+        disabled={loading}
+        style={{
+          width: '100%', padding: '14px',
+          borderRadius: 12, border: 'none',
+          background: loading ? 'rgba(139,127,255,0.4)' : 'linear-gradient(135deg, #60A5FA, #A78BFA)',
+          color: '#fff', fontSize: 15, fontWeight: 700,
+          cursor: loading ? 'not-allowed' : 'pointer',
+          boxShadow: loading ? 'none' : '0 4px 18px rgba(139,127,255,0.45)',
+          marginBottom: 10, transition: 'all 0.2s',
+        }}
+      >
+        {loading ? '⏳ Processing...' : `⚡ Pay ₹${displayAmount} — Activate Pro`}
+      </button>
+
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <button
+          onClick={onClose}
+          style={{ background: 'none', border: 'none', color: '#5A5578', fontSize: 12, cursor: 'pointer', padding: '4px 0' }}
+        >
+          Baad mein karta hoon
+        </button>
+        <a
+          href="/pricing"
+          style={{ color: '#7A75A0', fontSize: 12, textDecoration: 'none' }}
+          onClick={onClose}
+        >
+          Sabhi plans dekho →
+        </a>
+      </div>
+    </div>
+  )
+}
+
 /* ─── Main Component ─────────────────────────────────────────── */
 export default function InvoiceMaker() {
   useCSS()
@@ -850,6 +1079,30 @@ export default function InvoiceMaker() {
   const [items, setItems] = useState([defaultItem()])
   const [invNo, setInvNo] = useState('')
   const [generating, setGenerating] = useState(false)
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false)
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false)
+  const [showAuthModal, setShowAuthModal] = useState(false)
+  const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const pendingReset = useRef(null)
+  const pendingGenerate = useRef(false)
+  const [invoiceCount, setInvoiceCount] = useState(0)
+  const [isPro, setIsPro] = useState(false)
+  const FREE_LIMIT = 3
+  const { token } = useAuth()
+  const API = import.meta.env.VITE_API_URL || 'http://localhost:5000'
+
+  useEffect(() => {
+    if (!token) return
+    fetch(`${API}/api/invoices/status`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+      .then(r => r.json())
+      .then(d => {
+        setInvoiceCount(d.invoiceCount || 0)
+        setIsPro(d.isPro || false)
+      })
+      .catch(() => {})
+  }, [token])
 
   const [f, setF] = useState({
     bizName: '', bizEmail: '', bizPhone: '', bizGst: '', bizAddr: '',
@@ -898,13 +1151,46 @@ export default function InvoiceMaker() {
   const tax = gstTotal
   const total = sub - disc + gstTotal
 
+  useEffect(() => {
+    if (token && pendingGenerate.current) {
+      pendingGenerate.current = false
+      generateInvoice()
+    }
+  }, [token])
+
   const generateInvoice = async () => {
     if (!f.bizName.trim()) { alert('Please enter your Business Name.'); return }
     if (!f.clientName.trim()) { alert('Please enter Client Name.'); return }
     if (items.every(i => !i.desc && !i.rate)) { alert('Please add at least one item.'); return }
 
+    // Login mandatory hai
+    if (!token) {
+      pendingGenerate.current = true
+      setShowAuthModal(true)
+      return
+    }
+
+    // Backend se limit check karo
+    try {
+      const res = await fetch(`${API}/api/invoices/generate`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
+      })
+      const data = await res.json()
+      if (res.status === 403 && data.error === 'free_limit_reached') {
+        setShowUpgradeModal(true)
+        return
+      }
+      if (res.ok) {
+        setInvoiceCount(data.invoiceCount)
+      }
+    } catch (err) {
+      console.error('Invoice count error:', err)
+      return
+    }
+
     setGenerating(true)
-    await new Promise(r => setTimeout(r, 600)) // brief animation
+    await new Promise(r => setTimeout(r, 600))
 
     const inv = {
       id: uid(), ts: Date.now(), no: invNo,
@@ -919,14 +1205,40 @@ export default function InvoiceMaker() {
       items: [...items],
     }
     setSavedInvoices(p => [inv, ...p.filter(i => i.no !== invNo)].slice(0, 100))
-    setStatus('sent')
+
+    printInvoice()
+
+    // Next invoice number pre-calculate karo
     const biz = businesses.find(b => b.id === activeBizId)
     const next = genInvNo(biz)
-    setTimeout(() => setInvNo(next), 80)
-    setGenerating(false)
 
-    // Auto print
-    printInvoice()
+    // Reset function store karo — user choice pe chalega
+    pendingReset.current = () => {
+      setF(p => ({
+        ...p,
+        clientName: '', clientEmail: '', clientPhone: '', clientGst: '', clientAddr: '',
+        notes: '', date: today(),
+      }))
+      setItems([defaultItem()])
+      setDiscPct(0)
+      setStatus('draft')
+      setInvNo(next)
+    }
+
+    setTimeout(() => {
+      setGenerating(false)
+      setShowSuccessModal(true)
+    }, 800)
+  }
+
+  const handleNewInvoice = () => {
+    pendingReset.current?.()
+    pendingReset.current = null
+    setShowSuccessModal(false)
+  }
+
+  const handleStayAndEdit = () => {
+    setShowSuccessModal(false)
   }
 
   const printInvoice = () => {
@@ -1203,6 +1515,53 @@ export default function InvoiceMaker() {
             <div className="gen-area">
               <div className="gen-label">Total Amount</div>
               <div className="gen-total">{fmt(total, currency)}</div>
+
+              {/* Free limit indicator */}
+              {token && !isPro && (
+                invoiceCount >= FREE_LIMIT ? (
+                  <div style={{
+                    margin: '14px 0 0',
+                    padding: '14px 16px',
+                    background: 'linear-gradient(135deg, rgba(96,165,250,0.1), rgba(167,139,250,0.12))',
+                    border: '1px solid rgba(167,139,250,0.35)',
+                    borderRadius: 14,
+                    textAlign: 'center',
+                  }}>
+                    <div style={{ fontSize: 22, marginBottom: 6 }}>🎉</div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: '#C4BCFF', marginBottom: 4 }}>
+                      {FREE_LIMIT} free invoices use ho gaye!
+                    </div>
+                    <div style={{ fontSize: 12, color: 'var(--text2)', lineHeight: 1.5, marginBottom: 10 }}>
+                      Pro plan pe unlimited invoices banao — sirf <strong style={{ color: '#A78BFA' }}>₹19/month</strong> se shuru
+                    </div>
+                    <button
+                      onClick={() => setShowUpgradeModal(true)}
+                      style={{
+                        padding: '8px 18px', borderRadius: 20, border: 'none',
+                        background: 'linear-gradient(135deg, #60A5FA, #A78BFA)',
+                        color: '#fff', fontSize: 12, fontWeight: 700, cursor: 'pointer',
+                        boxShadow: '0 4px 14px rgba(139,127,255,0.4)',
+                      }}
+                    >
+                      ⚡ Pro Upgrade Karo
+                    </button>
+                  </div>
+                ) : (
+                  <div style={{
+                    margin: '12px 0 0',
+                    padding: '8px 14px',
+                    background: 'rgba(96,165,250,0.08)',
+                    border: '1px solid rgba(96,165,250,0.2)',
+                    borderRadius: 10,
+                    fontSize: 13,
+                    color: 'var(--text2)',
+                    textAlign: 'center'
+                  }}>
+                    ⚡ {FREE_LIMIT - invoiceCount} free invoice{FREE_LIMIT - invoiceCount === 1 ? '' : 's'} bacha hai
+                  </div>
+                )
+              )}
+
               <div style={{ marginTop: 16, display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
                 <button className="btn btn-accent" onClick={generateInvoice} disabled={generating}
                   style={{ fontSize: 14, padding: '10px 24px', opacity: generating ? 0.7 : 1 }}>
@@ -1217,6 +1576,52 @@ export default function InvoiceMaker() {
               </div>
             </div>
 
+            {/* Upgrade Modal — Razorpay integrated */}
+            {showUpgradeModal && (
+              <>
+                <div onClick={() => setShowUpgradeModal(false)} style={{
+                  position: 'fixed', inset: 0, zIndex: 2000,
+                  background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(6px)'
+                }} />
+                <div style={{
+                  position: 'fixed', inset: 0, zIndex: 2001,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16
+                }}>
+                  <div style={{
+                    background: '#1A1830',
+                    border: '1px solid rgba(167,139,250,0.4)',
+                    borderRadius: 20, padding: '36px 28px',
+                    maxWidth: 420, width: '100%',
+                    textAlign: 'center',
+                    boxShadow: '0 24px 80px rgba(0,0,0,0.6)',
+                    animation: 'slideUp 0.25s ease',
+                  }}>
+                    {/* Header */}
+                    <div style={{ fontSize: 44, marginBottom: 10 }}>⚡</div>
+                    <h2 style={{
+                      fontSize: 22, fontWeight: 800, marginBottom: 6,
+                      background: 'linear-gradient(135deg, #60A5FA, #A78BFA)',
+                      WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'
+                    }}>Pro Plan Lo, Unlimited Banao!</h2>
+                    <p style={{ color: '#9A96C0', fontSize: 13, marginBottom: 22, lineHeight: 1.6 }}>
+                      Tumne <strong style={{ color: '#f1f5f9' }}>{FREE_LIMIT} free invoices</strong> use kar liye. Ab Pro upgrade karo aur bina kisi limit ke invoices banate raho!
+                    </p>
+
+                    {/* Plan selector */}
+                    <UpgradePaymentFlow
+                      token={token}
+                      API={API}
+                      onSuccess={() => {
+                        setShowUpgradeModal(false)
+                        setIsPro(true)
+                      }}
+                      onClose={() => setShowUpgradeModal(false)}
+                    />
+                  </div>
+                </div>
+              </>
+            )}
+
             {/* Live preview */}
             <div className="sec-label" style={{ margin: '14px 0 10px' }}><span className="sec-dot" />Live Preview</div>
             <div className="prev-box" id="ig-print-zone">
@@ -1227,6 +1632,137 @@ export default function InvoiceMaker() {
       </div>
 
       {showBizModal && <BizModal businesses={businesses} onSave={handleBizSave} onClose={() => setShowBizModal(false)} />}
+
+      {/* ✅ Success Modal */}
+      {showSuccessModal && (
+        <>
+          <div onClick={handleStayAndEdit} style={{
+            position: 'fixed', inset: 0, zIndex: 2000,
+            background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(6px)'
+          }} />
+          <div style={{
+            position: 'fixed', inset: 0, zIndex: 2001,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16
+          }}>
+            <div style={{
+              background: '#1A1830',
+              border: '1px solid rgba(52,211,153,0.35)',
+              borderRadius: 20, padding: '36px 28px',
+              maxWidth: 400, width: '100%',
+              textAlign: 'center',
+              boxShadow: '0 24px 80px rgba(0,0,0,0.5)',
+              animation: 'slideUp 0.25s ease'
+            }}>
+              <div style={{
+                width: 64, height: 64, borderRadius: '50%',
+                background: 'rgba(52,211,153,0.15)',
+                border: '2px solid rgba(52,211,153,0.4)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 30, margin: '0 auto 16px'
+              }}>✅</div>
+              <h2 style={{
+                fontSize: 20, fontWeight: 800, marginBottom: 6,
+                background: 'linear-gradient(135deg, #34D399, #38BDF8)',
+                WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'
+              }}>Invoice Generated!</h2>
+              <p style={{ color: '#9A96C0', fontSize: 13, marginBottom: 24, lineHeight: 1.6 }}>
+                <span style={{ color: '#A78BFA', fontFamily: 'monospace', fontWeight: 700 }}>{invNo}</span> save ho gayi aur print dialog khul gaya.
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <button
+                  onClick={handleNewInvoice}
+                  style={{
+                    width: '100%', padding: '13px',
+                    borderRadius: 12, border: 'none',
+                    background: 'linear-gradient(135deg, #7C6FFF, #A78BFA)',
+                    color: '#fff', fontSize: 15, fontWeight: 700,
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 18px rgba(124,111,255,0.4)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8
+                  }}
+                >
+                  ➕ New Invoice Banao
+                </button>
+                <button
+                  onClick={handleStayAndEdit}
+                  style={{
+                    width: '100%', padding: '12px',
+                    borderRadius: 12,
+                    border: '1px solid rgba(255,255,255,0.12)',
+                    background: 'rgba(255,255,255,0.05)',
+                    color: '#B8B4E0', fontSize: 14, fontWeight: 600,
+                    cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8
+                  }}
+                >
+                  ✏️ Isi Invoice ko Edit Karo
+                </button>
+              </div>
+              <p style={{ color: '#5A5578', fontSize: 11, marginTop: 14 }}>
+                Edit option se same data rakhke duplicate invoice bana sakte ho
+              </p>
+            </div>
+          </div>
+        </>
+      )}
+
+      {showLoginPrompt && (
+        <>
+          <div onClick={() => setShowLoginPrompt(false)} style={{
+            position: 'fixed', inset: 0, zIndex: 2000,
+            background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(6px)'
+          }} />
+          <div style={{
+            position: 'fixed', inset: 0, zIndex: 2001,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16
+          }}>
+            <div style={{
+              background: 'var(--bg2, #1a1b2e)',
+              border: '1px solid rgba(96,165,250,0.4)',
+              borderRadius: 20, padding: '36px 28px',
+              maxWidth: 380, width: '100%',
+              textAlign: 'center',
+              boxShadow: '0 24px 80px rgba(0,0,0,0.5)'
+            }}>
+              <div style={{ fontSize: 48, marginBottom: 12 }}>👤</div>
+              <h2 style={{
+                fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 800,
+                marginBottom: 8,
+                background: 'linear-gradient(135deg, #60A5FA, #A78BFA)',
+                WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'
+              }}>Sign in to Continue</h2>
+              <p style={{ color: 'var(--text2, #94a3b8)', fontSize: 14, marginBottom: 24, lineHeight: 1.6 }}>
+                Please sign in to generate and save your invoices.
+              </p>
+              <button
+                onClick={() => {
+                  setShowLoginPrompt(false)
+                  pendingGenerate.current = true
+                  setShowAuthModal(true)
+                }}
+                style={{
+                  width: '100%', padding: '13px',
+                  borderRadius: 12, border: 'none',
+                  background: 'linear-gradient(135deg, #60A5FA, #A78BFA)',
+                  color: '#fff', fontSize: 15, fontWeight: 700,
+                  cursor: 'pointer', marginBottom: 10
+                }}
+              >
+                Sign in to Continue
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => {
+          setShowAuthModal(false)
+          pendingGenerate.current = false
+        }}
+        defaultTab="login"
+      />
     </div>
   )
 }
