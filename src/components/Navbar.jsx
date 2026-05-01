@@ -5,7 +5,12 @@ import styles from './Navbar.module.css'
 import { useAuth } from '../context/AuthContext'
 import AuthModal from './AuthModal'
 
-function UserDropdown({ user, logout, onClose }) {
+function UserDropdown({ user, logout, onClose, navigate }) {
+  const menuItems = [
+    { icon: '⚙️', label: 'Settings', route: '/settings' },
+    { icon: '💳', label: 'Billing & Plan', route: '/billing' },
+  ]
+
   return (
     <>
       <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 200 }} />
@@ -26,17 +31,15 @@ function UserDropdown({ user, logout, onClose }) {
         </div>
 
         {/* Menu items */}
-        {[
-          { icon: '📜', label: 'History' },
-          { icon: '⚙️', label: 'Settings' },
-          { icon: '💳', label: 'Billing & Plan' },
-        ].map(item => (
-          <button key={item.label} style={{
-            width: '100%', padding: '9px 12px', borderRadius: 9,
-            border: 'none', background: 'none', cursor: 'pointer',
-            display: 'flex', alignItems: 'center', gap: 10,
-            color: 'var(--text2)', fontSize: 14, textAlign: 'left'
-          }}
+        {menuItems.map(item => (
+          <button key={item.label}
+            onClick={() => { navigate(item.route); onClose() }}
+            style={{
+              width: '100%', padding: '9px 12px', borderRadius: 9,
+              border: 'none', background: 'none', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', gap: 10,
+              color: 'var(--text2)', fontSize: 14, textAlign: 'left'
+            }}
             onMouseEnter={e => e.currentTarget.style.background = 'var(--surface)'}
             onMouseLeave={e => e.currentTarget.style.background = 'none'}
           >
@@ -180,13 +183,7 @@ export default function Navbar({ theme, toggleTheme }) {
                     {user.email[0].toUpperCase()}
                   </button>
                   {showDropdown && (
-                    <UserDropdown user={user} logout={logout} onClose={() => setShowDropdown(false)} />
-                  )}
-                </div>
-              </>
-            )}
-
-            {/* PRO USER */}
+                    <UserDropdown user={user} logout={logout} onClose={() => setShowDropdown(false)} navigate={navigate} />
             {user && user.isPro && (
               <div style={{ position: 'relative' }}>
                 <button
@@ -199,7 +196,7 @@ export default function Navbar({ theme, toggleTheme }) {
                   <span style={{ fontSize: 13, fontWeight: 600 }}>✦ Pro</span>
                 </button>
                 {showDropdown && (
-                  <UserDropdown user={user} logout={logout} onClose={() => setShowDropdown(false)} />
+                  <UserDropdown user={user} logout={logout} onClose={() => setShowDropdown(false)} navigate={navigate} />
                 )}
               </div>
             )}

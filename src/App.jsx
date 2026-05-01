@@ -36,6 +36,8 @@ import RingtoneMaker from './pages/tools/RingtoneMaker'
 // Document Tools
 import InvoiceMaker from './pages/tools/InvoiceMaker'
 import ResumeBuilder from './pages/tools/ResumeBuilder'
+import SettingsPage from './pages/SettingsPage'
+import BillingPage from './pages/BillingPage'
 import WordCounter from './pages/tools/WordCounter'
 import TextToSpeech from './pages/tools/TextToSpeech'
 import SpeechToText from './pages/tools/SpeechToText'
@@ -135,6 +137,8 @@ function AppInner({ theme, toggleTheme }) {
           <Route path="/" element={<HomePage />} />
           <Route path="/all-tools" element={<HomePage />} />
           <Route path="/pricing" element={<PricingPage />} />
+          <Route path="/settings" element={<SettingsPage theme={theme} toggleTheme={toggleTheme} />} />
+          <Route path="/billing" element={<BillingPage />} />
 
           {/* PDF */}
           <Route path="/tools/merge-pdf" element={<MergePDF />} />
