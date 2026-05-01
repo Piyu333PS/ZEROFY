@@ -1082,6 +1082,10 @@ export default function InvoiceMaker() {
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   const [showLoginPrompt, setShowLoginPrompt] = useState(false)
   const [showAuthModal, setShowAuthModal] = useState(false)
+  const [showPreviewModal, setShowPreviewModal] = useState(false)
+  const [previewInvoice, setPreviewInvoice] = useState(null) // saved invoice preview ke liye
+  const [showShareModal, setShowShareModal] = useState(false)
+  const [shareInvoice, setShareInvoice] = useState(null)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const pendingReset = useRef(null)
   const pendingGenerate = useRef(false)
@@ -1297,6 +1301,34 @@ export default function InvoiceMaker() {
     setTimeout(() => w.print(), 900)
   }
 
+  // Bug 4: Saved invoice ko print/download karne ke liye
+  const printSavedInvoice = (inv) => {
+    const t = TEMPLATES.find(t => t.key === inv.template) || TEMPLATES[0]
+    const tempDiv = document.createElement('div')
+    tempDiv.style.position = 'fixed'
+    tempDiv.style.left = '-9999px'
+    tempDiv.style.top = '0'
+    document.body.appendChild(tempDiv)
+
+    const { createRoot } = window.__reactDom || {}
+    // ReactDOM import nahi kar sakte yahan seedha, isliye ek hidden preview render karenge
+    setPreviewInvoice(inv)
+    setShowPreviewModal(true)
+  }
+
+  // Bug 5: WhatsApp aur Email share
+  const shareViaWhatsApp = (inv) => {
+    const msg = `Hi ${inv.clientName || 'Client'},\n\nAapka invoice ${inv.no} ready hai!\n\nAmount: ${inv.total}\nDate: ${inv.date}\n\nZerofy Invoice Generator se banaya gaya\nhttps://www.zerofy.co.in`
+    const url = `https://wa.me/?text=${encodeURIComponent(msg)}`
+    window.open(url, '_blank')
+  }
+
+  const shareViaEmail = (inv) => {
+    const subject = `Invoice ${inv.no} from ${inv.bizName || 'Zerofy'}`
+    const body = `Hi ${inv.clientName || 'Client'},\n\nPlease find your invoice details below:\n\nInvoice No: ${inv.no}\nDate: ${inv.date}\nAmount: ${inv.total}\n\nBusiness: ${inv.bizName || ''}\n\nThank you for your business!\n\nRegards,\n${inv.bizName || ''}`
+    window.location.href = `mailto:${inv.clientEmail || ''}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+  }
+
   const statusMeta = { draft: '#818CF8', sent: '#38BDF8', paid: '#34D399', overdue: '#F87171', cancelled: '#9CA3AF' }
   const invData = { ...f, no: invNo }
   const t = TEMPLATES.find(t => t.key === template) || TEMPLATES[0]
@@ -1476,14 +1508,31 @@ export default function InvoiceMaker() {
                 <button className="btn btn-sm btn-ghost" onClick={() => { if (window.confirm('Clear all saved invoices?')) setSavedInvoices([]) }}>Clear</button>
               </div>
               {savedInvoices.slice(0, 5).map(inv => (
-                <div key={inv.id} className="saved-item">
-                  <div>
-                    <div className="s-no">{inv.no}</div>
-                    <div className="s-client">{inv.clientName || '—'} · {inv.date}</div>
+                <div key={inv.id} className="saved-item" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 8 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                      <div className="s-no">{inv.no}</div>
+                      <div className="s-client">{inv.clientName || '—'} · {inv.date}</div>
+                    </div>
+                    <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                      <span style={{ background: statusMeta[inv.status] + '22', color: statusMeta[inv.status], fontSize: 9, fontWeight: 700, padding: '2px 8px', borderRadius: 12, textTransform: 'uppercase', letterSpacing: '0.07em' }}>{inv.status}</span>
+                      <span className="s-amt">{inv.total}</span>
+                    </div>
                   </div>
-                  <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                    <span style={{ background: statusMeta[inv.status] + '22', color: statusMeta[inv.status], fontSize: 9, fontWeight: 700, padding: '2px 8px', borderRadius: 12, textTransform: 'uppercase', letterSpacing: '0.07em' }}>{inv.status}</span>
-                    <span className="s-amt">{inv.total}</span>
+                  {/* Bug 4 & 5: Action buttons */}
+                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                    <button className="btn btn-sm btn-green" onClick={() => printSavedInvoice(inv)}
+                      style={{ fontSize: 11, padding: '4px 10px' }}>
+                      👁 Preview & Print
+                    </button>
+                    <button className="btn btn-sm" onClick={() => shareViaWhatsApp(inv)}
+                      style={{ fontSize: 11, padding: '4px 10px', background: 'rgba(37,211,102,0.12)', borderColor: 'rgba(37,211,102,0.3)', color: '#25D366' }}>
+                      💬 WhatsApp
+                    </button>
+                    <button className="btn btn-sm" onClick={() => shareViaEmail(inv)}
+                      style={{ fontSize: 11, padding: '4px 10px', background: 'rgba(96,165,250,0.1)', borderColor: 'rgba(96,165,250,0.25)', color: '#60A5FA' }}>
+                      ✉️ Email
+                    </button>
                   </div>
                 </div>
               ))}
@@ -1562,18 +1611,23 @@ export default function InvoiceMaker() {
                 )
               )}
 
-              <div style={{ marginTop: 16, display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
-                <button className="btn btn-accent" onClick={generateInvoice} disabled={generating}
-                  style={{ fontSize: 14, padding: '10px 24px', opacity: generating ? 0.7 : 1 }}>
-                  {generating ? '⏳ Generating…' : '⚡ Generate & Print'}
-                </button>
-                <button className="btn btn-green btn-sm" onClick={() => document.getElementById('ig-print-zone') && printInvoice()}>
-                  👁 Preview PDF
-                </button>
-              </div>
-              <div style={{ fontSize: 11, color: 'var(--text3)', marginTop: 10 }}>
-                Saves to Sent → opens print/PDF dialog
-              </div>
+              {/* Bug 2 fix: limit khatam ho gayi to buttons mat dikhao */}
+              {(!token || isPro || invoiceCount < FREE_LIMIT) && (
+                <>
+                  <div style={{ marginTop: 16, display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
+                    <button className="btn btn-accent" onClick={generateInvoice} disabled={generating}
+                      style={{ fontSize: 14, padding: '10px 24px', opacity: generating ? 0.7 : 1 }}>
+                      {generating ? '⏳ Generating…' : '⚡ Generate & Print'}
+                    </button>
+                    <button className="btn btn-green btn-sm" onClick={() => document.getElementById('ig-print-zone') && printInvoice()}>
+                      👁 Preview PDF
+                    </button>
+                  </div>
+                  <div style={{ fontSize: 11, color: 'var(--text3)', marginTop: 10 }}>
+                    Saves to Sent → opens print/PDF dialog
+                  </div>
+                </>
+              )}
             </div>
 
             {/* Upgrade Modal — Razorpay integrated */}
@@ -1613,7 +1667,16 @@ export default function InvoiceMaker() {
                       API={API}
                       onSuccess={() => {
                         setShowUpgradeModal(false)
-                        setIsPro(true)
+                        // Re-fetch status so buttons wapas dikhe
+                        fetch(`${API}/api/invoices/status`, {
+                          headers: { Authorization: `Bearer ${token}` }
+                        })
+                          .then(r => r.json())
+                          .then(d => {
+                            setInvoiceCount(d.invoiceCount || 0)
+                            setIsPro(d.isPro || false)
+                          })
+                          .catch(() => {})
                       }}
                       onClose={() => setShowUpgradeModal(false)}
                     />
@@ -1632,6 +1695,71 @@ export default function InvoiceMaker() {
       </div>
 
       {showBizModal && <BizModal businesses={businesses} onSave={handleBizSave} onClose={() => setShowBizModal(false)} />}
+
+      {/* Bug 4: Saved Invoice Preview Modal */}
+      {showPreviewModal && previewInvoice && (
+        <>
+          <div onClick={() => setShowPreviewModal(false)} style={{
+            position: 'fixed', inset: 0, zIndex: 2000,
+            background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(6px)'
+          }} />
+          <div style={{
+            position: 'fixed', inset: 0, zIndex: 2001,
+            display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
+            padding: '20px', overflowY: 'auto'
+          }}>
+            <div style={{ width: '100%', maxWidth: 780, background: '#1A1830', borderRadius: 16, overflow: 'hidden', boxShadow: '0 24px 80px rgba(0,0,0,0.7)' }}>
+              {/* Modal Header */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 20px', borderBottom: '1px solid rgba(139,127,255,0.2)', background: '#15132A' }}>
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: 15, color: '#C4BCFF' }}>📄 {previewInvoice.no}</div>
+                  <div style={{ fontSize: 12, color: '#7A75A0', marginTop: 2 }}>{previewInvoice.clientName} · {previewInvoice.date}</div>
+                </div>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button
+                    onClick={() => {
+                      // Print this saved invoice
+                      const el = document.getElementById('saved-preview-zone')
+                      if (!el) return
+                      const w = window.open('', '_blank')
+                      w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${previewInvoice.no}</title><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"><style>*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}html,body{width:210mm;min-height:297mm;font-family:'Plus Jakarta Sans',sans-serif;background:#fff;color:#1a1a2e;-webkit-print-color-adjust:exact;print-color-adjust:exact;}@media print{@page{size:A4 portrait;margin:0;}}table{border-collapse:collapse;}</style></head><body><div style="width:210mm;min-height:297mm;background:#fff;">${el.innerHTML}</div></body></html>`)
+                      w.document.close()
+                      w.focus()
+                      setTimeout(() => w.print(), 900)
+                    }}
+                    className="btn btn-green btn-sm"
+                  >🖨️ Print / Download</button>
+                  <button
+                    onClick={() => shareViaWhatsApp(previewInvoice)}
+                    className="btn btn-sm"
+                    style={{ background: 'rgba(37,211,102,0.12)', borderColor: 'rgba(37,211,102,0.3)', color: '#25D366' }}
+                  >💬 WhatsApp</button>
+                  <button
+                    onClick={() => shareViaEmail(previewInvoice)}
+                    className="btn btn-sm"
+                    style={{ background: 'rgba(96,165,250,0.1)', borderColor: 'rgba(96,165,250,0.25)', color: '#60A5FA' }}
+                  >✉️ Email</button>
+                  <button className="btn btn-icon btn-ghost" onClick={() => setShowPreviewModal(false)} style={{ fontSize: 18 }}>×</button>
+                </div>
+              </div>
+              {/* Invoice Preview */}
+              <div style={{ padding: 20 }}>
+                <div id="saved-preview-zone" style={{ background: '#fff', borderRadius: 8, overflow: 'hidden' }}>
+                  <Preview
+                    inv={{ ...previewInvoice, no: previewInvoice.no }}
+                    items={previewInvoice.items || []}
+                    currency={previewInvoice.currency || '₹'}
+                    discPct={previewInvoice.discPct || 0}
+                    taxPct={previewInvoice.taxPct || 18}
+                    template={previewInvoice.template || 'modern'}
+                    status={previewInvoice.status || 'sent'}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
 
       {/* ✅ Success Modal */}
       {showSuccessModal && (

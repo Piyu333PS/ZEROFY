@@ -98,6 +98,8 @@ export function AuthProvider({ children }) {
     setError(null)
     localStorage.removeItem('zerofy-token')
     localStorage.removeItem('zerofy-user')
+    // Home page pe redirect karo
+    window.location.href = '/'
   }
 
   return (

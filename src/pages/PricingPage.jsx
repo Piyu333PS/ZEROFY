@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 
 const plans = [
   {
@@ -90,9 +91,97 @@ const faqs = [
   },
 ]
 
+const PLAN_AMOUNTS = { monthly: 19, quarterly: 49, yearly: 199 }
+const PLAN_DAYS = { monthly: 30, quarterly: 90, yearly: 365 }
+
+const API = import.meta.env.VITE_API_URL || 'http://localhost:5000'
+
 export default function PricingPage() {
   const [openFaq, setOpenFaq] = useState(null)
+  const [payLoading, setPayLoading] = useState(null) // planId jo process ho raha hai
+  const [payError, setPayError] = useState('')
+  const [showAuthPrompt, setShowAuthPrompt] = useState(false)
+  const [pendingPlan, setPendingPlan] = useState(null)
   const navigate = useNavigate()
+  const { token, user } = useAuth()
+
+  const handlePlanClick = async (planId) => {
+    // Agar login nahi hai to login prompt dikhao
+    if (!token) {
+      setPendingPlan(planId)
+      setShowAuthPrompt(true)
+      return
+    }
+    await startPayment(planId)
+  }
+
+  const startPayment = async (planId) => {
+    setPayLoading(planId)
+    setPayError('')
+    try {
+      // 1. Backend se order create karo
+      const orderRes = await fetch(`${API}/api/payment/create-order`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ planId })
+      })
+      const orderData = await orderRes.json()
+      if (!orderRes.ok) throw new Error(orderData.error || 'Order create nahi hua')
+
+      // 2. Razorpay script load karo agar nahi hai
+      if (!window.Razorpay) {
+        await new Promise((resolve, reject) => {
+          const s = document.createElement('script')
+          s.src = 'https://checkout.razorpay.com/v1/checkout.js'
+          s.onload = resolve
+          s.onerror = () => reject(new Error('Razorpay load nahi hua'))
+          document.head.appendChild(s)
+        })
+      }
+
+      // 3. Razorpay checkout kholo
+      const rzp = new window.Razorpay({
+        key: orderData.keyId,
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: 'Zerofy Pro',
+        description: orderData.planName,
+        order_id: orderData.orderId,
+        theme: { color: '#8B7FFF' },
+        handler: async (response) => {
+          // 4. Payment verify karo
+          const verifyRes = await fetch(`${API}/api/payment/verify`, {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              planId,
+            })
+          })
+          const verifyData = await verifyRes.json()
+          if (verifyRes.ok && verifyData.success) {
+            // Success! Home pe bhejo ya current page reload karo
+            alert('🎉 ' + verifyData.message)
+            navigate('/')
+          } else {
+            setPayError('Payment verify nahi hua. Support se contact karo.')
+          }
+          setPayLoading(null)
+        },
+        modal: { ondismiss: () => setPayLoading(null) }
+      })
+      rzp.on('payment.failed', (r) => {
+        setPayError(r.error?.description || 'Payment fail ho gayi.')
+        setPayLoading(null)
+      })
+      rzp.open()
+    } catch (err) {
+      setPayError(err.message || 'Kuch gadbad hui.')
+      setPayLoading(null)
+    }
+  }
 
   return (
     <div style={{
@@ -240,7 +329,8 @@ export default function PricingPage() {
             </div>
 
             <button
-              onClick={() => navigate('/tools/invoice-maker')}
+              onClick={() => handlePlanClick(plan.id)}
+              disabled={payLoading === plan.id}
               style={{
                 width: '100%',
                 padding: '13px 0',
@@ -264,7 +354,7 @@ export default function PricingPage() {
               onMouseEnter={e => { e.currentTarget.style.opacity = '0.85'; e.currentTarget.style.transform = 'scale(0.98)' }}
               onMouseLeave={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.transform = 'scale(1)' }}
             >
-              {plan.cta}
+              {payLoading === plan.id ? '⏳ Processing...' : plan.cta}
             </button>
 
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 11 }}>
@@ -366,6 +456,72 @@ export default function PricingPage() {
           ))}
         </div>
       </div>
+
+      {/* Payment Error */}
+      {payError && (
+        <div style={{ maxWidth: 500, margin: '24px auto 0', padding: '0 24px' }}>
+          <div style={{
+            padding: '12px 16px', borderRadius: 10, fontSize: 13,
+            background: 'rgba(248,113,113,0.1)', border: '1px solid rgba(248,113,113,0.3)', color: '#F87171',
+          }}>
+            ⚠️ {payError}
+          </div>
+        </div>
+      )}
+
+      {/* Auth Prompt Modal */}
+      {showAuthPrompt && (
+        <>
+          <div onClick={() => setShowAuthPrompt(false)} style={{
+            position: 'fixed', inset: 0, zIndex: 2000,
+            background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(6px)'
+          }} />
+          <div style={{
+            position: 'fixed', inset: 0, zIndex: 2001,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16
+          }}>
+            <div style={{
+              background: '#1A1830',
+              border: '1px solid rgba(167,139,250,0.4)',
+              borderRadius: 20, padding: '36px 28px',
+              maxWidth: 380, width: '100%',
+              textAlign: 'center',
+              boxShadow: '0 24px 80px rgba(0,0,0,0.6)',
+            }}>
+              <div style={{ fontSize: 44, marginBottom: 10 }}>👤</div>
+              <h2 style={{
+                fontSize: 20, fontWeight: 800, marginBottom: 8,
+                background: 'linear-gradient(135deg, #60A5FA, #A78BFA)',
+                WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'
+              }}>Pehle Login Karo</h2>
+              <p style={{ color: '#9A96C0', fontSize: 13, marginBottom: 24, lineHeight: 1.6 }}>
+                Payment ke liye login zaroori hai. Login karke wapas yahan aao aur plan select karo.
+              </p>
+              <button
+                onClick={() => { setShowAuthPrompt(false); navigate('/') }}
+                style={{
+                  width: '100%', padding: '13px',
+                  borderRadius: 12, border: 'none',
+                  background: 'linear-gradient(135deg, #60A5FA, #A78BFA)',
+                  color: '#fff', fontSize: 15, fontWeight: 700,
+                  cursor: 'pointer', marginBottom: 10
+                }}
+              >
+                Login / Register
+              </button>
+              <button
+                onClick={() => setShowAuthPrompt(false)}
+                style={{
+                  background: 'none', border: 'none', color: '#5A5578',
+                  fontSize: 13, cursor: 'pointer'
+                }}
+              >
+                Baad mein karta hoon
+              </button>
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Bottom */}
       <div style={{ textAlign: 'center', marginTop: 56, padding: '0 24px' }}>
