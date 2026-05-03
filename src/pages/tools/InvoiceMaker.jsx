@@ -1049,14 +1049,14 @@ function UpgradePaymentFlow({ token, API, onSuccess, onClose }) {
           onClick={onClose}
           style={{ background: 'none', border: 'none', color: '#5A5578', fontSize: 12, cursor: 'pointer', padding: '4px 0' }}
         >
-          Baad mein karta hoon
+          Maybe later
         </button>
         <a
           href="/pricing"
           style={{ color: '#7A75A0', fontSize: 12, textDecoration: 'none' }}
           onClick={onClose}
         >
-          Sabhi plans dekho →
+          View all plans →
         </a>
       </div>
     </div>
@@ -1684,7 +1684,10 @@ export default function InvoiceMaker() {
                     textAlign: 'center',
                     boxShadow: '0 24px 80px rgba(0,0,0,0.6)',
                     animation: 'slideUp 0.25s ease',
+                    position: "relative",
                   }}>
+                    {/* Close button */}
+                    <button onClick={() => setShowUpgradeModal(false)} style={{ position: "absolute", top: 14, right: 14, background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 8, width: 30, height: 30, color: "#9A96C0", fontSize: 18, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>×</button>
                     {/* Header */}
                     <div style={{ fontSize: 44, marginBottom: 10 }}>⚡</div>
                     <h2 style={{

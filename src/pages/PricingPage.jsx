@@ -192,10 +192,27 @@ export default function PricingPage() {
       paddingBottom: 80,
     }}>
 
+      {/* Back Button */}
+      <div style={{ padding: "16px 24px 0" }}>
+        <button
+          onClick={() => window.history.back()}
+          style={{
+            display: "inline-flex", alignItems: "center", gap: 6,
+            padding: "7px 16px", borderRadius: 8,
+            border: "1px solid rgba(255,255,255,0.15)",
+            background: "rgba(255,255,255,0.06)",
+            color: "#B8B4E0", fontSize: 13, fontWeight: 600,
+            cursor: "pointer", fontFamily: "inherit", transition: "all 0.15s",
+          }}
+        >
+          ‹ Back
+        </button>
+      </div>
+
       {/* Hero */}
       <div style={{
         textAlign: 'center',
-        padding: '72px 24px 52px',
+        padding: '48px 24px 52px',
         position: 'relative',
         overflow: 'hidden',
       }}>
