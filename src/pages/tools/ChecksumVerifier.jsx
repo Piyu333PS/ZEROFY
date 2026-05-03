@@ -57,7 +57,7 @@ export default function ChecksumVerifier() {
       <div style={{ border: '2px dashed var(--border)', borderRadius: 'var(--radius-lg)', padding: '32px 24px', textAlign: 'center', cursor: 'pointer', marginBottom: 20 }}
         onClick={() => document.getElementById('cs-upload').click()}>
         <div style={{ fontSize: 40, marginBottom: 8 }}>📁</div>
-        <div style={{ fontSize: 15, fontWeight: 600 }}>{file ? file.name : 'File upload karo checksum ke liye'}</div>
+        <div style={{ fontSize: 15, fontWeight: 600 }}>{file ? file.name : 'Upload a file to verify checksum'}</div>
         {file && <div style={{ fontSize: 13, color: 'var(--text3)', marginTop: 4 }}>{fmtSize(file.size)}</div>}
         <input id="cs-upload" type="file" style={{ display: 'none' }} onChange={handleFile} />
       </div>
@@ -94,7 +94,7 @@ export default function ChecksumVerifier() {
 
           {/* Verify */}
           <div style={{ background: 'var(--bg3)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: 20 }}>
-            <div className={styles.controlLabel} style={{ marginBottom: 10 }}>Expected Checksum se verify karo</div>
+            <div className={styles.controlLabel} style={{ marginBottom: 10 }}>Verify against expected checksum</div>
             <div style={{ display: 'flex', gap: 8 }}>
               <input className={styles.controlInput} style={{ flex: 1, fontFamily: 'monospace', fontSize: 13 }}
                 value={expected} onChange={e => { setExpected(e.target.value); setMatchResult(null) }}

@@ -100,7 +100,7 @@ export default function RingtoneMaker() {
     <ToolLayout icon="📱" name="Ringtone Maker" desc="Create a ringtone from any MP3 — trim and save it">
 
       <div className={styles.controlGroup} style={{ marginBottom: 16 }}>
-        <label className={styles.controlLabel}>Audio/MP3 File Upload karo</label>
+        <label className={styles.controlLabel}>Upload Audio / MP3 File</label>
         <input type="file" accept="audio/*" onChange={handleFile} style={{ color: 'var(--text2)', fontSize: 13 }} />
       </div>
 
@@ -149,7 +149,7 @@ export default function RingtoneMaker() {
           </label>
 
           <button className={styles.actionBtn} onClick={make} disabled={processing}>
-            {processing ? <><span className={styles.spinner} /> Creating...</> : '📱 Ringtone Banao'}
+            {processing ? <><span className={styles.spinner} /> Creating...</> : '📱 Create Ringtone'}
           </button>
         </>
       )}

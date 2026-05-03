@@ -75,7 +75,7 @@ export default function ImageConverter() {
         style={{ border: '2px dashed var(--border)', borderRadius: 'var(--radius-lg)', padding: '32px', textAlign: 'center', cursor: 'pointer', marginBottom: 16 }}
         onClick={() => document.getElementById('conv-upload').click()}>
         <div style={{ fontSize: 36, marginBottom: 8 }}>🔄</div>
-        <div style={{ fontWeight: 600 }}>{images.length > 0 ? `${images.length} file(s) selected` : 'Images drop karo ya click karo'}</div>
+        <div style={{ fontWeight: 600 }}>{images.length > 0 ? `${images.length} file(s) selected` : 'Drop images or click to upload'}</div>
         <div style={{ fontSize: 12, color: 'var(--text3)', marginTop: 4 }}>Multiple files ek saath select kar sakte ho</div>
         <input id="conv-upload" type="file" accept="image/*" multiple style={{ display: 'none' }} onChange={handleFiles} />
       </div>
@@ -119,7 +119,7 @@ export default function ImageConverter() {
           </div>
 
           <button className={styles.actionBtn} onClick={convert} disabled={processing}>
-            {processing ? <><span className={styles.spinner} /> Converting...</> : `🔄 ${images.length} file(s) convert karo`}
+            {processing ? <><span className={styles.spinner} /> Converting...</> : `🔄 ${images.length} file(s) — Convert`}
           </button>
         </>
       )}

@@ -75,7 +75,7 @@ export default function VideoToAudio() {
       setResult({ blob, size: blob.size, name: file.name.replace(/\.[^/.]+$/, '') + '.wav' })
       setProgress('')
     } catch (e) {
-      alert('Error: ' + e.message + '\n\nNote: Kuch video formats browser mein decode nahi hote. MP4/WebM try karo.')
+      alert('Error: ' + e.message + '\n\nNote: Some video formats cannot be decoded in the browser. Try MP4 or WebM.')
       setProgress('')
     }
     setProcessing(false)
@@ -119,7 +119,7 @@ export default function VideoToAudio() {
             <button className={styles.actionBtn} onClick={convert} disabled={processing}>
               {processing
                 ? <><span className={styles.spinner} /> {progress || 'Processing...'}</>
-                : '🎵 Audio Extract Karo'}
+                : '🎵 Extract Audio'}
             </button>
           )}
 
@@ -138,7 +138,7 @@ export default function VideoToAudio() {
       )}
 
       <div className={styles.hint} style={{ marginTop: 16 }}>
-        💡 Output WAV format mein hoga. Browser MP4/WebM best support karta hai. AVI/MKV kaam nahi kar sakta.
+        💡 Output will be in WAV format. MP4/WebM are best supported. AVI/MKV may not work.
       </div>
     </ToolLayout>
   )

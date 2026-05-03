@@ -82,7 +82,7 @@ export default function ImageCompressor() {
           </div>
 
           <button className={styles.actionBtn} onClick={compress} disabled={loading}>
-            {loading ? <><span className={styles.spinner} /> Compress ho raha hai...</> : `🗜️ ${files.length} Images Compress Karo`}
+            {loading ? <><span className={styles.spinner} /> Compressing...</> : `🗜️ ${files.length} Images — Compress`}
           </button>
         </>
       )}
@@ -120,7 +120,7 @@ export default function ImageCompressor() {
           ))}
           {results.length > 1 && (
             <button className={styles.actionBtn} onClick={downloadAll} style={{ marginTop: 12 }}>
-              ⬇ Sabhi Download Karo
+              ⬇ Download All
             </button>
           )}
         </div>

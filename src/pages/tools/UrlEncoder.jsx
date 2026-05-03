@@ -77,7 +77,7 @@ export default function UrlEncoder() {
             className={styles.textArea}
             value={input}
             onChange={e => { setInput(e.target.value); setError('') }}
-            placeholder={mode === 'encode' ? 'URL ya text yahan likho...\n\nhttps://example.com/path?name=राम&city=कोटा' : 'Encoded URL paste karo...\n\nhttps%3A%2F%2Fexample.com'}
+            placeholder={mode === 'encode' ? 'Enter URL or text here...\n\nhttps://example.com/path?name=राम&city=कोटा' : 'Paste encoded URL here...\n\nhttps%3A%2F%2Fexample.com'}
           />
         </div>
         <div>
@@ -85,7 +85,7 @@ export default function UrlEncoder() {
             <div className={styles.controlLabel}>Output</div>
             {output && <button className={styles.copyBtn} style={{ marginTop: 0 }} onClick={copy}>{copied ? '✅' : '📋 Copy'}</button>}
           </div>
-          <textarea className={styles.outputArea} value={output} readOnly placeholder="Result yahan aayega..." />
+          <textarea className={styles.outputArea} value={output} readOnly placeholder="Result will appear here..." />
         </div>
       </div>
 

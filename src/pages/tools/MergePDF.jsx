@@ -40,7 +40,7 @@ export default function MergePDF() {
       <FileUpload onFiles={addFiles} accept={{ 'application/pdf': ['.pdf'] }} multiple label="Drag or choose PDF files" />
       {files.length > 0 && (
         <div className={styles.fileList}>
-          <h3 className={styles.fileListTitle}>Files ({files.length}) — Order arrows se change karo</h3>
+          <h3 className={styles.fileListTitle}>Files ({files.length}) — Reorder using arrows</h3>
           {files.map((f, i) => (
             <div key={i} className={styles.fileItem}>
               <span className={styles.fileNum}>{i + 1}</span>
@@ -60,10 +60,10 @@ export default function MergePDF() {
       )}
       {files.length >= 2 && (
         <button className={styles.actionBtn} onClick={merge} disabled={loading}>
-          {loading ? <><span className={styles.spinner} /> Merge ho raha hai...</> : `⚡ ${files.length} PDFs Merge Karo`}
+          {loading ? <><span className={styles.spinner} /> Merging...</> : `⚡ ${files.length} PDFs — Merge`}
         </button>
       )}
-      {files.length === 1 && <p className={styles.hint}>ℹ️ Kam se kam 2 PDF files select karo</p>}
+      {files.length === 1 && <p className={styles.hint}>ℹ️ Please select at least 2 PDF files</p>}
       {done && <div className={styles.success}>✅ Merge ho gaya! File download ho gayi.</div>}
     </ToolLayout>
   )

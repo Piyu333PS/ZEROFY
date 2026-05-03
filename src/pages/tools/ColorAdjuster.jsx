@@ -60,7 +60,7 @@ export default function ColorAdjuster() {
           padding: '48px 24px', textAlign: 'center', cursor: 'pointer'
         }} onClick={() => document.getElementById('color-upload').click()}>
           <div style={{ fontSize: 48, marginBottom: 12 }}>🎨</div>
-          <div style={{ fontSize: 16, fontWeight: 600 }}>Image upload karo</div>
+          <div style={{ fontSize: 16, fontWeight: 600 }}>Upload an image</div>
           <div style={{ fontSize: 13, color: 'var(--text3)', marginTop: 6 }}>JPG, PNG, WebP</div>
           <input id="color-upload" type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFile} />
         </div>

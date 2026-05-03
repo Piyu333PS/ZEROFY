@@ -79,7 +79,7 @@ export default function Base64Tool() {
       </div>
 
       <div className={styles.controlGroup} style={{ marginBottom: 12 }}>
-        <label className={styles.controlLabel}>Ya file/image upload karo (encode ke liye)</label>
+        <label className={styles.controlLabel}>Or upload a file / image (for encoding)</label>
         <input type="file" onChange={handleFile} style={{ color: 'var(--text2)', fontSize: 13 }} />
       </div>
 
@@ -98,7 +98,7 @@ export default function Base64Tool() {
             <div className={styles.controlLabel}>Output</div>
             {output && <button className={styles.copyBtn} style={{ marginTop: 0 }} onClick={copy}>{copied ? '✅' : '📋 Copy'}</button>}
           </div>
-          <textarea className={styles.outputArea} value={output} readOnly placeholder="Result yahan aayega..." />
+          <textarea className={styles.outputArea} value={output} readOnly placeholder="Result will appear here..." />
         </div>
       </div>
 

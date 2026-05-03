@@ -47,7 +47,7 @@ export default function SettingsPage({ theme, toggleTheme }) {
     e.preventDefault()
     setPwdMsg(null)
     if (pwdForm.newPassword !== pwdForm.confirmPassword) {
-      setPwdMsg({ type: 'error', text: 'Naye passwords match nahi kar rahe' })
+      setPwdMsg({ type: 'error', text: 'New passwords do not match' })
       return
     }
     setPwdLoading(true)
@@ -163,7 +163,7 @@ export default function SettingsPage({ theme, toggleTheme }) {
             {emailMsg && <div style={msgStyle(emailMsg.type)}>{emailMsg.type === 'success' ? '✅' : '⚠️'} {emailMsg.text}</div>}
             {emailMsg?.type === 'success' && (
               <div style={{ fontSize: 12, color: 'var(--text3)', marginTop: 8 }}>
-                Email update hui! Naye email se dobara login karo.
+                Email updated! Please log in again with your new email.
               </div>
             )}
           </form>
@@ -218,7 +218,7 @@ export default function SettingsPage({ theme, toggleTheme }) {
         {/* Danger Zone */}
         <div style={{ ...cardStyle, borderColor: 'rgba(248,113,113,0.2)' }}>
           <h2 style={{ fontSize: 16, fontWeight: 700, color: '#F87171', marginBottom: 8, marginTop: 0 }}>🚪 Account</h2>
-          <p style={{ fontSize: 13, color: 'var(--text3)', marginBottom: 16 }}>Account se logout karo</p>
+          <p style={{ fontSize: 13, color: 'var(--text3)', marginBottom: 16 }}>Sign out of your account</p>
           <button
             onClick={() => { logout() }}
             style={{

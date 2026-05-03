@@ -126,7 +126,7 @@ export default function PricingPage() {
         body: JSON.stringify({ planId })
       })
       const orderData = await orderRes.json()
-      if (!orderRes.ok) throw new Error(orderData.error || 'Order create nahi hua')
+      if (!orderRes.ok) throw new Error(orderData.error || 'Failed to create order')
 
       // 2. Razorpay script load karo agar nahi hai
       if (!window.Razorpay) {
@@ -134,7 +134,7 @@ export default function PricingPage() {
           const s = document.createElement('script')
           s.src = 'https://checkout.razorpay.com/v1/checkout.js'
           s.onload = resolve
-          s.onerror = () => reject(new Error('Razorpay load nahi hua'))
+          s.onerror = () => reject(new Error('Failed to load payment gateway'))
           document.head.appendChild(s)
         })
       }
@@ -166,7 +166,7 @@ export default function PricingPage() {
             alert('🎉 ' + verifyData.message)
             navigate('/')
           } else {
-            setPayError('Payment verify nahi hua. Support se contact karo.')
+            setPayError('Payment verification failed. Please contact support.')
           }
           setPayLoading(null)
         },
@@ -178,7 +178,7 @@ export default function PricingPage() {
       })
       rzp.open()
     } catch (err) {
-      setPayError(err.message || 'Kuch gadbad hui.')
+      setPayError(err.message || 'Something went wrong. Please try again.')
       setPayLoading(null)
     }
   }
@@ -493,9 +493,9 @@ export default function PricingPage() {
                 fontSize: 20, fontWeight: 800, marginBottom: 8,
                 background: 'linear-gradient(135deg, #60A5FA, #A78BFA)',
                 WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'
-              }}>Pehle Login Karo</h2>
+              }}>Login to Continue</h2>
               <p style={{ color: '#9A96C0', fontSize: 13, marginBottom: 24, lineHeight: 1.6 }}>
-                Payment ke liye login zaroori hai. Login karke wapas yahan aao aur plan select karo.
+                Please log in to proceed with payment. Select your plan after logging in.
               </p>
               <button
                 onClick={() => { setShowAuthPrompt(false); navigate('/') }}

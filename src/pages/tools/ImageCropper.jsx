@@ -106,14 +106,14 @@ export default function ImageCropper() {
           padding: '48px 24px', textAlign: 'center', cursor: 'pointer'
         }} onClick={() => document.getElementById('crop-upload').click()}>
           <div style={{ fontSize: 48, marginBottom: 12 }}>✂️</div>
-          <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 8 }}>Image choose karo</div>
+          <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 8 }}>Choose an image</div>
           <div style={{ fontSize: 13, color: 'var(--text3)' }}>JPG, PNG, WebP</div>
           <input id="crop-upload" type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFile} />
         </div>
       ) : (
         <>
           <div className={styles.hint} style={{ marginBottom: 12 }}>
-            💡 Box ko drag karke move karo, corner se resize karo
+            💡 Drag to move the crop box, resize from corners
           </div>
 
           <div ref={containerRef} style={{ position: 'relative', display: 'inline-block', maxWidth: '100%', userSelect: 'none' }}>

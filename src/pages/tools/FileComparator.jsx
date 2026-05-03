@@ -288,7 +288,7 @@ export default function FileComparator() {
           <div className="fc-head">
             <div className="fc-eyebrow">⚡ Smart Comparison</div>
             <h1 className="fc-title">File <em>Comparator</em></h1>
-            <p className="fc-sub">JSON · XML · TXT files ko side-by-side compare karo — instantly</p>
+            <p className="fc-sub">Compare JSON · XML · TXT files side by side — instantly</p>
           </div>
 
           {/* File Cards */}
@@ -311,7 +311,7 @@ export default function FileComparator() {
                 ↺ Reset
               </button>
             )}
-            {!canCompare && <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: 12 }}>2 files upload karo compare karne ke liye</span>}
+            {!canCompare && <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: 12 }}>Upload 2 files to compare</span>}
           </div>
 
           {/* Results */}
@@ -356,7 +356,7 @@ export default function FileComparator() {
                       <div className="fc-empty">
                         <div className="big">🎉</div>
                         <div style={{ color: '#00d478', fontWeight: 600 }}>Dono files bilkul same hain!</div>
-                        <div style={{ fontSize: 13, marginTop: 6 }}>Koi bhi difference nahi mila</div>
+                        <div style={{ fontSize: 13, marginTop: 6 }}>No differences found</div>
                       </div>
                     ) : (
                       <div>
@@ -377,8 +377,8 @@ export default function FileComparator() {
 
                                   {/* Human explanation */}
                                   <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)', marginBottom: 8, lineHeight: 1.5 }}>
-                                    {d.type === 'added' && <>📥 <strong style={{ color: '#00d478' }}>File 2 mein naya item hai</strong> jo File 1 mein nahi tha</>}
-                                    {d.type === 'removed' && <>📤 <strong style={{ color: '#ff6060' }}>File 1 mein tha</strong> par File 2 mein nahi hai</>}
+                                    {d.type === 'added' && <>📥 <strong style={{ color: '#00d478' }}>New item in File 2</strong> not present in File 1</>}
+                                    {d.type === 'removed' && <>📤 <strong style={{ color: '#ff6060' }}>Present in File 1</strong> but missing in File 2</>}
                                     {d.type === 'changed' && <>✏️ <strong style={{ color: '#ffb432' }}>Value alag hai</strong> dono files mein</>}
                                     {d.type === 'type_changed' && <>⚡ <strong style={{ color: '#c084fc' }}>Data type badal gaya</strong> ({d.from} → {d.to})</>}
                                   </div>

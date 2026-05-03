@@ -178,7 +178,7 @@ export default function DocumentScanner() {
       setStream(s); setCamOpen(true)
       setTimeout(() => { if (videoRef.current) videoRef.current.srcObject = s }, 80)
     } catch {
-      setCamErr('Camera permission nahi mila. Browser mein camera allow karo.')
+      setCamErr('Camera access denied. Please allow camera permissions in your browser.')
     }
   }
 
@@ -292,7 +292,7 @@ export default function DocumentScanner() {
               onClick={() => fileRef.current?.click()} style={C.capBtn(true)}>
               <span style={{ fontSize:30 }}>🖼️</span>
               <span style={{ fontWeight:700, fontSize:15, color:'var(--text)' }}>Gallery Upload</span>
-              <span style={{ fontSize:12, color:'var(--text3)' }}>Drag ya click karo</span>
+              <span style={{ fontSize:12, color:'var(--text3)' }}>Drag or click to upload</span>
             </div>
             <input ref={fileRef} type="file" accept="image/*" multiple style={{ display:'none' }} onChange={onFileChange} />
           </div>
@@ -345,9 +345,9 @@ export default function DocumentScanner() {
             <div style={{ marginTop:24, padding:'16px 18px', background:'rgba(108,99,255,0.07)', border:'1px solid rgba(108,99,255,0.18)', borderRadius:'var(--radius)' }}>
               <div style={{ fontSize:13, fontWeight:600, color:'var(--accent2)', marginBottom:8 }}>⚡ Yahan kya special hai?</div>
               <div style={{ fontSize:13, color:'var(--text3)', lineHeight:1.9 }}>
-                📸 Scan karo → ek click mein <b style={{color:'var(--text2)'}}>PDF, JPG ya Text file</b> choose karo<br/>
-                📄 Multiple pages → <b style={{color:'var(--text2)'}}>automatically ek PDF</b> mein merge hoga<br/>
-                🔤 OCR — Hindi + English text extract karo<br/>
+                📸 Scan → choose <b style={{color:'var(--text2)'}}>PDF, JPG, or Text</b> output in one click<br/>
+                📄 Multiple pages → automatically <b style={{color:'var(--text2)'}}>merged into one PDF</b><br/>
+                🔤 OCR — Extract Hindi + English text from images<br/>
                 🎨 Auto-enhance — printed docs, handwriting, colour docs ke liye alag modes
               </div>
             </div>
@@ -373,7 +373,7 @@ export default function DocumentScanner() {
           {pages.length > 1 && (
             <div style={{ ...C.card, marginBottom:16 }}>
               <div style={{ fontSize:14, fontWeight:600, color:'var(--text)', marginBottom:12 }}>
-                📄 {pages.length} pages hain — kaise save karna hai?
+                📄 {pages.length} pages ready — choose how to save:
               </div>
               <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
                 {[
@@ -397,7 +397,7 @@ export default function DocumentScanner() {
           )}
 
           {/* Format cards */}
-          <div style={C.sLabel}>Kaunse format mein save karna hai?</div>
+          <div style={C.sLabel}>Select output format:</div>
           <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:10, marginBottom:16 }}>
 
             {/* PDF */}
@@ -442,7 +442,7 @@ export default function DocumentScanner() {
           {/* Success states */}
           {exportDone && exportType === 'pdf' && exportUrl && (
             <a href={exportUrl} download={mergeAll && pages.length > 1 ? 'scanned_merged.pdf' : 'scanned_document.pdf'} style={C.successLink}>
-              ✅ PDF ready! — Click karke download karo 📄
+              ✅ PDF ready! — Click below to download 📄
             </a>
           )}
           {exportDone && exportType === 'jpg' && (
@@ -465,8 +465,8 @@ export default function DocumentScanner() {
           )}
 
           <div style={{ display:'flex', gap:10, marginTop:18 }}>
-            <button onClick={scanMore} style={{ ...C.ghost, flex:1, padding:'11px', display:'flex', justifyContent:'center' }}>📸 Aur pages scan karo</button>
-            <button onClick={startFresh} style={{ ...C.ghost, flex:1, padding:'11px', display:'flex', justifyContent:'center' }}>🔄 Naya scan shuru karo</button>
+            <button onClick={scanMore} style={{ ...C.ghost, flex:1, padding:'11px', display:'flex', justifyContent:'center' }}>📸 Scan More Pages</button>
+            <button onClick={startFresh} style={{ ...C.ghost, flex:1, padding:'11px', display:'flex', justifyContent:'center' }}>🔄 Start New Scan</button>
           </div>
         </>
       )}
@@ -488,7 +488,7 @@ export default function DocumentScanner() {
             <div style={{ display:'flex', gap:10, alignItems:'center' }}>
               <span style={{ fontSize:12, color:'var(--text3)' }}>{pages.length} page{pages.length>1?'s':''} captured</span>
               <button onClick={() => { closeCamera(); goToExport() }} style={{ background:'var(--green)', color:'#000', border:'none', borderRadius:100, padding:'8px 18px', fontWeight:700, fontSize:13, cursor:'pointer' }}>
-                ✅ Done — Save Karo
+                ✅ Done — Save
               </button>
             </div>
           )}

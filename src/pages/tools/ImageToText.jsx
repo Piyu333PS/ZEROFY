@@ -59,7 +59,7 @@ export default function ImageToText() {
       setProgress('')
     } catch (e) {
       setProgress('')
-      setText('❌ Error: ' + e.message + '\n\nNote: Tesseract.js CDN load nahi ho paya. Internet connection check karo.')
+      setText('❌ Error: ' + e.message + '\n\nNote: Failed to load Tesseract.js. Please check your internet connection.')
     }
     setProcessing(false)
   }
@@ -89,7 +89,7 @@ export default function ImageToText() {
           style={{ border: '2px dashed var(--border)', borderRadius: 'var(--radius-lg)', padding: '48px 24px', textAlign: 'center', cursor: 'pointer' }}
           onClick={() => document.getElementById('ocr-upload').click()}>
           <div style={{ fontSize: 48, marginBottom: 12 }}>🔤</div>
-          <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 8 }}>Image drop karo ya click karo</div>
+          <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 8 }}>Drop an image or click to upload</div>
           <div style={{ fontSize: 13, color: 'var(--text3)' }}>JPG, PNG, WebP, BMP — screenshot bhi kaam karta hai</div>
           <input id="ocr-upload" type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFile} />
         </div>
@@ -122,7 +122,7 @@ export default function ImageToText() {
       )}
 
       <div className={styles.hint} style={{ marginTop: 16 }}>
-        💡 Best results ke liye: clear, high-resolution image use karo. Handwritten text ke liye accuracy kam ho sakti hai.
+        💡 For best results, use a clear, high-resolution image. Accuracy may be lower for handwritten text.
       </div>
     </ToolLayout>
   )

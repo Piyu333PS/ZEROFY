@@ -55,7 +55,7 @@ export default function IpLookup() {
         <div className={styles.hint} style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <span>🖥️ Tumhara IP: <strong style={{ color: 'var(--accent2)' }}>{myIp}</strong></span>
           <button className={styles.copyBtn} style={{ marginTop: 0 }} onClick={() => lookup(myIp)}>
-            Apna IP lookup karo
+            Look Up My IP
           </button>
         </div>
       )}

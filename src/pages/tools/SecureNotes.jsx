@@ -47,7 +47,7 @@ export default function SecureNotes() {
   const process = async () => {
     if (!text.trim() || !password) return
     if (mode === 'encrypt' && password !== confirmPwd) {
-      setError('❌ Passwords match nahi kar raha!'); return
+      setError('❌ Passwords do not match!'); return
     }
     setProcessing(true); setError(''); setOutput('')
     try {
@@ -75,7 +75,7 @@ export default function SecureNotes() {
   }
 
   return (
-    <ToolLayout icon="🔐" name="Secure Notes" desc="Notes ko AES-256 encryption se lock karo — password ke bina koi nahi padh sakta">
+    <ToolLayout icon="🔐" name="Secure Notes" desc="Lock notes with AES-256 encryption — unreadable without the password">
 
       <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
         {['encrypt', 'decrypt'].map(m => (
@@ -95,7 +95,7 @@ export default function SecureNotes() {
         <label className={styles.controlLabel}>{mode === 'encrypt' ? 'Text / Note' : 'Encrypted Text'}</label>
         <textarea className={styles.textArea} style={{ minHeight: 120 }} value={text}
           onChange={e => { setText(e.target.value); setError('') }}
-          placeholder={mode === 'encrypt' ? 'Woh note ya text yahan likho jo encrypt karna hai...' : 'Encrypted text paste karo...'} />
+          placeholder={mode === 'encrypt' ? 'Enter the note or text to encrypt...' : 'Paste encrypted text here...'} />
       </div>
 
       <div className={styles.controls}>
@@ -116,20 +116,20 @@ export default function SecureNotes() {
             <label className={styles.controlLabel}>Confirm Password</label>
             <input className={styles.controlInput} type={showPwd ? 'text' : 'password'}
               value={confirmPwd} onChange={e => setConfirmPwd(e.target.value)}
-              placeholder="Password dobara dalao"
+              placeholder="Confirm password"
               style={{ borderColor: confirmPwd && confirmPwd !== password ? '#ff4d4d' : undefined }} />
           </div>
         )}
       </div>
 
       {password.length > 0 && password.length < 8 && (
-        <div style={{ fontSize: 12, color: '#ffd700', marginBottom: 8 }}>⚠️ Password kam se kam 8 characters ka hona chahiye</div>
+        <div style={{ fontSize: 12, color: '#ffd700', marginBottom: 8 }}>⚠️ Password must be at least 8 characters</div>
       )}
 
       {error && <div style={{ color: '#ff4d4d', fontSize: 14, marginBottom: 8 }}>{error}</div>}
 
       <button className={styles.actionBtn} onClick={process} disabled={processing || !text || !password || (mode === 'encrypt' && password !== confirmPwd)}>
-        {processing ? <><span className={styles.spinner} /> Processing...</> : mode === 'encrypt' ? '🔒 Encrypt karo' : '🔓 Decrypt karo'}
+        {processing ? <><span className={styles.spinner} /> Processing...</> : mode === 'encrypt' ? '🔒 Encrypt' : '🔓 Decrypt'}
       </button>
 
       {output && (
@@ -143,7 +143,7 @@ export default function SecureNotes() {
           </div>
           <textarea className={styles.outputArea} style={{ minHeight: 100 }} value={output} readOnly />
           <div className={styles.hint} style={{ marginTop: 8 }}>
-            🔐 AES-256-GCM encryption use ho rahi hai • Password ke bina decrypt nahi ho sakta
+            🔐 AES-256-GCM encryption • Cannot be decrypted without the password
           </div>
         </div>
       )}

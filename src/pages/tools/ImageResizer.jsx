@@ -91,7 +91,7 @@ export default function ImageResizer() {
           }}
           onClick={() => document.getElementById('img-upload').click()}>
           <div style={{ fontSize: 48, marginBottom: 12 }}>🖼️</div>
-          <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 8 }}>Image drop karo ya click karo</div>
+          <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 8 }}>Drop an image or click to upload</div>
           <div style={{ fontSize: 13, color: 'var(--text3)' }}>JPG, PNG, WebP, GIF</div>
           <input id="img-upload" type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFile} />
         </div>
@@ -135,7 +135,7 @@ export default function ImageResizer() {
 
           <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, color: 'var(--text2)', marginBottom: 8, cursor: 'pointer' }}>
             <input type="checkbox" checked={keepRatio} onChange={e => setKeepRatio(e.target.checked)} style={{ accentColor: 'var(--accent)' }} />
-            Aspect ratio lock karo
+            Lock aspect ratio
           </label>
 
           {format !== 'image/png' && (

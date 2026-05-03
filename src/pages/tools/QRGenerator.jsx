@@ -96,7 +96,7 @@ export default function QRGenerator() {
               placeholder={type === 'url' ? 'https://...' : type === 'email' ? 'example@gmail.com' : type === 'phone' ? '+91 98765 43210' : 'Koi bhi text...'} />
           </div>
           <p style={{ fontSize: 13, color: 'var(--text3)', lineHeight: 1.6 }}>
-            💡 QR code device pe generate hota hai — koi data bahar nahi jaata.
+            💡 QR code is generated on your device — no data is sent to any server.
           </p>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
@@ -106,7 +106,7 @@ export default function QRGenerator() {
           }}>
             {loading ? <span className={styles.spinner} style={{ width: 28, height: 28 }} />
               : qrDataUrl ? <img src={qrDataUrl} alt="QR" style={{ width: 168, height: 168 }} />
-              : <span style={{ color: 'var(--text3)', fontSize: 13 }}>QR yahan dikhega</span>}
+              : <span style={{ color: 'var(--text3)', fontSize: 13 }}>QR code will appear here</span>}
           </div>
           {qrDataUrl && (
             <button className={styles.actionBtn} style={{ padding: '10px 24px', fontSize: 14 }} onClick={download}>

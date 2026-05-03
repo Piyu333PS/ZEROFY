@@ -11,7 +11,7 @@ async function hashText(text, algorithm) {
 }
 
 const ALGOS = [
-  { label: 'MD5', algo: null, note: '(browser me native support nahi, CRC32 use ho raha)' },
+  { label: 'MD5', algo: null, note: '(no native browser support, using CRC32)' },
   { label: 'SHA-1', algo: 'SHA-1' },
   { label: 'SHA-256', algo: 'SHA-256' },
   { label: 'SHA-384', algo: 'SHA-384' },
@@ -65,7 +65,7 @@ export default function HashGenerator() {
     <ToolLayout icon="🔑" name="Hash Generator" desc="Generate MD5, SHA-1, SHA-256, SHA-512 hash of text or file">
 
       <div className={styles.controlGroup} style={{ marginBottom: 16 }}>
-        <label className={styles.controlLabel}>File se hash karo</label>
+        <label className={styles.controlLabel}>Generate hash from file</label>
         <input type="file" onChange={handleFile} style={{ color: 'var(--text2)', fontSize: 13 }} />
       </div>
 
@@ -111,7 +111,7 @@ export default function HashGenerator() {
 
       {!input && (
         <div className={styles.hint} style={{ marginTop: 16 }}>
-          💡 Text type karo ya file upload karo — sabhi hash formats ek saath dikhenge
+          💡 Type text or upload a file — all hash formats will be shown at once
         </div>
       )}
     </ToolLayout>

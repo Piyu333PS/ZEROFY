@@ -143,7 +143,7 @@ export default function Mp3Trimmer() {
               </div>
 
               <button className={styles.actionBtn} onClick={trim} disabled={loading}>
-                {loading ? <><span className={styles.spinner} /> Trim ho raha hai...</> : '✂️ Trim & Download Karo'}
+                {loading ? <><span className={styles.spinner} /> Trimming...</> : '✂️ Trim & Download'}
               </button>
             </div>
           )}

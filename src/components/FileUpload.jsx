@@ -19,17 +19,17 @@ export default function FileUpload({ onFiles, accept, multiple = false, maxSize 
         <input {...getInputProps()} />
         <div className={styles.icon}>{isDragActive ? '📂' : '📁'}</div>
         <div className={styles.title}>
-          {isDragActive ? 'File yahan chodo...' : (label || 'File drag karo ya click karke choose karo')}
+          {isDragActive ? 'Drop file here...' : (label || 'Drag & drop or click to choose a file')}
         </div>
         <div className={styles.sub}>
           {acceptStr && <span>{acceptStr}</span>}
           <span>Max {Math.round(maxSize / (1024 * 1024))}MB</span>
         </div>
-        <button className={styles.btn} type="button">File Choose Karo</button>
+        <button className={styles.btn} type="button">Choose File</button>
       </div>
       {fileRejections.length > 0 && (
         <div className={styles.error}>
-          ⚠️ {fileRejections[0]?.errors[0]?.message || 'File accept nahi hui'}
+          ⚠️ {fileRejections[0]?.errors[0]?.message || 'File not accepted'}
         </div>
       )}
     </div>

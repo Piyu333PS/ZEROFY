@@ -71,7 +71,7 @@ export default function LoremIpsum() {
       <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, color: 'var(--text2)', marginBottom: 16, cursor: 'pointer' }}>
         <input type="checkbox" checked={startWithLorem} onChange={e => setStartWithLorem(e.target.checked)}
           style={{ accentColor: 'var(--accent)', width: 16, height: 16 }} />
-        "Lorem ipsum..." se start karo
+        "Start with Lorem ipsum..."
       </label>
 
       <button className={styles.actionBtn} onClick={generate}>

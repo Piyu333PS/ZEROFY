@@ -20,7 +20,7 @@ export default function PdfToJpg() {
         'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'
       resolve(window.pdfjsLib)
     }
-    script.onerror = () => reject(new Error('pdfjs-dist load nahi hua'))
+    script.onerror = () => reject(new Error('Failed to load pdfjs-dist'))
     document.head.appendChild(script)
   })
 
@@ -84,7 +84,7 @@ export default function PdfToJpg() {
       {pages.length > 0 && (
         <>
           <button className={styles.actionBtn} onClick={downloadAll} style={{ margin: '16px 0' }}>
-            ⬇️ Sab Pages Download Karo ({pages.length})
+            ⬇️ Download All Pages ({pages.length})
           </button>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 12 }}>
             {pages.map(p => (

@@ -52,7 +52,7 @@ export default function HeicConverter() {
         }
       }
     } catch (e) {
-      alert('Library load nahi hui. Internet check karo.')
+      alert('Failed to load library. Please check your internet connection.')
     }
 
     setResults(done)
@@ -68,7 +68,7 @@ export default function HeicConverter() {
           background: 'rgba(108,99,255,0.1)', border: '1px solid rgba(108,99,255,0.3)',
           borderRadius: 'var(--radius)', padding: '12px 16px', marginBottom: 24, fontSize: 13, color: 'var(--text2)'
         }}>
-          📱 iPhone se bheje HEIC photos ko JPG/PNG mein convert karo — Windows aur Android pe open hote hain.
+          📱 Convert HEIC photos from iPhone to JPG/PNG — compatible with Windows and Android.
         </div>
 
         <label style={{
@@ -78,7 +78,7 @@ export default function HeicConverter() {
         }}>
           <span style={{ fontSize: 40 }}>📷</span>
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>HEIC files choose karo</div>
+            <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>Choose HEIC files</div>
             <div style={{ fontSize: 13, color: 'var(--text3)' }}>.heic ya .heif files — multiple select kar sakte ho</div>
           </div>
           <input type="file" accept=".heic,.heif,image/heic,image/heif" multiple onChange={onFiles} style={{ display: 'none' }} />

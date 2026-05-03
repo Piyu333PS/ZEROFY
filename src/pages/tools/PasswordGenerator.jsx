@@ -18,7 +18,7 @@ export default function PasswordGenerator() {
     if (lower) chars += 'abcdefghijklmnopqrstuvwxyz'
     if (numbers) chars += '0123456789'
     if (symbols) chars += '!@#$%^&*()_+-=[]{}|;:,.<>?'
-    if (!chars) { alert('Kam se kam ek option select karo'); return }
+    if (!chars) { alert('Please select at least one option'); return }
     let pass = ''
     const arr = new Uint32Array(length)
     window.crypto.getRandomValues(arr)
@@ -78,7 +78,7 @@ export default function PasswordGenerator() {
         ))}
       </div>
 
-      <button className={styles.actionBtn} onClick={generate}>🔑 Password Generate Karo</button>
+      <button className={styles.actionBtn} onClick={generate}>🔑 Generate Password</button>
 
       {password && (
         <div style={{ marginTop: 24 }}>
@@ -102,9 +102,9 @@ export default function PasswordGenerator() {
 
           <div style={{ display: 'flex', gap: 10 }}>
             <button className={styles.copyBtn} onClick={() => copy()} style={{ flex: 1 }}>
-              {copied ? '✅ Copied!' : '📋 Copy Karo'}
+              {copied ? '✅ Copied!' : '📋 Copy'}
             </button>
-            <button className={styles.copyBtn} onClick={generate}>🔄 Naya Generate Karo</button>
+            <button className={styles.copyBtn} onClick={generate}>🔄 Generate New</button>
           </div>
         </div>
       )}

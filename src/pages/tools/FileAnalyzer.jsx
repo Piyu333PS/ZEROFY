@@ -154,7 +154,7 @@ function explainJSON(data, stats) {
     cards.push({
       icon: '⚠️',
       title: 'Khaali values',
-      desc: `${stats.nulls} field${stats.nulls !== 1 ? 's' : ''} mein koi value nahi hai (null). Ye intentional bhi ho sakta hai ya missing data bhi.`,
+      desc: `${stats.nulls} field${stats.nulls !== 1 ? 's' : ''} fields have no value (null). This may be intentional or indicate missing data.`,
       color: '#FF8C42'
     })
   }
@@ -378,7 +378,7 @@ export default function FileAnalyzer() {
           <div className="fa-head">
             <div className="fa-eyebrow">🔍 AI Powered</div>
             <h1 className="fa-title">File <em>Analyzer</em></h1>
-            <p className="fa-sub">JSON · XML · TXT — koi bhi file upload karo, hum aasaan Hindi mein samjhayenge</p>
+            <p className="fa-sub">Upload any JSON · XML · TXT file and get a clear, structured analysis</p>
           </div>
 
           {/* Drop Zone */}
@@ -399,14 +399,14 @@ export default function FileAnalyzer() {
                 </div>
                 {file.error && <div style={{ color: '#ff8080', marginTop: 8, fontSize: 13 }}>⚠ {file.error}</div>}
                 <label style={{ marginTop: 14, display: 'inline-block', background: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.5)', padding: '6px 16px', borderRadius: 100, fontSize: 12, cursor: 'pointer' }}>
-                  Dusri file choose karo
+                  Choose another file
                   <input type="file" accept=".json,.xml,.txt" style={{ display: 'none' }} onChange={e => e.target.files[0] && handleFile(e.target.files[0])} />
                 </label>
               </div>
             ) : (
               <div>
                 <div style={{ fontSize: 44, marginBottom: 12 }}>📂</div>
-                <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: 15, fontWeight: 600, marginBottom: 6 }}>File yahan drop karo</div>
+                <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: 15, fontWeight: 600, marginBottom: 6 }}>Drop file here</div>
                 <div style={{ color: 'rgba(255,255,255,0.25)', fontSize: 13, marginBottom: 16 }}>JSON · XML · TXT supported</div>
                 <label style={{ background: 'linear-gradient(135deg,#00D4AA,#6C63FF)', color: '#fff', padding: '10px 24px', borderRadius: 100, fontSize: 13, fontWeight: 700, cursor: 'pointer', display: 'inline-block' }}>
                   📁 Browse File

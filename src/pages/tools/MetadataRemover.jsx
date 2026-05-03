@@ -79,7 +79,7 @@ export default function MetadataRemover() {
         }}>
           <span style={{ fontSize: 40 }}>🧹</span>
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>Images choose karo</div>
+            <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>Choose images</div>
             <div style={{ fontSize: 13, color: 'var(--text3)' }}>JPG, PNG, WebP — multiple select kar sakte ho</div>
           </div>
           <input type="file" accept="image/*" multiple onChange={onFiles} style={{ display: 'none' }} />

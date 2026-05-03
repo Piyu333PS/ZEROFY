@@ -103,7 +103,7 @@ export default function ImageCollage() {
       <canvas ref={canvasRef} style={{ display: 'none' }} />
 
       <div className={styles.controlGroup} style={{ marginBottom: 16 }}>
-        <label className={styles.controlLabel}>Images upload karo ({images.length} selected)</label>
+        <label className={styles.controlLabel}>Upload images ({images.length} selected)</label>
         <input type="file" accept="image/*" multiple onChange={handleFiles}
           style={{ color: 'var(--text2)', fontSize: 13 }} />
       </div>
@@ -151,11 +151,11 @@ export default function ImageCollage() {
       </div>
 
       {images.length < needed && (
-        <div className={styles.hint}>💡 Is layout ke liye {needed} images chahiye, abhi {images.length} hain</div>
+        <div className={styles.hint}>💡 This layout needs {needed} images, currently {images.length} hain</div>
       )}
 
       <button className={styles.actionBtn} onClick={generate} disabled={processing || images.length === 0}>
-        {processing ? <><span className={styles.spinner} /> Generating...</> : '🖼️ Collage Banao'}
+        {processing ? <><span className={styles.spinner} /> Generating...</> : '🖼️ Create Collage'}
       </button>
 
       {result && (

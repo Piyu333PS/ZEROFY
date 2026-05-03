@@ -22,7 +22,7 @@ export default function SpeechToText() {
 
   const start = () => {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition
-    if (!SR) { alert('Aapka browser speech recognition support nahi karta. Chrome use karo.'); return }
+    if (!SR) { alert('Your browser does not support speech recognition. Please use Chrome.'); return }
     const rec = new SR()
     rec.continuous = true
     rec.interimResults = true
@@ -85,12 +85,12 @@ export default function SpeechToText() {
       <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
         {!listening ? (
           <button className={styles.actionBtn} onClick={start}>
-            🎤 Recording Shuru Karo
+            🎤 Start Recording
           </button>
         ) : (
           <button className={styles.actionBtn} onClick={stop}
             style={{ background: '#ff4d4d' }}>
-            ⏹ Stop Karo
+            ⏹ Stop
           </button>
         )}
         {text && (
@@ -106,7 +106,7 @@ export default function SpeechToText() {
       </div>
 
       <div className={styles.hint} style={{ marginTop: 16 }}>
-        💡 Chrome browser mein best kaam karta hai. Microphone permission allow karna hoga. Hindi mein bolne ke liye "Hindi (हिन्दी)" select karo.
+        💡 Works best in Chrome. Microphone permission is required. Select "Hindi (हिन्दी)" to speak in Hindi.
       </div>
     </ToolLayout>
   )

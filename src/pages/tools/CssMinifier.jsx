@@ -140,7 +140,7 @@ const greet = (name) => {
             </div>
           </div>
           <textarea className={styles.outputArea} style={{ minHeight: 300, fontSize: 12 }}
-            value={output} readOnly placeholder="Result yahan aayega..." />
+            value={output} readOnly placeholder="Result will appear here..." />
         </div>
       </div>
 

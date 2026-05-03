@@ -923,7 +923,7 @@ export default function ResumeBuilder() {
           <div className="rb-header">
             <div className="rb-badge">✦ AI Powered</div>
             <h1 className="rb-title">Resume jo <span>impress</span> kare</h1>
-            <p className="rb-subtitle">AI se ATS-optimized professional resume banao — sirf 60 seconds mein</p>
+            <p className="rb-subtitle">Build an ATS-optimized professional resume with AI — in just 60 seconds</p>
           </div>
 
           {/* Steps */}
@@ -942,8 +942,8 @@ export default function ResumeBuilder() {
           {/* ── STEP 1: Auth ── */}
           {step === 1 && (
             <div className="rb-card">
-              <h2 className="rb-card-title">{authMode === 'register' ? 'Account banao' : 'Wapas aao'}</h2>
-              <p className="rb-card-sub">{authMode === 'register' ? '2 resumes bilkul free — koi credit card nahi' : 'Apne account mein login karo'}</p>
+              <h2 className="rb-card-title">{authMode === 'register' ? 'Create Account' : 'Welcome Back'}</h2>
+              <p className="rb-card-sub">{authMode === 'register' ? '2 resumes free — no credit card required' : 'Log in to your account'}</p>
               {error && <div className="rb-error">{error}</div>}
               <form onSubmit={handleAuth}>
                 <div className="rb-field">
@@ -955,13 +955,13 @@ export default function ResumeBuilder() {
                   <input className="rb-input" type="password" placeholder="Min 6 characters" value={password} onChange={e => setPassword(e.target.value)} required />
                 </div>
                 <button type="submit" className="rb-btn rb-btn-primary" disabled={loading}>
-                  {loading ? 'Thoda ruko...' : authMode === 'register' ? '✦ Account Banao — Free' : '→ Login Karo'}
+                  {loading ? 'Please wait...' : authMode === 'register' ? '✦ Create Account — Free' : '→ Log In'}
                 </button>
               </form>
               <div className="rb-toggle">
                 {authMode === 'register' ? 'Pehle se account hai? ' : 'Naya account? '}
                 <span onClick={() => { setAuthMode(authMode === 'register' ? 'login' : 'register'); setError('') }}>
-                  {authMode === 'register' ? 'Login karo' : 'Register karo'}
+                  {authMode === 'register' ? 'Log in' : 'Register'}
                 </span>
               </div>
             </div>
@@ -981,7 +981,7 @@ export default function ResumeBuilder() {
 
               {/* Template Picker */}
               <div className="rb-tpl-picker">
-                <span className="rb-tpl-label">Template choose karo</span>
+                <span className="rb-tpl-label">Choose a template</span>
                 <div className="rb-tpl-options">
                   {TEMPLATES.map(t => (
                     <div key={t.id} className={`rb-tpl-opt ${selectedTemplate === t.id ? 'selected' : ''}`} onClick={() => setSelectedTemplate(t.id)}>
@@ -1040,19 +1040,19 @@ export default function ResumeBuilder() {
                 {experiences.map((exp, i) => (
                   <ExperienceEntry key={i} exp={exp} idx={i} onChange={updExp} onRemove={remExp} />
                 ))}
-                <button type="button" className="rb-btn-add" onClick={addExp}>+ Aur Experience Add Karo</button>
+                <button type="button" className="rb-btn-add" onClick={addExp}>+ Add More Experience</button>
 
                 {/* Education */}
                 <div className="rb-section-divider">Education</div>
                 {educations.map((edu, i) => (
                   <EducationEntry key={i} edu={edu} idx={i} onChange={updEdu} onRemove={remEdu} />
                 ))}
-                <button type="button" className="rb-btn-add" onClick={addEdu} style={{ marginTop: 4 }}>+ Aur Education Add Karo</button>
+                <button type="button" className="rb-btn-add" onClick={addEdu} style={{ marginTop: 4 }}>+ Add More Education</button>
 
                 {/* Skills */}
                 <div className="rb-section-divider">Skills</div>
                 <div className="rb-field">
-                  <label className="rb-label">Technical Skills — type karke ya select karke add karo</label>
+                  <label className="rb-label">Technical Skills — type or select to add</label>
                   <TagInput
                     tags={techSkills} onAdd={t => setTechSkills(p => [...p, t])} onRemove={t => setTechSkills(p => p.filter(x => x !== t))}
                     suggestions={SKILL_SUGGESTIONS.tech} placeholder="e.g. React, Python, Excel..." color="#6C63FF"
@@ -1091,12 +1091,12 @@ export default function ResumeBuilder() {
                 {generating && (
                   <div className="rb-progress">
                     <span style={{ fontSize: 18 }}>✨</span>
-                    <span>AI aapka resume bana raha hai<span className="rb-generating-dots" /></span>
+                    <span>AI is building your resume<span className="rb-generating-dots" /></span>
                   </div>
                 )}
 
                 <button type="submit" className="rb-btn rb-btn-primary" disabled={generating} style={{ marginTop: 16 }}>
-                  {generating ? '✦ AI kaam kar raha hai...' : '✦ Resume Generate Karo'}
+                  {generating ? '✦ AI is working...' : '✦ Generate Resume'}
                 </button>
                 <button type="button" className="rb-logout" onClick={logout}>Logout</button>
               </form>
@@ -1106,8 +1106,8 @@ export default function ResumeBuilder() {
           {/* ── STEP 3: Result ── */}
           {step === 3 && resume && (
             <div className="rb-card">
-              <h2 className="rb-card-title">🎉 Aapka Resume Taiyaar!</h2>
-              <p className="rb-card-sub">Template change karo ya PDF save karo</p>
+              <h2 className="rb-card-title">🎉 Your Resume is Ready!</h2>
+              <p className="rb-card-sub">Change template or save as PDF</p>
               <div className="rb-tpl-picker" style={{ marginBottom: 16 }}>
                 <div className="rb-tpl-options">
                   {TEMPLATES.map(t => (
@@ -1122,7 +1122,7 @@ export default function ResumeBuilder() {
                 <div id="resume-print-area">{renderResume()}</div>
               </div>
               <button className="rb-btn rb-btn-primary" onClick={handlePrint}>🖨️ Print / Save as PDF</button>
-              <button className="rb-btn rb-btn-ghost" onClick={() => { setStep(2); setResume(null) }}>← Naya Resume Banao</button>
+              <button className="rb-btn rb-btn-ghost" onClick={() => { setStep(2); setResume(null) }}>← Create New Resume</button>
             </div>
           )}
 
@@ -1144,7 +1144,7 @@ export default function ResumeBuilder() {
                 </ul>
                 {error && <div className="rb-error">{error}</div>}
                 <button className="rb-btn rb-btn-primary" onClick={handlePayment} disabled={payLoading}>
-                  {payLoading ? 'Processing...' : '💳 ₹19/month se unlock karo'}
+                  {payLoading ? 'Processing...' : '💳 Unlock from ₹19/month'}
                 </button>
                 <button className="rb-btn rb-btn-ghost" onClick={() => setStep(2)}>← Wapas jao</button>
               </div>

@@ -154,7 +154,7 @@ export default function BillingPage() {
                 ))}
                 <div style={{ marginTop: 20, padding: '12px 16px', background: 'rgba(52,211,153,0.06)', borderRadius: 10, fontSize: 13, color: 'var(--text3)' }}>
                   {daysLeft(info?.proExpiry) <= 7 && daysLeft(info?.proExpiry) > 0 ? (
-                    <span style={{ color: '#F87171' }}>⚠️ Plan {daysLeft(info?.proExpiry)} din mein expire ho raha hai! <Link to="/pricing" style={{ color: '#60A5FA' }}>Renew karo →</Link></span>
+                    <span style={{ color: '#F87171' }}>⚠️ Plan {daysLeft(info?.proExpiry)} days left until expiry! <Link to="/pricing" style={{ color: '#60A5FA' }}>Renew Now →</Link></span>
                   ) : (
                     <span>Plan renew karne ke liye <Link to="/pricing" style={{ color: '#60A5FA' }}>Pricing page pe jao →</Link></span>
                   )}

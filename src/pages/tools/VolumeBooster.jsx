@@ -134,7 +134,7 @@ export default function VolumeBooster() {
         </div>
       )}
       <div className={styles.hint} style={{ marginTop: 16 }}>
-        💡 2x se zyada boost karne pe distortion aa sakta hai. Pehle sunke check karo.
+        💡 Boosting above 2x may cause distortion. Preview before saving.
       </div>
     </ToolLayout>
   )
