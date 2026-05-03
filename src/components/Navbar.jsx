@@ -184,6 +184,12 @@ export default function Navbar({ theme, toggleTheme }) {
                   </button>
                   {showDropdown && (
                     <UserDropdown user={user} logout={logout} onClose={() => setShowDropdown(false)} navigate={navigate} />
+                  )}
+                </div>
+              </>
+            )}
+
+            {/* LOGGED IN PRO USER */}
             {user && user.isPro && (
               <div style={{ position: 'relative' }}>
                 <button

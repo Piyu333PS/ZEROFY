@@ -1,8 +1,28 @@
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { CATEGORIES, TOOLS, POPULAR_TOOLS } from '../tools/toolsData'
 import styles from './HomePage.module.css'
 import ZerofyLogoAnimation from '../components/ZerofyLogoAnimation'
+
+const RECENT_TOOLS_KEY = 'zerofy_recent_tools'
+const MAX_RECENT = 8
+
+function getRecentToolIds() {
+  try {
+    const stored = localStorage.getItem(RECENT_TOOLS_KEY)
+    return stored ? JSON.parse(stored) : []
+  } catch {
+    return []
+  }
+}
+
+export function trackToolUsage(toolId) {
+  try {
+    const recent = getRecentToolIds().filter(id => id !== toolId)
+    recent.unshift(toolId)
+    localStorage.setItem(RECENT_TOOLS_KEY, JSON.stringify(recent.slice(0, MAX_RECENT)))
+  } catch {}
+}
 
 function ToolCard({ tool }) {
   const isReady = tool.status === 'ready'
@@ -34,7 +54,7 @@ function ToolCard({ tool }) {
   }
 
   return (
-    <Link to={tool.route} className={styles.toolCard}>
+    <Link to={tool.route} className={styles.toolCard} onClick={() => trackToolUsage(tool.id)}>
       {content}
     </Link>
   )
@@ -50,6 +70,14 @@ export default function HomePage() {
   const [activecat, setActivecat]       = useState('all')
   const [search, setSearch]             = useState('')
   const [statusFilter, setStatusFilter] = useState('live')
+  const [recentToolIds, setRecentToolIds] = useState(() => getRecentToolIds())
+
+  // Refresh recent tools when page gains focus (user comes back from a tool)
+  useEffect(() => {
+    const onFocus = () => setRecentToolIds(getRecentToolIds())
+    window.addEventListener('focus', onFocus)
+    return () => window.removeEventListener('focus', onFocus)
+  }, [])
 
   const filtered = TOOLS.filter(t => {
     const matchCat    = activecat === 'all' || t.cat === activecat
@@ -63,7 +91,15 @@ export default function HomePage() {
   })
 
   const comingSoonCount = TOOLS.filter(t => t.status !== 'ready').length
+
+  const recentTools = recentToolIds
+    .map(id => TOOLS.find(t => t.id === id))
+    .filter(Boolean)
+
+  const hasRecentTools = recentTools.length > 0
   const popularTools = TOOLS.filter(t => POPULAR_TOOLS.includes(t.id))
+  const shownTools = hasRecentTools ? recentTools : popularTools
+  const sectionLabel = hasRecentTools ? '🕐 Recently Used' : '🔥 Popular Tools'
   const isSearching = search.length > 0
 
   const displayTools = isSearching
@@ -115,15 +151,33 @@ export default function HomePage() {
       </section>
 
       <div className="page-wrapper">
-        {/* Popular Tools */}
+        {/* Popular / Recently Used Tools */}
         {!isSearching && activecat === 'all' && statusFilter === 'live' && (
           <section className={styles.section}>
             <h2 className={styles.sectionTitle}>
-              <span className={styles.fire}>🔥</span> Popular Tools
+              <span className={styles.fire}>{hasRecentTools ? '🕐' : '🔥'}</span>
+              {hasRecentTools ? 'Recently Used' : 'Popular Tools'}
+              {hasRecentTools && (
+                <button
+                  className={styles.clearRecentBtn}
+                  onClick={() => {
+                    localStorage.removeItem(RECENT_TOOLS_KEY)
+                    setRecentToolIds([])
+                  }}
+                  title="Clear history"
+                >
+                  Clear
+                </button>
+              )}
             </h2>
             <div className={styles.popularGrid}>
-              {popularTools.map(t => (
-                <Link to={t.route} key={t.id} className={styles.popularCard}>
+              {shownTools.map(t => (
+                <Link
+                  to={t.route}
+                  key={t.id}
+                  className={styles.popularCard}
+                  onClick={() => trackToolUsage(t.id)}
+                >
                   <span className={styles.popularIcon}>{t.icon}</span>
                   <span className={styles.popularName}>{t.name}</span>
                   <span className={styles.popularArrow}>→</span>

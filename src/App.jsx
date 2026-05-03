@@ -10,6 +10,7 @@ import { AuthProvider } from './context/AuthContext'
 // PDF Tools
 import MergePDF from './pages/tools/MergePDF'
 import PdfToJpg from './pages/tools/PdfToJpg'
+import PdfTextEditor from './pages/tools/PdfTextEditor'
 
 // Image Tools
 import ImageCompressor from './pages/tools/ImageCompressor'
@@ -143,6 +144,7 @@ function AppInner({ theme, toggleTheme }) {
           {/* PDF */}
           <Route path="/tools/merge-pdf" element={<MergePDF />} />
           <Route path="/tools/pdf-to-jpg" element={<PdfToJpg />} />
+          <Route path="/tools/pdf-text-editor" element={<PdfTextEditor />} />
           <Route path="/tools/jpg-to-pdf" element={<ImagesToPdf />} />
           <Route path="/tools/split-pdf" element={<ComingSoon name="Split PDF" />} />
           <Route path="/tools/compress-pdf" element={<ComingSoon name="Compress PDF" />} />

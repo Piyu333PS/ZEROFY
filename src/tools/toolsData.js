@@ -27,6 +27,7 @@ export const TOOLS = [
   { id: 'sign-pdf',         cat: 'pdf', name: 'Sign PDF',            desc: 'Add a digital signature to your PDF',                     icon: '✍️', status: 'coming', route: '/tools/sign-pdf' },
   { id: 'organize-pdf',     cat: 'pdf', name: 'Organize PDF',        desc: 'Reorder, delete, or rearrange pages',                     icon: '📑', status: 'coming', route: '/tools/organize-pdf' },
   { id: 'redact-pdf',       cat: 'pdf', name: 'Redact PDF',          desc: 'Permanently remove sensitive information',                 icon: '⬛', status: 'coming', route: '/tools/redact-pdf' },
+  { id: 'pdf-text-editor', cat: 'pdf', name: 'PDF Text Editor',     desc: 'Add and edit text directly on any PDF page',               icon: '✏️', status: 'ready',  route: '/tools/pdf-text-editor' },
 
   // ─── VIDEO ──────────────────────────────
   { id: 'video-to-audio',   cat: 'video', name: 'Video → Audio',     desc: 'Extract MP3 or AAC audio from any video',                 icon: '🎵', status: 'ready',  route: '/tools/video-to-audio' },
