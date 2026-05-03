@@ -69,7 +69,7 @@ export const TOOLS = [
 
   // ─── DOCUMENT ───────────────────────────
   { id: 'invoice-maker',    cat: 'document', name: 'Invoice Generator',    desc: 'Create professional invoices with PDF export',    icon: '🧾', status: 'ready',  route: '/tools/invoice-maker' },
-  { id: 'resume-builder',   cat: 'document', name: 'Resume Builder',        desc: 'Build a professional resume with 10+ templates',  icon: '📋', status: 'ready',  route: '/tools/resume-builder' },
+  { id: 'resume-builder',   cat: 'document', name: 'AI Resume Builder',    desc: 'Build a professional CV with AI assistance',      icon: '📋', status: 'coming',  route: '/tools/resume-builder' },
   { id: 'word-counter',     cat: 'document', name: 'Word Counter',         desc: 'Count words, characters, and sentences',          icon: '🔢', status: 'ready',  route: '/tools/word-counter' },
   { id: 'case-converter',   cat: 'document', name: 'Case Converter',       desc: 'Switch between UPPER, lower, and Title Case',     icon: 'Aa', status: 'ready',  route: '/tools/case-converter' },
   { id: 'text-to-speech',   cat: 'document', name: 'Text to Speech',       desc: 'Convert written text into natural audio',         icon: '🔊', status: 'ready',  route: '/tools/text-to-speech' },
