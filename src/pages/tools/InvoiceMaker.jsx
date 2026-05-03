@@ -121,7 +121,7 @@ const TEMPLATES = [
   { key: 'minimal', label: 'Minimal', accent: '#1a1a2e' },
 ]
 
-const defaultItem = () => ({ id: uid(), type: 'goods', hsnSac: '', desc: '', qty: 1, rate: '', gstRate: 18 })
+const defaultItem = () => ({ id: uid(), type: 'goods', hsnSac: '', desc: '', qty: '', rate: '', gstRate: 18 })
 
 /* ─── CSS ────────────────────────────────────────────────────── */
 const CSS = `
@@ -256,7 +256,7 @@ select.inp option { background: #252338; color: #F0EEFF; }
   background: var(--accent-dim); border: 1px solid rgba(124,111,255,0.3);
   border-radius: var(--r-sm); padding: 8px 14px;
   font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 500;
-  color: #A78BFA; letter-spacing: 0.04em; margin-bottom: 14px;
+  color: #A78BFA; letter-spacing: 0.04em; margin-bottom: 0;
 }
 .inv-no input {
   background: transparent; border: none; outline: none; color: #A78BFA;
@@ -1149,9 +1149,9 @@ export default function InvoiceMaker() {
   const updateItem = (id, k, v) => setItems(p => p.map(i => i.id === id ? { ...i, [k]: v } : i))
   const removeItem = id => setItems(p => p.length > 1 ? p.filter(i => i.id !== id) : p)
 
-  const sub = items.reduce((s, i) => s + (i.qty || 0) * (parseFloat(i.rate) || 0), 0)
+  const sub = items.reduce((s, i) => s + (parseFloat(i.qty) || 0) * (parseFloat(i.rate) || 0), 0)
   const disc = sub * (discPct / 100)
-  const gstTotal = items.reduce((s, i) => s + (i.qty||0)*(parseFloat(i.rate)||0)*((i.gstRate||0)/100), 0)
+  const gstTotal = items.reduce((s, i) => s + (parseFloat(i.qty)||0)*(parseFloat(i.rate)||0)*((i.gstRate||0)/100), 0)
   const tax = gstTotal
   const total = sub - disc + gstTotal
 
@@ -1236,12 +1236,18 @@ export default function InvoiceMaker() {
   }
 
   const handleNewInvoice = () => {
-    pendingReset.current?.()
-    pendingReset.current = null
     setShowSuccessModal(false)
+    // Small timeout taaki modal animation complete ho
+    setTimeout(() => {
+      if (pendingReset.current) {
+        pendingReset.current()
+        pendingReset.current = null
+      }
+    }, 100)
   }
 
   const handleStayAndEdit = () => {
+    pendingReset.current = null
     setShowSuccessModal(false)
   }
 
@@ -1390,7 +1396,7 @@ export default function InvoiceMaker() {
 
           {/* Invoice No + Status */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14, flexWrap: 'wrap' }}>
-            <div className="inv-no">
+            <div className="inv-no" style={{ marginBottom: 0 }}>
               🧾 <input value={invNo} onChange={e => setInvNo(e.target.value)} />
             </div>
             <input type="date" className="inp" value={f.date} onChange={sf('date')} style={{ width: 'auto', flex: '0 0 auto' }} />
@@ -1489,8 +1495,9 @@ export default function InvoiceMaker() {
                 </div>
                 {/* Qty */}
                 <div>
-                  <input className="inp" type="number" min="1" value={it.qty}
-                    onChange={e => updateItem(it.id, 'qty', Math.max(1, +e.target.value))}
+                  <input className="inp" type="number" min="0" value={it.qty}
+                    onChange={e => updateItem(it.id, 'qty', e.target.value === '' ? '' : +e.target.value)}
+                    placeholder="Qty"
                     style={{ textAlign: 'center' }} />
                 </div>
                 {/* Rate */}
