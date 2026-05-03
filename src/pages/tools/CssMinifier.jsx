@@ -93,7 +93,7 @@ const greet = (name) => {
   }
 
   return (
-    <ToolLayout icon="🗜️" name="CSS / JS Minifier" desc="CSS aur JavaScript code ko minify ya beautify karo — file size reduce karo">
+    <ToolLayout icon="🗜️" name="CSS / JS Minifier" desc="Minify or beautify CSS and JavaScript code">
 
       <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
         {['css', 'js'].map(t => (
@@ -118,7 +118,7 @@ const greet = (name) => {
 
       <button className={styles.copyBtn} style={{ marginBottom: 10 }}
         onClick={() => setInput(SAMPLES[type])}>
-        📄 Sample {type.toUpperCase()} load karo
+        📄 Load Sample {type.toUpperCase()}
       </button>
 
       <div className={styles.splitRow}>
@@ -129,7 +129,7 @@ const greet = (name) => {
           </div>
           <textarea className={styles.textArea} style={{ minHeight: 300, fontFamily: 'monospace', fontSize: 12 }}
             value={input} onChange={e => setInput(e.target.value)}
-            placeholder={`Apna ${type.toUpperCase()} code yahan paste karo...`} />
+            placeholder={`Paste your ${type.toUpperCase()} code here...`} />
         </div>
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>

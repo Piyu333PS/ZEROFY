@@ -37,7 +37,7 @@ function MobileLogo() {
           <span className={styles.logoText}>ZEROFY</span>
         </div>
       </div>
-      <div className={styles.mobileBtmPill}>70+ Tools · 100% Free</div>
+      <div className={styles.mobileBtmPill}>One Platform. Zero Limits.</div>
     </div>
   )
 }
@@ -263,7 +263,7 @@ export default function ZerofyLogoAnimation() {
         </div>
       </div>
 
-      <div className={styles.btmPill}>70+ Tools · 100% Free</div>
+      <div className={styles.btmPill}>One Platform. Zero Limits.</div>
     </div>
   )
 }

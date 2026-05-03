@@ -99,7 +99,7 @@ export default function ImageCollage() {
   const needed = (lo?.cols || 2) * (lo?.rows || 1)
 
   return (
-    <ToolLayout icon="🖼️" name="Image Collage" desc="Multiple images ko ek collage mein combine karo">
+    <ToolLayout icon="🖼️" name="Image Collage" desc="Combine multiple images into one collage">
       <canvas ref={canvasRef} style={{ display: 'none' }} />
 
       <div className={styles.controlGroup} style={{ marginBottom: 16 }}>

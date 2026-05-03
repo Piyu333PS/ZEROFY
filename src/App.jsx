@@ -6,6 +6,9 @@ import PricingPage from './pages/PricingPage'
 import SplashScreen from './components/SplashScreen'
 import { useBackButton } from './hooks/useBackButton'
 import { AuthProvider } from './context/AuthContext'
+import Footer from './components/Footer'
+import PrivacyPolicy from './pages/PrivacyPolicy'
+import TermsConditions from './pages/TermsConditions'
 
 // PDF Tools
 import MergePDF from './pages/tools/MergePDF'
@@ -39,6 +42,8 @@ import InvoiceMaker from './pages/tools/InvoiceMaker'
 import ResumeBuilder from './pages/tools/ResumeBuilder'
 import SettingsPage from './pages/SettingsPage'
 import BillingPage from './pages/BillingPage'
+import RefundPage from './pages/RefundPage'
+import ContactPage from './pages/ContactPage'
 import WordCounter from './pages/tools/WordCounter'
 import TextToSpeech from './pages/tools/TextToSpeech'
 import SpeechToText from './pages/tools/SpeechToText'
@@ -98,34 +103,7 @@ function ComingSoon({ name }) {
   )
 }
 
-function Footer() {
-  return (
-    <footer style={{
-      background: 'var(--bg2)',
-      borderTop: '1px solid var(--nav-border)',
-      padding: '36px 24px',
-      textAlign: 'center',
-      marginTop: 'auto'
-    }}>
-      <div style={{ maxWidth: 1280, margin: '0 auto' }}>
-        <div style={{
-          fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 800, marginBottom: 6,
-          letterSpacing: '3px',
-          background: 'linear-gradient(135deg, #60A5FA 0%, #A78BFA 100%)',
-          WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text'
-        }}>
-          ZEROFY
-        </div>
-        <p style={{ color: 'var(--text3)', fontSize: 13, marginBottom: 4 }}>
-          Zero Limits. Infinite Tools.
-        </p>
-        <p style={{ color: 'var(--text3)', fontSize: 12, marginTop: 14 }}>
-          © 2025 Zerofy — Made with ❤️ for everyone
-        </p>
-      </div>
-    </footer>
-  )
-}
+
 
 function AppInner({ theme, toggleTheme }) {
   useBackButton()
@@ -140,6 +118,10 @@ function AppInner({ theme, toggleTheme }) {
           <Route path="/pricing" element={<PricingPage />} />
           <Route path="/settings" element={<SettingsPage theme={theme} toggleTheme={toggleTheme} />} />
           <Route path="/billing" element={<BillingPage />} />
+          <Route path="/refund" element={<RefundPage />} />
+          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/terms-conditions" element={<TermsConditions />} />
 
           {/* PDF */}
           <Route path="/tools/merge-pdf" element={<MergePDF />} />

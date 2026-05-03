@@ -81,12 +81,12 @@ export default function VolumeBooster() {
   }
 
   return (
-    <ToolLayout icon="🔊" name="Volume Booster" desc="Audio file ka volume badhao — 2x, 3x, 5x tak">
+    <ToolLayout icon="🔊" name="Volume Booster" desc="Boost audio file volume — up to 2x, 3x or 5x">
       {!file ? (
         <FileUpload
           onFiles={handleFile}
           accept={{ 'audio/*': ['.mp3', '.wav', '.ogg', '.m4a', '.aac'] }}
-          label="Audio file drag karo (MP3, WAV, OGG, M4A)"
+          label="Drag or choose audio file (MP3, WAV, OGG, M4A)"
         />
       ) : (
         <div>
@@ -119,7 +119,7 @@ export default function VolumeBooster() {
             ))}
           </div>
           <button className={styles.actionBtn} onClick={process} disabled={processing} style={{ marginTop: 16 }}>
-            {processing ? <><span className={styles.spinner} /> Processing...</> : '🔊 Volume Boost karo'}
+            {processing ? <><span className={styles.spinner} /> Processing...</> : '🔊 Volume Boost'}
           </button>
         </div>
       )}

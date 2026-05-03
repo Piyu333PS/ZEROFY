@@ -90,7 +90,7 @@ export default function UnitConverter() {
   }
 
   return (
-    <ToolLayout icon="📏" name="Unit Converter" desc="Length, weight, temperature, area, speed, volume, data sab convert karo">
+    <ToolLayout icon="📏" name="Unit Converter" desc="Convert length, weight, temperature, area, speed, volume and data units">
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 28 }}>
         {Object.entries(CATEGORIES).map(([key, c]) => (
           <button key={key} onClick={() => handleCatChange(key)}

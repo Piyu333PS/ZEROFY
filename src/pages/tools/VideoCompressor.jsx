@@ -272,7 +272,17 @@ export default function VideoCompressor() {
                 {videoInfo && ` · ${videoInfo.width}×${videoInfo.height} · ${fmtTime(videoInfo.duration)}`}
               </div>
             </div>
-            <button className={styles.copyBtn} onClick={reset} style={{ margin: 0, flexShrink: 0 }}>
+            <button
+              className={styles.copyBtn}
+              onClick={reset}
+              disabled={processing}
+              style={{
+                margin: 0, flexShrink: 0,
+                opacity: processing ? 0.4 : 1,
+                cursor: processing ? 'not-allowed' : 'pointer',
+                pointerEvents: processing ? 'none' : 'auto',
+              }}
+            >
               Change File
             </button>
           </div>

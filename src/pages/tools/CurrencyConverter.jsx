@@ -75,7 +75,7 @@ export default function CurrencyConverter() {
   ]
 
   return (
-    <ToolLayout icon="💱" name="Currency Converter" desc="Live exchange rates ke saath 20+ currencies convert karo">
+    <ToolLayout icon="💱" name="Currency Converter" desc="Convert 20+ currencies with live exchange rates">
 
       {loading && <div className={styles.hint}>📡 Live rates load ho rahe hain...</div>}
       {!loading && usingFallback && (

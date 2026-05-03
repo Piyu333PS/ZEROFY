@@ -60,7 +60,7 @@ export default function RotateFlip() {
   })
 
   return (
-    <ToolLayout icon="🔄" name="Rotate & Flip" desc="Image ko rotate aur flip karo — 90°, 180°, mirror effect">
+    <ToolLayout icon="🔄" name="Rotate & Flip" desc="Rotate and flip your image — 90°, 180° or mirror">
       <canvas ref={canvasRef} style={{ display: 'none' }} />
 
       {!original ? (

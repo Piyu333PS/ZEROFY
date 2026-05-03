@@ -59,7 +59,7 @@ export default function RegexTester() {
   }
 
   return (
-    <ToolLayout icon="🔍" name="Regex Tester" desc="Regular expressions test karo — live highlighting aur match details ke saath">
+    <ToolLayout icon="🔍" name="Regex Tester" desc="Test regular expressions with live highlighting and match details">
 
       {/* Presets */}
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 16 }}>
@@ -103,7 +103,7 @@ export default function RegexTester() {
       <div className={styles.controlLabel} style={{ marginBottom: 6 }}>Test Text</div>
       <textarea className={styles.textArea} value={testText}
         onChange={e => setTestText(e.target.value)}
-        placeholder="Yahan wo text paste karo jisme regex test karna hai..." />
+        placeholder="Paste the text you want to test your regex against..." />
 
       {/* Highlighted result */}
       {pattern && !result.error && (

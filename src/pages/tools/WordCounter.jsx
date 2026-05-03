@@ -24,11 +24,11 @@ export default function WordCounter() {
   }, [text])
 
   return (
-    <ToolLayout icon="🔢" name="Word Counter" desc="Words, characters, sentences sab count karo — reading time bhi bata dega">
+    <ToolLayout icon="🔢" name="Word Counter" desc="Count words, characters and sentences — also shows estimated reading time">
       <textarea
         className={styles.textArea}
         style={{ minHeight: 200 }}
-        placeholder="Yahan apna text paste karo ya likhna shuru karo..."
+        placeholder="Paste or type your text here..."
         value={text}
         onChange={e => setText(e.target.value)}
       />

@@ -51,7 +51,7 @@ export default function ColorAdjuster() {
   const isDefault = JSON.stringify(adj) === JSON.stringify(defaults)
 
   return (
-    <ToolLayout icon="🎨" name="Color Adjuster" desc="Image ki brightness, contrast, saturation, hue aur aur effects adjust karo">
+    <ToolLayout icon="🎨" name="Color Adjuster" desc="Adjust brightness, contrast, saturation, hue and effects of your image">
       <canvas ref={canvasRef} style={{ display: 'none' }} />
 
       {!original ? (

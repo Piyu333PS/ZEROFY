@@ -67,7 +67,7 @@ export default function QRGenerator() {
   }
 
   return (
-    <ToolLayout icon="📱" name="QR Code Maker" desc="Kisi bhi URL, text, phone number ka QR code banao — bilkul free">
+    <ToolLayout icon="📱" name="QR Code Maker" desc="Generate a QR code from any URL, text or phone number — completely free">
       <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 32, alignItems: 'start' }}>
         <div>
           <div className={styles.controls}>

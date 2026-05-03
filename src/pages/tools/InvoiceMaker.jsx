@@ -1335,6 +1335,34 @@ export default function InvoiceMaker() {
 
   return (
     <div className="ig-root">
+      {/* BACK / BREADCRUMB BAR */}
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: 10,
+        padding: '12px 20px',
+        background: '#16152A',
+        borderBottom: '1px solid rgba(255,255,255,0.07)',
+      }}>
+        <button
+          onClick={() => window.history.back()}
+          style={{
+            display: 'inline-flex', alignItems: 'center', gap: 6,
+            padding: '6px 14px', borderRadius: 8,
+            border: '1px solid rgba(255,255,255,0.15)',
+            background: 'rgba(255,255,255,0.06)',
+            color: '#B8B4E0', fontSize: 13, fontWeight: 600,
+            cursor: 'pointer', fontFamily: 'inherit',
+            transition: 'all 0.15s',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.12)'; e.currentTarget.style.color = '#F0EEFF'; }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = '#B8B4E0'; }}
+        >
+          ‹ Back
+        </button>
+        <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 13 }}>Home</span>
+        <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 13 }}>›</span>
+        <span style={{ color: '#B8B4E0', fontSize: 13 }}>Invoice Generator</span>
+      </div>
+
       {/* TOP BAR */}
       <div className="ig-top">
         <div className="ig-brand">

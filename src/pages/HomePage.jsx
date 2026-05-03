@@ -121,13 +121,16 @@ export default function HomePage() {
           <div className={styles.heroBadge}>
             <ZerofyLogoAnimation />
           </div>
+          <div className={`${styles.heroEyebrow} fade-up`}>
+            <span className={styles.eyebrowDot} />
+            All-in-one productivity platform
+          </div>
           <h1 className={`${styles.heroTitle} fade-up`}>
-            Zero Limits.<br />
-            <span className={styles.accent}>Infinite Tools.</span>
+            Stop Switching.<br />
+            <span className={styles.accent}>Start Doing.</span>
           </h1>
           <p className={`${styles.heroSub} fade-up-1`}>
-            PDF, Video, Audio, Image — everything in one place.<br />
-            Fast, free, and incredibly easy to use.
+            70+ tools. One platform. Zero distractions.
           </p>
           <div className={`${styles.heroSearch} fade-up-2`}>
             <span className={styles.heroSearchIcon}>🔍</span>
@@ -138,15 +141,7 @@ export default function HomePage() {
               className={styles.heroSearchInput}
             />
           </div>
-          <div className={`${styles.heroStats} fade-up-3`}>
-            <div className={styles.stat}><strong>70+</strong> Tools</div>
-            <div className={styles.statDivider} />
-            <div className={styles.stat}><strong>100%</strong> Free</div>
-            <div className={styles.statDivider} />
-            <div className={styles.stat}><strong>Privacy</strong> First</div>
-            <div className={styles.statDivider} />
-            <div className={styles.stat}><strong>No</strong> Limits</div>
-          </div>
+
         </div>
       </section>
 

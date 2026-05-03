@@ -80,7 +80,7 @@ export default function AudioRecorder() {
       startTimer()
       drawWave()
     } catch (e) {
-      setError('❌ Microphone access nahi mila! Permission allow karo.')
+      setError('❌ Microphone access denied! Please allow microphone permission.')
     }
   }
 
@@ -111,7 +111,7 @@ export default function AudioRecorder() {
   useEffect(() => () => { stopTimer(); cancelAnimationFrame(animRef.current) }, [])
 
   return (
-    <ToolLayout icon="🎤" name="Audio Recorder" desc="Directly browser se mic se audio record karo">
+    <ToolLayout icon="🎤" name="Audio Recorder" desc="Record audio directly from your microphone">
 
       {/* Timer & Waveform */}
       <div style={{

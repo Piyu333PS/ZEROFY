@@ -77,7 +77,7 @@ export default function MarkdownEditor() {
   }
 
   return (
-    <ToolLayout icon="✍️" name="Markdown Editor" desc="Markdown likhao aur real-time preview dekho">
+    <ToolLayout icon="✍️" name="Markdown Editor" desc="Write Markdown and preview it in real time">
 
       {/* Toolbar */}
       <div style={{ display: 'flex', gap: 6, marginBottom: 12, flexWrap: 'wrap', alignItems: 'center' }}>

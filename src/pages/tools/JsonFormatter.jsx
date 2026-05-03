@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import ToolLayout from '../../components/ToolLayout'
 import styles from '../ToolPage.module.css'
 
@@ -8,6 +8,21 @@ export default function JsonFormatter() {
   const [error, setError] = useState('')
   const [indent, setIndent] = useState(2)
   const [copied, setCopied] = useState(false)
+  const [fileName, setFileName] = useState('')
+  const fileRef = useRef()
+
+  const onFile = (e) => {
+    const f = e.target.files[0]
+    if (!f) return
+    setFileName(f.name)
+    const reader = new FileReader()
+    reader.onload = (ev) => {
+      setInput(ev.target.result)
+      setError('')
+      setOutput('')
+    }
+    reader.readAsText(f)
+  }
 
   const format = () => {
     try {
@@ -41,15 +56,24 @@ export default function JsonFormatter() {
     try {
       JSON.parse(input)
       setError('')
-      alert('✅ Valid JSON hai!')
+      alert('✅ Valid JSON!')
     } catch (e) {
       setError('❌ Invalid JSON: ' + e.message)
     }
   }
 
   return (
-    <ToolLayout icon="{ }" name="JSON Formatter" desc="JSON ko beautify, minify aur validate karo">
+    <ToolLayout icon="{ }" name="JSON Formatter" desc="Beautify, minify and validate JSON">
       <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
+        <input ref={fileRef} type="file" accept=".json,application/json" style={{ display: 'none' }} onChange={onFile} />
+        <button className={styles.copyBtn} onClick={() => fileRef.current?.click()} title="Upload a .json file">
+          📂 Upload JSON
+        </button>
+        {fileName && (
+          <span style={{ fontSize: 12, color: 'var(--text3)', maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            📄 {fileName}
+          </span>
+        )}
         <select value={indent} onChange={e => setIndent(+e.target.value)} className={styles.controlSelect}
           style={{ width: 'auto' }}>
           <option value={2}>2 spaces</option>
@@ -73,7 +97,7 @@ export default function JsonFormatter() {
         <div>
           <div className={styles.controlLabel} style={{ marginBottom: 8 }}>Output</div>
           <textarea className={styles.outputArea} style={{ fontFamily: 'monospace', fontSize: 13, minHeight: 300 }}
-            readOnly value={output} placeholder="Yahan formatted JSON aayega..." />
+            readOnly value={output} placeholder="Formatted JSON will appear here..." />
         </div>
       </div>
 
@@ -81,7 +105,7 @@ export default function JsonFormatter() {
 
       {output && (
         <button className={styles.copyBtn} onClick={copy} style={{ marginTop: 12 }}>
-          {copied ? '✅ Copied!' : '📋 Output Copy Karo'}
+          {copied ? '✅ Copied!' : '📋 Copy Output'}
         </button>
       )}
     </ToolLayout>

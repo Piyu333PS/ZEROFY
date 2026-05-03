@@ -71,7 +71,7 @@ export default function ImageToText() {
   }
 
   return (
-    <ToolLayout icon="🔤" name="Image → Text (OCR)" desc="Image ya screenshot se text extract karo — Tesseract.js powered">
+    <ToolLayout icon="🔤" name="Image → Text (OCR)" desc="Extract text from any image or screenshot — powered by Tesseract.js">
 
       <div className={styles.controls} style={{ marginBottom: 16 }}>
         <div className={styles.controlGroup}>
@@ -106,7 +106,7 @@ export default function ImageToText() {
           <button className={styles.actionBtn} onClick={extract} disabled={processing}>
             {processing
               ? <><span className={styles.spinner} /> {progress || 'Processing...'}</>
-              : '🔍 Text Extract karo'}
+              : '🔍 Text Extract'}
           </button>
         </>
       )}

@@ -36,8 +36,8 @@ export default function MergePDF() {
   }
 
   return (
-    <ToolLayout icon="📄" name="Merge PDF" desc="Multiple PDF files ko ek PDF mein combine karo">
-      <FileUpload onFiles={addFiles} accept={{ 'application/pdf': ['.pdf'] }} multiple label="PDF files drag karo ya choose karo" />
+    <ToolLayout icon="📄" name="Merge PDF" desc="Combine multiple PDF files into one">
+      <FileUpload onFiles={addFiles} accept={{ 'application/pdf': ['.pdf'] }} multiple label="Drag or choose PDF files" />
       {files.length > 0 && (
         <div className={styles.fileList}>
           <h3 className={styles.fileListTitle}>Files ({files.length}) — Order arrows se change karo</h3>

@@ -52,12 +52,12 @@ export default function ImageCompressor() {
   }
 
   return (
-    <ToolLayout icon="🗜️" name="Image Compressor" desc="JPG, PNG, WebP images ka size kam karo — quality almost same rahegi">
+    <ToolLayout icon="🗜️" name="Image Compressor" desc="Compress JPG, PNG, WebP images — quality stays nearly the same">
       <FileUpload
         onFiles={addFiles}
         accept={{ 'image/*': ['.jpg', '.jpeg', '.png', '.webp', '.gif'] }}
         multiple
-        label="Images drag karo ya choose karo (JPG, PNG, WebP)"
+        label="Drag or choose images (JPG, PNG, WebP)"
       />
 
       {files.length > 0 && (

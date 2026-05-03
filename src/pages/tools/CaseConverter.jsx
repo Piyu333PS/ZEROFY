@@ -26,11 +26,11 @@ export default function CaseConverter() {
   }
 
   return (
-    <ToolLayout icon="Aa" name="Case Converter" desc="Text ko UPPER, lower, Title Case, camelCase aur aur formats mein convert karo">
+    <ToolLayout icon="Aa" name="Case Converter" desc="Convert text to UPPER, lower, Title Case, camelCase and more formats">
       <textarea
         className={styles.textArea}
         style={{ minHeight: 120 }}
-        placeholder="Yahan apna text paste karo..."
+        placeholder="Paste your text here..."
         value={input}
         onChange={e => setInput(e.target.value)}
       />
@@ -60,7 +60,7 @@ export default function CaseConverter() {
 
       {!input.trim() && (
         <div className={styles.hint} style={{ marginTop: 16 }}>
-          💡 Upar text type karo — sab conversions ek saath dikhenge
+          💡 Type text above — all conversions will appear instantly
         </div>
       )}
     </ToolLayout>

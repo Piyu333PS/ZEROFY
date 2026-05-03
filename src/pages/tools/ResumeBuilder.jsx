@@ -1073,7 +1073,7 @@ export default function ResumeBuilder() {
                   <TagInput
                     tags={languages} onAdd={t => setLanguages(p => [...p, t])} onRemove={t => setLanguages(p => p.filter(x => x !== t))}
                     suggestions={['Hindi', 'English', 'Gujarati', 'Marathi', 'Bengali', 'Tamil', 'Telugu', 'Kannada', 'Punjabi', 'Urdu', 'Rajasthani', 'Odia', 'Malayalam']}
-                    placeholder="Language add karo..." color="#00D4AA"
+                    placeholder="Add language..." color="#00D4AA"
                   />
                 </div>
 

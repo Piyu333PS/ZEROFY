@@ -67,7 +67,7 @@ export default function ImageConverter() {
   const fmtSize = (b) => b > 1024*1024 ? (b/1024/1024).toFixed(2)+' MB' : (b/1024).toFixed(1)+' KB'
 
   return (
-    <ToolLayout icon="🔄" name="Image Converter" desc="JPG, PNG, WebP, BMP — batch mein convert karo">
+    <ToolLayout icon="🔄" name="Image Converter" desc="Convert JPG, PNG, WebP, BMP images in batch">
       <canvas ref={canvasRef} style={{ display: 'none' }} />
 
       <div onDrop={e => { e.preventDefault(); handleFiles(e) }}

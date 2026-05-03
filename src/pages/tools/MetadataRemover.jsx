@@ -63,7 +63,7 @@ export default function MetadataRemover() {
   const fmtSize = b => b > 1024 * 1024 ? (b / 1024 / 1024).toFixed(1) + ' MB' : (b / 1024).toFixed(0) + ' KB'
 
   return (
-    <ToolLayout icon="🧹" name="Metadata Remover" desc="Image se EXIF data, GPS location, camera info sab hatao — privacy protect karo">
+    <ToolLayout icon="🧹" name="Metadata Remover" desc="Remove EXIF data, GPS location and camera info from images — protect your privacy">
       <div>
         <div style={{
           background: 'rgba(255,193,7,0.1)', border: '1px solid rgba(255,193,7,0.3)',

@@ -12,15 +12,15 @@ export const CATEGORIES = [
 export const TOOLS = [
   // ─── PDF ────────────────────────────────
   { id: 'merge-pdf',        cat: 'pdf', name: 'Merge PDF',          desc: 'Combine multiple PDFs into one file',                        icon: '📄', status: 'ready',  route: '/tools/merge-pdf' },
-  { id: 'split-pdf',        cat: 'pdf', name: 'Split PDF',           desc: 'Split a PDF into separate pages or sections',               icon: '✂️', status: 'ready',  route: '/tools/split-pdf' },
-  { id: 'compress-pdf',     cat: 'pdf', name: 'Compress PDF',        desc: 'Reduce file size while keeping quality',                    icon: '🗜️', status: 'ready',  route: '/tools/compress-pdf' },
+  { id: 'split-pdf',        cat: 'pdf', name: 'Split PDF',           desc: 'Split a PDF into separate pages or sections',               icon: '✂️', status: 'coming',  route: '/tools/split-pdf' },
+  { id: 'compress-pdf',     cat: 'pdf', name: 'Compress PDF',        desc: 'Reduce file size while keeping quality',                    icon: '🗜️', status: 'coming',  route: '/tools/compress-pdf' },
   { id: 'pdf-to-word',      cat: 'pdf', name: 'PDF → Word',          desc: 'Convert PDF to an editable DOCX file',                     icon: '📝', status: 'coming', route: '/tools/pdf-to-word' },
   { id: 'pdf-to-excel',     cat: 'pdf', name: 'PDF → Excel',         desc: 'Extract tables into a spreadsheet',                        icon: '📊', status: 'coming', route: '/tools/pdf-to-excel' },
   { id: 'pdf-to-ppt',       cat: 'pdf', name: 'PDF → PowerPoint',    desc: 'Convert to presentation format',                           icon: '📋', status: 'coming', route: '/tools/pdf-to-ppt' },
   { id: 'pdf-to-jpg',       cat: 'pdf', name: 'PDF → JPG',           desc: 'Convert each page to an image',                           icon: '🖼️', status: 'ready',  route: '/tools/pdf-to-jpg' },
   { id: 'jpg-to-pdf',       cat: 'pdf', name: 'Images → PDF',        desc: 'Create a PDF from multiple images',                        icon: '📷', status: 'ready',  route: '/tools/jpg-to-pdf' },
-  { id: 'rotate-pdf',       cat: 'pdf', name: 'Rotate PDF',          desc: 'Rotate pages to the correct orientation',                  icon: '🔄', status: 'ready',  route: '/tools/rotate-pdf' },
-  { id: 'watermark-pdf',    cat: 'pdf', name: 'Watermark PDF',       desc: 'Add a text or image watermark',                           icon: '💧', status: 'ready',  route: '/tools/watermark-pdf' },
+  { id: 'rotate-pdf',       cat: 'pdf', name: 'Rotate PDF',          desc: 'Rotate pages to the correct orientation',                  icon: '🔄', status: 'coming',  route: '/tools/rotate-pdf' },
+  { id: 'watermark-pdf',    cat: 'pdf', name: 'Watermark PDF',       desc: 'Add a text or image watermark',                           icon: '💧', status: 'coming',  route: '/tools/watermark-pdf' },
   { id: 'protect-pdf',      cat: 'pdf', name: 'Protect PDF',         desc: 'Lock your PDF with a password',                           icon: '🔐', status: 'coming', route: '/tools/protect-pdf' },
   { id: 'unlock-pdf',       cat: 'pdf', name: 'Unlock PDF',          desc: 'Remove password protection from a PDF',                   icon: '🔓', status: 'coming', route: '/tools/unlock-pdf' },
   { id: 'ocr-pdf',          cat: 'pdf', name: 'OCR PDF',             desc: 'Make scanned PDFs searchable and selectable',             icon: '🔍', status: 'coming', route: '/tools/ocr-pdf' },
@@ -43,7 +43,7 @@ export const TOOLS = [
   { id: 'remove-audio',     cat: 'video', name: 'Remove Audio',      desc: 'Mute a video by stripping its audio track',              icon: '🔇', status: 'coming', route: '/tools/remove-audio' },
 
   // ─── AUDIO ──────────────────────────────
-  { id: 'mp3-merger',       cat: 'audio', name: 'MP3 Merger',        desc: 'Join multiple audio files into one',                     icon: '🔗', status: 'ready',  route: '/tools/mp3-merger' },
+  { id: 'mp3-merger',       cat: 'audio', name: 'MP3 Merger',        desc: 'Join multiple audio files into one',                     icon: '🔗', status: 'coming',  route: '/tools/mp3-merger' },
   { id: 'mp3-trimmer',      cat: 'audio', name: 'MP3 Trimmer',       desc: 'Cut and trim audio to the exact length you need',        icon: '✂️', status: 'ready',  route: '/tools/mp3-trimmer' },
   { id: 'audio-converter',  cat: 'audio', name: 'Audio Converter',   desc: 'Convert between MP3, WAV, AAC, FLAC, OGG',              icon: '🔄', status: 'coming', route: '/tools/audio-converter' },
   { id: 'audio-compressor', cat: 'audio', name: 'Audio Compressor',  desc: 'Shrink audio file size for easy sharing',                icon: '🗜️', status: 'coming', route: '/tools/audio-compressor' },
@@ -63,13 +63,13 @@ export const TOOLS = [
   { id: 'color-adjuster',   cat: 'image', name: 'Color Adjuster',    desc: 'Adjust brightness, contrast, and saturation',          icon: '🎨', status: 'ready',  route: '/tools/color-adjuster' },
   { id: 'heic-converter',   cat: 'image', name: 'HEIC Converter',    desc: 'Convert iPhone HEIC photos to JPG instantly',           icon: '📷', status: 'ready',  route: '/tools/heic-converter' },
   { id: 'document-scanner', cat: 'image', name: 'Document Scanner',  desc: 'Scan physical documents to high-quality PDF or JPG',   icon: '🔍', status: 'ready',  route: '/tools/document-scanner' },
-  { id: 'meme-maker',       cat: 'image', name: 'Meme Maker',        desc: 'Add captions and text to create memes',                icon: '😂', status: 'ready',  route: '/tools/meme-maker' },
+  { id: 'meme-maker',       cat: 'image', name: 'Meme Maker',        desc: 'Add captions and text to create memes',                icon: '😂', status: 'coming',  route: '/tools/meme-maker' },
   { id: 'screenshot-to-text', cat: 'image', name: 'Image → Text (OCR)', desc: 'Extract text from any image or screenshot',        icon: '🔤', status: 'ready',  route: '/tools/screenshot-to-text' },
   { id: 'image-merger',     cat: 'image', name: 'Image Collage',     desc: 'Combine multiple images into one collage',              icon: '🖼️', status: 'ready',  route: '/tools/image-merger' },
 
   // ─── DOCUMENT ───────────────────────────
   { id: 'invoice-maker',    cat: 'document', name: 'Invoice Generator',    desc: 'Create professional invoices with PDF export',    icon: '🧾', status: 'ready',  route: '/tools/invoice-maker' },
-  { id: 'resume-builder',   cat: 'document', name: 'AI Resume Builder',    desc: 'Build a professional CV with AI assistance',      icon: '📋', status: 'ready',  route: '/tools/resume-builder' },
+  { id: 'resume-builder',   cat: 'document', name: 'AI Resume Builder',    desc: 'Build a professional CV with AI assistance',      icon: '📋', status: 'coming',  route: '/tools/resume-builder' },
   { id: 'word-counter',     cat: 'document', name: 'Word Counter',         desc: 'Count words, characters, and sentences',          icon: '🔢', status: 'ready',  route: '/tools/word-counter' },
   { id: 'case-converter',   cat: 'document', name: 'Case Converter',       desc: 'Switch between UPPER, lower, and Title Case',     icon: 'Aa', status: 'ready',  route: '/tools/case-converter' },
   { id: 'text-to-speech',   cat: 'document', name: 'Text to Speech',       desc: 'Convert written text into natural audio',         icon: '🔊', status: 'ready',  route: '/tools/text-to-speech' },
@@ -90,7 +90,7 @@ export const TOOLS = [
   // ─── DEVELOPER ──────────────────────────
   { id: 'json-formatter',    cat: 'developer', name: 'JSON Formatter',     desc: 'Beautify, minify, and validate JSON',             icon: '{ }', status: 'ready', route: '/tools/json-formatter' },
   { id: 'base64',            cat: 'developer', name: 'Base64 Encode/Decode', desc: 'Encode and decode text or images in Base64',   icon: '🔡', status: 'ready',  route: '/tools/base64' },
-  { id: 'url-encoder',       cat: 'developer', name: 'URL Encoder/Decoder', desc: 'Encode and decode URLs into safe format',       icon: '🔗', status: 'ready',  route: '/tools/url-encoder' },
+  { id: 'url-encoder',       cat: 'developer', name: 'URL Encoder/Decoder', desc: 'Encode and decode URLs into safe format',       icon: '🔗', status: 'coming',  route: '/tools/url-encoder' },
   { id: 'hash-generator',    cat: 'developer', name: 'Hash Generator',     desc: 'Generate MD5, SHA1, and SHA256 hashes',          icon: '#',  status: 'ready',  route: '/tools/hash-generator' },
   { id: 'password-generator',cat: 'developer', name: 'Password Generator', desc: 'Create strong, random passwords instantly',      icon: '🔑', status: 'ready',  route: '/tools/password-generator' },
   { id: 'regex-tester',      cat: 'developer', name: 'Regex Tester',       desc: 'Test and debug regular expressions live',        icon: '.*', status: 'ready',  route: '/tools/regex-tester' },

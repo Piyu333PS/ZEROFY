@@ -62,7 +62,7 @@ export default function HeicConverter() {
   const fmtSize = b => b > 1024 * 1024 ? (b / 1024 / 1024).toFixed(1) + ' MB' : (b / 1024).toFixed(0) + ' KB'
 
   return (
-    <ToolLayout icon="📷" name="HEIC Converter" desc="iPhone ke HEIC/HEIF photos ko JPG, PNG mein convert karo">
+    <ToolLayout icon="📷" name="HEIC Converter" desc="Convert iPhone HEIC/HEIF photos to JPG or PNG">
       <div>
         <div style={{
           background: 'rgba(108,99,255,0.1)', border: '1px solid rgba(108,99,255,0.3)',

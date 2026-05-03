@@ -87,12 +87,12 @@ export default function VideoToAudio() {
   }
 
   return (
-    <ToolLayout icon="🎬" name="Video → Audio" desc="Video file se audio extract karo — MP4, WebM, AVI support">
+    <ToolLayout icon="🎬" name="Video → Audio" desc="Extract audio from a video file — supports MP4, WebM, AVI">
       {!file ? (
         <FileUpload
           onFiles={onFile}
           accept={{ 'video/*': ['.mp4', '.webm', '.mov', '.avi', '.mkv'] }}
-          label="Video file drag karo (MP4, WebM, MOV)"
+          label="Drag or choose video file (MP4, WebM, MOV)"
         />
       ) : (
         <div>

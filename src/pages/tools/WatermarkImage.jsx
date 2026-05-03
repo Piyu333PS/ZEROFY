@@ -87,7 +87,7 @@ export default function WatermarkImage() {
   const POSITIONS = ['top-left', 'top-center', 'top-right', 'center', 'bottom-left', 'bottom-center', 'bottom-right']
 
   return (
-    <ToolLayout icon="💧" name="Watermark Image" desc="Image pe custom text watermark lagao — position aur style customize karo">
+    <ToolLayout icon="💧" name="Watermark Image" desc="Add a custom text watermark to your image — customize position and style">
       <canvas ref={canvasRef} style={{ display: 'none' }} />
 
       {!original ? (

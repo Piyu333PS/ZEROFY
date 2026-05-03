@@ -57,7 +57,7 @@ export default function SpeechToText() {
   }
 
   return (
-    <ToolLayout icon="🎤" name="Speech to Text" desc="Bolkar text likho — Hindi, English aur 6 aur languages mein">
+    <ToolLayout icon="🎤" name="Speech to Text" desc="Speak and convert to text — supports Hindi, English and 6 more languages">
       <div className={styles.controls}>
         <div className={styles.controlGroup}>
           <label className={styles.controlLabel}>Language / Bhasha</label>
@@ -69,7 +69,7 @@ export default function SpeechToText() {
 
       <div style={{ position: 'relative', marginBottom: 16 }}>
         <textarea className={styles.textArea} style={{ minHeight: 200 }}
-          placeholder="Yahan text appear hoga jab tum bologe..."
+          placeholder="Your spoken text will appear here..."
           value={text} onChange={e => setText(e.target.value)} />
         {listening && (
           <div style={{ position: 'absolute', top: 12, right: 12, display: 'flex', alignItems: 'center', gap: 6,

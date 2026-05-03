@@ -62,7 +62,7 @@ export default function HashGenerator() {
   }
 
   return (
-    <ToolLayout icon="🔑" name="Hash Generator" desc="Text ya file ka MD5, SHA-1, SHA-256, SHA-512 hash generate karo">
+    <ToolLayout icon="🔑" name="Hash Generator" desc="Generate MD5, SHA-1, SHA-256, SHA-512 hash of text or file">
 
       <div className={styles.controlGroup} style={{ marginBottom: 16 }}>
         <label className={styles.controlLabel}>File se hash karo</label>
@@ -73,7 +73,7 @@ export default function HashGenerator() {
         <textarea
           className={styles.textArea}
           style={{ minHeight: 100 }}
-          placeholder="Text yahan likho ya paste karo..."
+          placeholder="Type or paste text here..."
           value={input}
           onChange={e => { setInput(e.target.value); setIsFile(false) }}
         />

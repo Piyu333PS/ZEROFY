@@ -98,11 +98,11 @@ export default function Mp3Trimmer() {
   }
 
   return (
-    <ToolLayout icon="✂️" name="MP3 Trimmer" desc="Audio file ka koi bhi hissa cut karke download karo">
+    <ToolLayout icon="✂️" name="MP3 Trimmer" desc="Cut and trim any part of an audio file and download it">
       {!file ? (
         <FileUpload onFiles={onFile}
           accept={{ 'audio/*': ['.mp3', '.wav', '.ogg', '.m4a', '.aac'] }}
-          label="Audio file drag karo (MP3, WAV, OGG, M4A)" />
+          label="Drag or choose audio file (MP3, WAV, OGG, M4A)" />
       ) : (
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24,

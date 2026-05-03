@@ -214,7 +214,7 @@ export default function DocumentScanner() {
     setExport(type); setExportDone(false); setExportUrl(null); setProc(true)
     try {
       if (type === 'pdf') {
-        setProcMsg('PDF ban raha hai...')
+        setProcMsg('Creating PDF...')
         const pagesForPdf = mergeAll ? pages : [pages[0]]
         const url = await makePdf(pagesForPdf)
         setExportUrl(url); setExportDone(true)
@@ -246,7 +246,7 @@ export default function DocumentScanner() {
 
   return (
     <ToolLayout icon="📷" name="Document Scanner"
-      desc="Camera ya gallery se scan karo — JPG, PDF ya Text — zero extra steps">
+      desc="Scan documents from camera or gallery — export as JPG, PDF or Text">
 
       {/* ════════════════════ STEP 1: SCAN ════════════════════ */}
       {step === 'scan' && (

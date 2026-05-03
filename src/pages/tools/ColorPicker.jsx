@@ -64,7 +64,7 @@ export default function ColorPicker() {
   )
 
   return (
-    <ToolLayout icon="🎨" name="Color Picker" desc="HEX, RGB, HSL values copy karo aur shades generate karo">
+    <ToolLayout icon="🎨" name="Color Picker" desc="Copy HEX, RGB, HSL values and generate color shades">
       <div style={{ display: 'flex', gap: 32, alignItems: 'flex-start', flexWrap: 'wrap' }}>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
           <div style={{ width: 200, height: 200, background: color, borderRadius: 20,
@@ -104,7 +104,7 @@ export default function ColorPicker() {
       </div>
 
       <div className={styles.hint} style={{ marginTop: 20 }}>
-        💡 Color wheel se choose karo ya HEX input field mein directly type karo. Kisi bhi value pe click karo to copy.
+        💡 Choose from the color wheel or type directly in the HEX field. Click any value to copy.
       </div>
     </ToolLayout>
   )

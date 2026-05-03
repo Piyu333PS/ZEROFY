@@ -49,7 +49,7 @@ export default function IpLookup() {
   ].filter(f => f.value) : []
 
   return (
-    <ToolLayout icon="🌐" name="IP Lookup" desc="Kisi bhi IP address ki location aur ISP details dekho">
+    <ToolLayout icon="🌐" name="IP Lookup" desc="Look up location and ISP details of any IP address">
 
       {myIp && (
         <div className={styles.hint} style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -64,7 +64,7 @@ export default function IpLookup() {
         <input className={styles.controlInput} style={{ flex: 1 }}
           value={ip} onChange={e => setIp(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && lookup()}
-          placeholder="IP address dalao (e.g. 8.8.8.8) ya blank chodo apna IP dekhne ke liye" />
+          placeholder="Enter an IP address (e.g. 8.8.8.8) or leave blank to check your own IP" />
         <button className={styles.actionBtn} style={{ width: 'auto', padding: '0 24px', marginTop: 0 }}
           onClick={() => lookup()} disabled={loading}>
           {loading ? <span className={styles.spinner} /> : '🔍'}

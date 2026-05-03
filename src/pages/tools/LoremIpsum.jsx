@@ -49,7 +49,7 @@ export default function LoremIpsum() {
   }
 
   return (
-    <ToolLayout icon="📄" name="Lorem Ipsum Generator" desc="Placeholder text generate karo — words, sentences ya paragraphs mein">
+    <ToolLayout icon="📄" name="Lorem Ipsum Generator" desc="Generate placeholder text — in words, sentences or paragraphs">
 
       <div className={styles.controls}>
         <div className={styles.controlGroup}>

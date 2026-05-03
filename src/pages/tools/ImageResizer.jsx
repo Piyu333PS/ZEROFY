@@ -79,7 +79,7 @@ export default function ImageResizer() {
   const fmt = (bytes) => bytes > 1024 * 1024 ? (bytes / 1024 / 1024).toFixed(2) + ' MB' : (bytes / 1024).toFixed(1) + ' KB'
 
   return (
-    <ToolLayout icon="📐" name="Image Resizer" desc="Image ka size change karo — aspect ratio bhi maintain kar sakte ho">
+    <ToolLayout icon="📐" name="Image Resizer" desc="Resize your image — optionally maintain aspect ratio">
       <canvas ref={canvasRef} style={{ display: 'none' }} />
 
       {!original ? (
@@ -147,7 +147,7 @@ export default function ImageResizer() {
           )}
 
           <button className={styles.actionBtn} onClick={resize} disabled={processing}>
-            {processing ? <><span className={styles.spinner} /> Processing...</> : '📐 Resize karo'}
+            {processing ? <><span className={styles.spinner} /> Processing...</> : '📐 Resize'}
           </button>
 
           {result && (

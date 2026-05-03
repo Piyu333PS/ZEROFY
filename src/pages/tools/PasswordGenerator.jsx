@@ -49,7 +49,7 @@ export default function PasswordGenerator() {
   const s = strength()
 
   return (
-    <ToolLayout icon="🔑" name="Password Generator" desc="Cryptographically secure random passwords banao">
+    <ToolLayout icon="🔑" name="Password Generator" desc="Generate cryptographically secure random passwords">
       <div className={styles.controls}>
         <div className={styles.controlGroup} style={{ gridColumn: '1/-1' }}>
           <label className={styles.controlLabel}>Length: {length} characters</label>

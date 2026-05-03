@@ -97,7 +97,7 @@ export default function RingtoneMaker() {
   const fmtSize = (b) => (b / 1024).toFixed(0) + ' KB'
 
   return (
-    <ToolLayout icon="📱" name="Ringtone Maker" desc="Kisi bhi MP3 se apni ringtone banao — trim karke set karo">
+    <ToolLayout icon="📱" name="Ringtone Maker" desc="Create a ringtone from any MP3 — trim and save it">
 
       <div className={styles.controlGroup} style={{ marginBottom: 16 }}>
         <label className={styles.controlLabel}>Audio/MP3 File Upload karo</label>

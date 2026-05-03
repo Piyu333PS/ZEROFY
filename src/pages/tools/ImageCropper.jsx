@@ -97,7 +97,7 @@ export default function ImageCropper() {
   }
 
   return (
-    <ToolLayout icon="✂️" name="Image Cropper" desc="Image ka koi bhi hissa select karke crop karo">
+    <ToolLayout icon="✂️" name="Image Cropper" desc="Select any area of your image and crop it">
       <canvas ref={canvasRef} style={{ display: 'none' }} />
 
       {!original ? (
@@ -155,7 +155,7 @@ export default function ImageCropper() {
             </div>
           </div>
 
-          <button className={styles.actionBtn} onClick={crop}>✂️ Crop karo</button>
+          <button className={styles.actionBtn} onClick={crop}>✂️ Crop</button>
 
           {result && (
             <div style={{ marginTop: 20 }}>

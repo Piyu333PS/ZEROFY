@@ -56,8 +56,8 @@ export default function PdfToJpg() {
   const downloadAll = () => pages.forEach((p, i) => setTimeout(() => download(p), i * 300))
 
   return (
-    <ToolLayout icon="🖼️" name="PDF → JPG" desc="PDF ke har page ko JPG image mein convert karo">
-      <FileUpload onFiles={convert} accept={{ 'application/pdf': ['.pdf'] }} label="PDF file choose karo" />
+    <ToolLayout icon="🖼️" name="PDF → JPG" desc="Convert each page of a PDF to a JPG image">
+      <FileUpload onFiles={convert} accept={{ 'application/pdf': ['.pdf'] }} label="Choose PDF file" />
 
       <div className={styles.controls} style={{ marginTop: 16 }}>
         <div className={styles.controlGroup}>

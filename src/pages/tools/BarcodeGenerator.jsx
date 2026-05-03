@@ -110,7 +110,7 @@ export default function BarcodeGenerator() {
   }
 
   return (
-    <ToolLayout icon="📊" name="Barcode Generator" desc="Code 128 barcode generate karo — customize karke download karo">
+    <ToolLayout icon="📊" name="Barcode Generator" desc="Generate Code 128 barcodes — customize and download">
 
       <div className={styles.controlGroup} style={{ marginBottom: 16 }}>
         <label className={styles.controlLabel}>Text / Code</label>
@@ -144,7 +144,7 @@ export default function BarcodeGenerator() {
 
       <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, color: 'var(--text2)', marginBottom: 20, cursor: 'pointer' }}>
         <input type="checkbox" checked={showText} onChange={e => setShowText(e.target.checked)} style={{ accentColor: 'var(--accent)' }} />
-        Text bhi dikhao barcode ke neeche
+        Show text below barcode
       </label>
 
       {text && (
@@ -157,7 +157,7 @@ export default function BarcodeGenerator() {
       )}
 
       <button className={styles.actionBtn} onClick={download} style={{ marginTop: 16 }} disabled={!text}>
-        ⬇️ PNG Download karo
+        ⬇️ PNG Download
       </button>
     </ToolLayout>
   )

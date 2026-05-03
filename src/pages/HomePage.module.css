@@ -79,14 +79,46 @@
 
 .heroTitle {
   font-family: var(--font-display);
-  font-size: clamp(44px, 8vw, 78px);
+  font-size: clamp(48px, 8vw, 82px);
   font-weight: 800;
   line-height: 1.0;
-  letter-spacing: -2px;
+  letter-spacing: -2.5px;
   color: var(--text);
-  margin-bottom: 22px;
+  margin-bottom: 20px;
   position: relative;
   z-index: 1;
+}
+
+.heroEyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(123, 110, 246, 0.08);
+  border: 1px solid rgba(123, 110, 246, 0.2);
+  border-radius: 100px;
+  padding: 6px 16px;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  color: rgba(167, 139, 250, 0.9);
+  margin-bottom: 24px;
+  position: relative;
+  z-index: 1;
+}
+
+.eyebrowDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #a78bfa;
+  box-shadow: 0 0 8px #a78bfa;
+  animation: dotPulse 2s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+@keyframes dotPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
 }
 
 .accent {
@@ -97,12 +129,14 @@
 }
 
 .heroSub {
-  font-size: 17px;
+  font-size: 18px;
   color: var(--text2);
   margin-bottom: 40px;
   line-height: 1.7;
   position: relative;
   z-index: 1;
+  font-weight: 400;
+  letter-spacing: 0.2px;
 }
 
 .heroSearch {

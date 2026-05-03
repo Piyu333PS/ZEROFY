@@ -48,7 +48,7 @@ export default function NumberBaseConverter() {
   const COMMON_NUMS = [0, 1, 8, 10, 15, 16, 32, 64, 128, 255, 256, 512, 1024, 65535]
 
   return (
-    <ToolLayout icon="🔢" name="Number Base Converter" desc="Decimal, Binary, Octal, Hexadecimal — sabhi bases mein convert karo">
+    <ToolLayout icon="🔢" name="Number Base Converter" desc="Convert between Decimal, Binary, Octal and Hexadecimal">
 
       <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
         {BASES.map(b => (

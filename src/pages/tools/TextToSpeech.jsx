@@ -43,9 +43,9 @@ export default function TextToSpeech() {
   const stop = () => { speechSynthesis.cancel(); setSpeaking(false); setPaused(false) }
 
   return (
-    <ToolLayout icon="🔊" name="Text to Speech" desc="Likha hua text sunao — alag alag voices aur speed mein">
+    <ToolLayout icon="🔊" name="Text to Speech" desc="Listen to written text — choose from different voices and speeds">
       <textarea className={styles.textArea} style={{ minHeight: 160 }}
-        placeholder="Yahan text likhon ya paste karo..."
+        placeholder="Type or paste text here..."
         value={text} onChange={e => setText(e.target.value)} />
 
       <div className={styles.controls}>
@@ -75,7 +75,7 @@ export default function TextToSpeech() {
       <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
         {!speaking ? (
           <button className={styles.actionBtn} onClick={speak} disabled={!text.trim()}>
-            ▶ Sunao
+            ▶ Play
           </button>
         ) : (
           <>

@@ -62,7 +62,7 @@ export default function Base64Tool() {
   }
 
   return (
-    <ToolLayout icon="🔐" name="Base64 Encoder / Decoder" desc="Text ya file ko Base64 mein encode karo ya decode karo">
+    <ToolLayout icon="🔐" name="Base64 Encoder / Decoder" desc="Encode or decode text and files in Base64">
 
       <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
         {['encode', 'decode'].map(m => (
@@ -90,7 +90,7 @@ export default function Base64Tool() {
             className={styles.textArea}
             value={input}
             onChange={e => handleInput(e.target.value)}
-            placeholder={mode === 'encode' ? 'Text yahan likho...' : 'Base64 string paste karo...'}
+            placeholder={mode === 'encode' ? 'Type text here...' : 'Paste Base64 string here...'}
           />
         </div>
         <div>

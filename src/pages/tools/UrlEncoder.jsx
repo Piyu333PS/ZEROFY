@@ -44,7 +44,7 @@ export default function UrlEncoder() {
   const params = mode === 'decode' ? parseParams() : []
 
   return (
-    <ToolLayout icon="🔗" name="URL Encoder / Decoder" desc="URLs ko encode ya decode karo — query params bhi parse karo">
+    <ToolLayout icon="🔗" name="URL Encoder / Decoder" desc="Encode or decode URLs — also parse query parameters">
 
       <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
         {['encode', 'decode'].map(m => (

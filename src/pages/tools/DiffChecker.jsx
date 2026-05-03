@@ -34,18 +34,18 @@ export default function DiffChecker() {
   const same = diff.filter(d => d.type === 'same').length
 
   return (
-    <ToolLayout icon="🔍" name="Diff Checker" desc="Do texts mein kya farq hai — line by line dekho">
+    <ToolLayout icon="🔍" name="Diff Checker" desc="Compare two texts and see differences line by line">
       <div className={styles.splitRow} style={{ marginBottom: 16 }}>
         <div>
           <div className={styles.controlLabel} style={{ marginBottom: 8 }}>Text A (Original)</div>
           <textarea className={styles.textArea} style={{ minHeight: 200 }}
-            placeholder="Pehla text yahan paste karo..."
+            placeholder="Paste first text here..."
             value={text1} onChange={e => { setText1(e.target.value); setShow(false) }} />
         </div>
         <div>
           <div className={styles.controlLabel} style={{ marginBottom: 8 }}>Text B (Changed)</div>
           <textarea className={styles.textArea} style={{ minHeight: 200 }}
-            placeholder="Dusra text yahan paste karo..."
+            placeholder="Paste second text here..."
             value={text2} onChange={e => { setText2(e.target.value); setShow(false) }} />
         </div>
       </div>

@@ -52,7 +52,7 @@ export default function ChecksumVerifier() {
   const fmtSize = (b) => b > 1024*1024 ? (b/1024/1024).toFixed(2)+' MB' : b > 1024 ? (b/1024).toFixed(1)+' KB' : b+' B'
 
   return (
-    <ToolLayout icon="🔍" name="Checksum Verifier" desc="File ka SHA-1, SHA-256, SHA-512 checksum verify karo — integrity check karo">
+    <ToolLayout icon="🔍" name="Checksum Verifier" desc="Verify SHA-1, SHA-256, SHA-512 checksum of any file">
 
       <div style={{ border: '2px dashed var(--border)', borderRadius: 'var(--radius-lg)', padding: '32px 24px', textAlign: 'center', cursor: 'pointer', marginBottom: 20 }}
         onClick={() => document.getElementById('cs-upload').click()}>
@@ -98,7 +98,7 @@ export default function ChecksumVerifier() {
             <div style={{ display: 'flex', gap: 8 }}>
               <input className={styles.controlInput} style={{ flex: 1, fontFamily: 'monospace', fontSize: 13 }}
                 value={expected} onChange={e => { setExpected(e.target.value); setMatchResult(null) }}
-                placeholder="Expected hash yahan paste karo..." />
+                placeholder="Paste expected hash here..." />
               <button className={styles.actionBtn} style={{ width: 'auto', padding: '0 20px', marginTop: 0 }}
                 onClick={verify} disabled={!expected.trim()}>
                 Verify
@@ -113,7 +113,7 @@ export default function ChecksumVerifier() {
                 color: matchResult ? 'var(--green)' : '#ff4d4d',
                 fontWeight: 600, fontSize: 15, textAlign: 'center'
               }}>
-                {matchResult ? '✅ Checksum match kiya! File original hai.' : '❌ Checksum match nahi kiya! File corrupt ya modified ho sakti hai.'}
+                {matchResult ? '✅ Checksum matched! File is original.' : '❌ Checksum did not match! File may be corrupt or modified.'}
               </div>
             )}
           </div>

@@ -131,33 +131,6 @@ export default function Navbar({ theme, toggleTheme }) {
             <span className={styles.logoText}>ZEROFY</span>
           </Link>
 
-          {/* Search — Desktop only */}
-          <div className={styles.searchWrap}>
-            <svg className={styles.searchIcon} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-            </svg>
-            <input
-              className={styles.searchInput}
-              placeholder="Search any tool..."
-              value={query}
-              onChange={handleSearch}
-              onBlur={() => setTimeout(() => setResults([]), 200)}
-            />
-            {results.length > 0 && (
-              <div className={styles.dropdown}>
-                {results.map(t => (
-                  <div key={t.id} className={styles.dropItem} onMouseDown={() => goTo(t.route)}>
-                    <span className={styles.dropIcon}>{t.icon}</span>
-                    <div>
-                      <div className={styles.dropName}>{t.name}</div>
-                      <div className={styles.dropDesc}>{t.desc}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
           {/* Desktop Nav */}
           <div className={styles.navLinks}>
 
@@ -214,9 +187,6 @@ export default function Navbar({ theme, toggleTheme }) {
 
           {/* Mobile Actions */}
           <div className={styles.mobileActions}>
-            <button className={styles.themeBtn} onClick={toggleTheme} aria-label="Toggle theme">
-              {theme === 'dark' ? '☀️' : '🌙'}
-            </button>
             <button className={styles.iconBtn} onClick={() => setMenuOpen(m => !m)} aria-label="Menu">
               {menuOpen
                 ? <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
