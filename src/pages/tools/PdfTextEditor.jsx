@@ -580,6 +580,18 @@ export default function PdfTextEditor() {
         <div className="bar">
           <span className="logo">PDF<b>Edit</b></span>
 
+          <div className="bsep"/>
+
+          <button
+            className="btn"
+            onClick={() => window.history.back()}
+            style={{ color: '#94a3b8', borderColor: '#1e293b' }}
+          >
+            ‹ Back
+          </button>
+
+          <div className="bsep"/>
+
           <label className="btn btn-open">
             📂 Open PDF
             <input type="file" accept=".pdf" style={{display:'none'}} onChange={e => onFile(e.target.files[0])} />
