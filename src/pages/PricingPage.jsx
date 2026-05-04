@@ -7,7 +7,7 @@ const plans = [
     id: 'monthly',
     name: 'Monthly',
     emoji: '⚡',
-    price: 19,
+    price: 49,
     period: '/month',
     desc: 'Billed every month. Cancel anytime.',
     color: 'rgba(96,165,250,0.08)',
@@ -28,7 +28,7 @@ const plans = [
     id: 'quarterly',
     name: 'Quarterly',
     emoji: '🔥',
-    price: 49,
+    price: 129,
     period: '/3 months',
     desc: 'Save vs monthly. Billed every 3 months.',
     color: 'linear-gradient(135deg, rgba(96,165,250,0.12) 0%, rgba(167,139,250,0.14) 100%)',
@@ -49,9 +49,9 @@ const plans = [
     id: 'yearly',
     name: 'Yearly',
     emoji: '💰',
-    price: 199,
+    price: 399,
     period: '/year',
-    desc: 'Best value. Save over 12% vs monthly.',
+    desc: 'Best value. Save over 30% vs monthly.',
     color: 'rgba(251,191,36,0.07)',
     border: 'rgba(251,191,36,0.3)',
     badge: '💰 Best Value',
@@ -91,7 +91,7 @@ const faqs = [
   },
 ]
 
-const PLAN_AMOUNTS = { monthly: 19, quarterly: 49, yearly: 199 }
+const PLAN_AMOUNTS = { monthly: 49, quarterly: 129, yearly: 399 }
 const PLAN_DAYS = { monthly: 30, quarterly: 90, yearly: 365 }
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000'
