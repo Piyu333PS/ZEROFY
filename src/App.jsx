@@ -14,6 +14,9 @@ import TermsConditions from './pages/TermsConditions'
 import MergePDF from './pages/tools/MergePDF'
 import PdfToJpg from './pages/tools/PdfToJpg'
 import PdfTextEditor from './pages/tools/PdfTextEditor'
+import PdfToWord from './pages/tools/PdfToWord'
+import ProtectPdf from './pages/tools/ProtectPdf'
+import CompressPDF from './pages/tools/CompressPDF'
 
 // Image Tools
 import ImageCompressor from './pages/tools/ImageCompressor'
@@ -129,13 +132,13 @@ function AppInner({ theme, toggleTheme }) {
           <Route path="/tools/pdf-text-editor" element={<PdfTextEditor />} />
           <Route path="/tools/jpg-to-pdf" element={<ImagesToPdf />} />
           <Route path="/tools/split-pdf" element={<ComingSoon name="Split PDF" />} />
-          <Route path="/tools/compress-pdf" element={<ComingSoon name="Compress PDF" />} />
+          <Route path="/tools/compress-pdf" element={<CompressPDF />} />
           <Route path="/tools/rotate-pdf" element={<ComingSoon name="Rotate PDF" />} />
           <Route path="/tools/watermark-pdf" element={<ComingSoon name="Watermark PDF" />} />
-          <Route path="/tools/pdf-to-word" element={<ComingSoon name="PDF → Word" />} />
+          <Route path="/tools/pdf-to-word" element={<PdfToWord />} />
           <Route path="/tools/pdf-to-excel" element={<ComingSoon name="PDF → Excel" />} />
           <Route path="/tools/pdf-to-ppt" element={<ComingSoon name="PDF → PowerPoint" />} />
-          <Route path="/tools/protect-pdf" element={<ComingSoon name="Protect PDF" />} />
+          <Route path="/tools/protect-pdf" element={<ProtectPdf />} />
           <Route path="/tools/unlock-pdf" element={<ComingSoon name="Unlock PDF" />} />
           <Route path="/tools/ocr-pdf" element={<ComingSoon name="OCR PDF" />} />
           <Route path="/tools/sign-pdf" element={<ComingSoon name="Sign PDF" />} />
