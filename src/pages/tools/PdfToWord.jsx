@@ -42,7 +42,7 @@ export default function PdfToWord() {
       const pdfjsLib = await import("pdfjs-dist");
       // Worker version must match installed pdfjs-dist version exactly
       const pdfjsVersion = pdfjsLib.version;
-      pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsVersion}/pdf.worker.min.js`;
+      pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsVersion}/build/pdf.worker.min.mjs`;
 
       const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
       const total = pdf.numPages;
