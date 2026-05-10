@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+  <!-- Main Pages -->
+  <url><loc>https://zerofy.co.in/</loc><priority>1.0</priority><changefreq>weekly</changefreq></url>
+  <url><loc>https://zerofy.co.in/pricing</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/contact</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/privacy-policy</loc><priority>0.5</priority><changefreq>yearly</changefreq></url>
+  <url><loc>https://zerofy.co.in/terms-conditions</loc><priority>0.5</priority><changefreq>yearly</changefreq></url>
+  <url><loc>https://zerofy.co.in/refund</loc><priority>0.5</priority><changefreq>yearly</changefreq></url>
+
+  <!-- PDF Tools -->
+  <url><loc>https://zerofy.co.in/tools/merge-pdf</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/pdf-to-jpg</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/pdf-text-editor</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/jpg-to-pdf</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/compress-pdf</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/pdf-to-word</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/protect-pdf</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/split-pdf</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/rotate-pdf</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/watermark-pdf</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/pdf-to-excel</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/pdf-to-ppt</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/unlock-pdf</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/ocr-pdf</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/sign-pdf</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/organize-pdf</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/redact-pdf</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+
+  <!-- Image Tools -->
+  <url><loc>https://zerofy.co.in/tools/image-compressor</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/image-converter</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/image-resizer</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/image-cropper</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/rotate-flip</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/color-adjuster</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/watermark-image</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/image-merger</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/screenshot-to-text</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/heic-converter</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/document-scanner</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/bg-remover</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/meme-maker</loc><priority>0.6</priority><changefreq>monthly</changefreq></url>
+
+  <!-- Audio Tools -->
+  <url><loc>https://zerofy.co.in/tools/mp3-trimmer</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/audio-recorder</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/volume-booster</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/ringtone-maker</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/mp3-merger</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/audio-converter</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/audio-compressor</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/noise-remover</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+
+  <!-- Video Tools -->
+  <url><loc>https://zerofy.co.in/tools/video-to-audio</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/video-cutter</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/video-compressor</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/video-merger</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/video-converter</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/video-to-gif</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/add-subtitles</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/video-watermark</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/change-speed</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/resize-video</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/remove-audio</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+
+  <!-- Document Tools -->
+  <url><loc>https://zerofy.co.in/tools/invoice-maker</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/resume-builder</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/word-counter</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/case-converter</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/text-to-speech</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/speech-to-text</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/diff-checker</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/markdown-editor</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/lorem-ipsum</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/translator</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+
+  <!-- Developer Tools -->
+  <url><loc>https://zerofy.co.in/tools/json-formatter</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/password-generator</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/color-picker</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/qr-generator</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/unit-converter</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/base64</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/url-encoder</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/hash-generator</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/regex-tester</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/css-minifier</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/number-base</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+
+  <!-- Security Tools -->
+  <url><loc>https://zerofy.co.in/tools/secure-notes</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/checksum</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/metadata-remover</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/ip-lookup</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+
+  <!-- Converter Tools -->
+  <url><loc>https://zerofy.co.in/tools/currency-converter</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://zerofy.co.in/tools/barcode-generator</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+
+</urlset>

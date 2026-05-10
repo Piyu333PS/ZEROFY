@@ -130,10 +130,10 @@
 
 .heroSearchInput {
   width: 100%;
-  background: var(--surface);
+  background: rgba(255,255,255,0.04);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1.5px solid var(--border);
+  border: 1.5px solid rgba(255,255,255,0.10);
   border-radius: 100px;
   padding: 16px 24px 16px 52px;
   font-size: 15px;
@@ -143,9 +143,9 @@
 }
 
 .heroSearchInput:focus {
-  border-color: var(--accent);
-  background: var(--surface2);
-  box-shadow: 0 0 0 4px var(--accent-glow), 0 8px 32px rgba(0,0,0,0.1);
+  border-color: rgba(99,179,237,0.5);
+  background: rgba(255,255,255,0.07);
+  box-shadow: 0 0 0 4px rgba(99,179,237,0.12), 0 8px 32px rgba(0,0,0,0.2);
 }
 
 .heroSearchInput::placeholder { color: var(--text3); }
@@ -182,7 +182,7 @@
 .clearRecentBtn {
   margin-left: auto;
   background: none;
-  border: 1px solid var(--border);
+  border: 1px solid rgba(255,255,255,0.10);
   border-radius: 100px;
   color: var(--text3);
   font-size: 11px;
@@ -210,11 +210,11 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  background: var(--surface);
+  background: rgba(255,255,255,0.045);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--border);
-  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  border: 1px solid rgba(255,255,255,0.10);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 4px 16px rgba(0,0,0,0.2);
   border-radius: var(--radius);
   padding: 13px 15px;
   text-decoration: none;
@@ -227,16 +227,16 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, var(--accent-glow) 0%, var(--purple-glow) 100%);
+  background: linear-gradient(135deg, rgba(99,179,237,0.10) 0%, rgba(167,139,250,0.07) 100%);
   opacity: 0;
   transition: opacity 0.22s;
 }
 
 .popularCard:hover {
-  border-color: var(--border2);
+  border-color: rgba(99,179,237,0.35);
   transform: translateY(-2px);
-  background: var(--surface2);
-  box-shadow: 0 10px 32px rgba(0,0,0,0.12), 0 0 0 1px var(--accent-glow2);
+  background: rgba(255,255,255,0.07);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 10px 32px rgba(0,0,0,0.35), 0 0 0 1px rgba(99,179,237,0.15);
 }
 
 .popularCard:hover::before { opacity: 1; }
@@ -253,17 +253,17 @@
   padding: 7px 16px;
   font-size: 13px;
   font-weight: 500;
-  background: var(--surface);
+  background: rgba(255,255,255,0.04);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  border: 1px solid var(--border);
+  border: 1px solid rgba(255,255,255,0.08);
   border-radius: 100px;
   color: var(--text2);
   cursor: pointer;
   transition: all 0.2s;
 }
 
-.catTab:hover { border-color: var(--border2); color: var(--text); background: var(--accent-glow2); }
+.catTab:hover { border-color: rgba(99,179,237,0.3); color: var(--text); background: rgba(99,179,237,0.07); }
 
 .catActive {
   background: rgba(99,179,237,0.12) !important;
@@ -278,16 +278,19 @@
   gap: 12px;
 }
 
-/* ─── GLASS TOOL CARD ─── */
+/* ─── Category color variables per card ─── */
+/* These are set via inline style on the card: --cat-color, --cat-dim */
+
+/* ─── TOOL CARD ─── */
 .toolCard {
-  background: var(--surface);
+  background: var(--cat-dim, rgba(255,255,255,0.04));
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--border);
-  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+  border: 1px solid color-mix(in srgb, var(--cat-color, #63b3ed) 25%, transparent);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.06);
   border-radius: var(--radius-lg);
   text-decoration: none;
-  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
   position: relative;
@@ -295,56 +298,48 @@
   min-height: 145px;
 }
 
-/* Ambient gradient always visible */
-.toolCard::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    135deg,
-    rgba(99,179,237,0.06) 0%,
-    rgba(167,139,250,0.04) 50%,
-    rgba(236,72,153,0.03) 100%
-  );
-  opacity: 0.7;
-  transition: opacity 0.22s;
-  pointer-events: none;
-}
-
-/* Top shimmer line */
+/* Colored top border line */
 .toolCard:not(.coming)::after {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0;
-  height: 1.5px;
-  background: linear-gradient(90deg, transparent, rgba(99,179,237,0.7), rgba(167,139,250,0.7), transparent);
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--cat-color, #63b3ed), transparent);
+  opacity: 0.6;
+  transition: opacity 0.25s;
+}
+
+/* Glow bg on hover */
+.toolCard:not(.coming)::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--cat-color, #63b3ed) 15%, transparent) 0%, transparent 70%);
   opacity: 0;
-  transition: opacity 0.22s;
+  transition: opacity 0.25s;
+  pointer-events: none;
 }
 
 .toolCard:not(.coming):hover {
-  background: var(--surface2);
-  border-color: var(--border2);
-  transform: translateY(-3px);
+  background: color-mix(in srgb, var(--cat-color, #63b3ed) 10%, rgba(10,10,18,0.8));
+  border-color: color-mix(in srgb, var(--cat-color, #63b3ed) 55%, transparent);
+  transform: translateY(-4px);
   box-shadow:
-    0 16px 40px rgba(0,0,0,0.12),
-    0 0 0 1px var(--accent-glow2),
-    0 0 28px var(--accent-glow2);
+    0 20px 44px rgba(0,0,0,0.35),
+    0 0 0 1px color-mix(in srgb, var(--cat-color, #63b3ed) 20%, transparent),
+    0 0 32px color-mix(in srgb, var(--cat-color, #63b3ed) 15%, transparent);
 }
 
 .toolCard:not(.coming):hover::before { opacity: 1; }
 .toolCard:not(.coming):hover::after  { opacity: 1; }
 .toolCard:not(.coming):hover .readyArrow { opacity: 1; transform: translate(2px,-2px); }
-.toolCard:not(.coming):hover .toolIcon   { transform: scale(1.15); }
 
 .toolCard.coming {
   cursor: default;
-  background: var(--surface);
-  border: 1px dashed var(--border);
+  background: rgba(255,255,255,0.015);
+  border: 1px dashed rgba(255,255,255,0.06);
   box-shadow: none;
-  opacity: 0.6;
 }
-.toolCard.coming::before { opacity: 0.2; }
 
 .comingOverlay {
   position: absolute;
@@ -367,41 +362,113 @@
   z-index: 1;
 }
 
+/* ─── Icon Wrap with category color ─── */
 .toolIconWrap {
-  width: 40px; height: 40px;
-  border-radius: 11px;
-  background: var(--surface2);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid var(--border);
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--cat-color, #63b3ed) 15%, rgba(255,255,255,0.05));
+  border: 1px solid color-mix(in srgb, var(--cat-color, #63b3ed) 30%, transparent);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--cat-color, #63b3ed) 12%, transparent);
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 4px;
-  transition: all 0.2s;
+  transition: all 0.25s;
+  position: relative;
+  overflow: hidden;
 }
 
 .toolCard:not(.coming):hover .toolIconWrap {
-  background: rgba(99,179,237,0.14);
-  border-color: rgba(99,179,237,0.28);
-  box-shadow: 0 0 16px rgba(99,179,237,0.18), inset 0 1px 0 rgba(255,255,255,0.15);
+  background: color-mix(in srgb, var(--cat-color, #63b3ed) 25%, rgba(255,255,255,0.06));
+  border-color: color-mix(in srgb, var(--cat-color, #63b3ed) 60%, transparent);
+  box-shadow: 0 0 20px color-mix(in srgb, var(--cat-color, #63b3ed) 30%, transparent);
 }
 
 .coming .toolIconWrap {
-  background: var(--surface);
-  border-color: var(--border);
+  background: rgba(255,255,255,0.025);
+  border-color: rgba(255,255,255,0.05);
   box-shadow: none;
 }
 
-.toolIcon { font-size: 21px; transition: transform 0.2s; display: block; }
+/* ─── Icon Animations per category ─── */
+.toolIcon {
+  font-size: 22px;
+  display: block;
+  transition: transform 0.25s;
+}
+
 .coming .toolIcon { filter: grayscale(0.7); opacity: 0.4; }
 
+/* PDF - bounce */
+@keyframes iconBounce {
+  0%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-5px); }
+  60% { transform: translateY(-2px); }
+}
+/* Video - spin once */
+@keyframes iconSpin {
+  0% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(180deg) scale(1.1); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+/* Audio - pulse */
+@keyframes iconPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.25); }
+}
+/* Image - swing */
+@keyframes iconSwing {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-12deg); }
+  75% { transform: rotate(12deg); }
+}
+/* Document - slide up */
+@keyframes iconSlideUp {
+  0% { transform: translateY(4px); opacity: 0.7; }
+  100% { transform: translateY(-4px); opacity: 1; }
+}
+/* Converter - rotate */
+@keyframes iconRotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+/* Developer - shake */
+@keyframes iconShake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-4px) rotate(-5deg); }
+  40% { transform: translateX(4px) rotate(5deg); }
+  60% { transform: translateX(-3px); }
+  80% { transform: translateX(3px); }
+}
+/* Security - lock wiggle */
+@keyframes iconWiggle {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  20% { transform: rotate(-10deg) scale(1.1); }
+  40% { transform: rotate(10deg) scale(1.1); }
+  60% { transform: rotate(-5deg); }
+  80% { transform: rotate(5deg); }
+}
+
+.toolCard[data-cat="pdf"]:not(.coming):hover .toolIcon        { animation: iconBounce 0.6s ease; }
+.toolCard[data-cat="video"]:not(.coming):hover .toolIcon      { animation: iconSpin 0.6s ease; }
+.toolCard[data-cat="audio"]:not(.coming):hover .toolIcon      { animation: iconPulse 0.5s ease infinite; }
+.toolCard[data-cat="image"]:not(.coming):hover .toolIcon      { animation: iconSwing 0.6s ease; }
+.toolCard[data-cat="document"]:not(.coming):hover .toolIcon   { animation: iconSlideUp 0.4s ease alternate infinite; }
+.toolCard[data-cat="converter"]:not(.coming):hover .toolIcon  { animation: iconRotate 0.7s linear; }
+.toolCard[data-cat="developer"]:not(.coming):hover .toolIcon  { animation: iconShake 0.6s ease; }
+.toolCard[data-cat="security"]:not(.coming):hover .toolIcon   { animation: iconWiggle 0.6s ease; }
+
+/* ─── Tool Name colored on hover ─── */
 .toolName {
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text);
   font-family: var(--font-display);
   line-height: 1.25;
+  transition: color 0.2s;
+}
+.toolCard:not(.coming):hover .toolName {
+  color: var(--cat-color, var(--accent));
 }
 .coming .toolName { color: var(--text3); }
 
@@ -412,7 +479,7 @@
   position: absolute;
   top: 14px; right: 14px;
   font-size: 13px;
-  color: #63b3ed;
+  color: var(--cat-color, #63b3ed);
   opacity: 0;
   transition: all 0.2s;
   z-index: 1;
@@ -429,8 +496,8 @@
   text-transform: uppercase;
   letter-spacing: 0.8px;
   color: var(--text3);
-  background: var(--surface);
-  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
   padding: 3px 9px 3px 7px;
   border-radius: 100px;
 }
@@ -457,8 +524,8 @@
   gap: 6px;
   padding: 7px 16px;
   border-radius: 100px;
-  border: 1px solid var(--border);
-  background: var(--surface);
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.04);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   color: var(--text2);
@@ -470,9 +537,9 @@
 }
 
 .statusTab:hover {
-  border-color: var(--purple2);
+  border-color: rgba(167,139,250,0.35);
   color: var(--text);
-  background: var(--purple-glow);
+  background: rgba(167,139,250,0.07);
 }
 
 .statusActive {
@@ -696,4 +763,540 @@
 
 @media (max-width: 640px) {
   .proGrid { grid-template-columns: 1fr; }
+}
+
+/* ── GOVT JOBS CARD ── */
+.govtLiveBadge {
+  background: rgba(239,68,68,0.12);
+  border: 1px solid rgba(239,68,68,0.3);
+  color: #ef4444;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 2px 10px;
+  border-radius: 100px;
+}
+
+.govtJobsCard {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: rgba(245,158,11,0.04);
+  border: 1px solid rgba(245,158,11,0.25);
+  border-radius: 16px;
+  padding: 20px 22px;
+  text-decoration: none;
+  overflow: hidden;
+  transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+  box-shadow:
+    inset 0 1px 0 rgba(245,158,11,0.12),
+    0 4px 20px rgba(0,0,0,0.25);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.govtJobsCard:hover {
+  border-color: rgba(245,158,11,0.55);
+  background: rgba(245,158,11,0.07);
+  transform: translateY(-2px);
+  box-shadow:
+    inset 0 1px 0 rgba(245,158,11,0.2),
+    0 12px 36px rgba(0,0,0,0.35),
+    0 0 0 1px rgba(245,158,11,0.2),
+    0 0 32px rgba(245,158,11,0.08);
+}
+
+.govtJobsCardGlow {
+  position: absolute;
+  top: -40px; right: -40px;
+  width: 200px; height: 200px;
+  background: radial-gradient(circle, rgba(245,158,11,0.12) 0%, transparent 70%);
+  pointer-events: none;
+  border-radius: 50%;
+}
+
+.govtJobsCardInner {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  flex: 1;
+  position: relative;
+  z-index: 1;
+}
+
+.govtJobsIconWrap {
+  width: 48px; height: 48px;
+  border-radius: 13px;
+  background: rgba(245,158,11,0.1);
+  border: 1px solid rgba(245,158,11,0.2);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 0 16px rgba(245,158,11,0.1);
+}
+
+.govtJobsIcon { font-size: 24px; }
+
+.govtJobsCardContent { flex: 1; }
+
+.govtJobsCardTop {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.govtJobsCardName {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  font-family: var(--font-display);
+}
+
+.govtJobsCardDesc {
+  font-size: 12.5px;
+  color: var(--text2);
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+
+.govtJobsTags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.govtJobsTags span {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(245,158,11,0.85);
+  background: rgba(245,158,11,0.08);
+  border: 1px solid rgba(245,158,11,0.2);
+  padding: 3px 10px;
+  border-radius: 100px;
+}
+
+.govtJobsArrow {
+  font-size: 18px;
+  color: rgba(245,158,11,0.5);
+  position: relative;
+  z-index: 1;
+  transition: all 0.2s;
+  flex-shrink: 0;
+  margin-left: 12px;
+}
+
+.govtJobsCard:hover .govtJobsArrow {
+  color: rgba(245,158,11,0.9);
+  transform: translateX(4px);
+}
+
+/* ── POWER TOOLS CARD ── */
+.toolsCountBadge {
+  background: rgba(99,179,237,0.12);
+  border: 1px solid rgba(99,179,237,0.3);
+  color: #63b3ed;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 2px 10px;
+  border-radius: 100px;
+}
+
+.powerToolsCard {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: rgba(99,179,237,0.04);
+  border: 1px solid rgba(99,179,237,0.22);
+  border-radius: 16px;
+  padding: 20px 22px;
+  text-decoration: none;
+  overflow: hidden;
+  transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+  box-shadow:
+    inset 0 1px 0 rgba(99,179,237,0.10),
+    0 4px 20px rgba(0,0,0,0.25);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.powerToolsCard:hover {
+  border-color: rgba(99,179,237,0.5);
+  background: rgba(99,179,237,0.07);
+  transform: translateY(-2px);
+  box-shadow:
+    inset 0 1px 0 rgba(99,179,237,0.18),
+    0 12px 36px rgba(0,0,0,0.35),
+    0 0 0 1px rgba(99,179,237,0.18),
+    0 0 32px rgba(99,179,237,0.08);
+}
+
+.powerToolsCardGlow {
+  position: absolute;
+  top: -40px; right: -40px;
+  width: 220px; height: 220px;
+  background: radial-gradient(circle, rgba(99,179,237,0.10) 0%, transparent 70%);
+  pointer-events: none;
+  border-radius: 50%;
+}
+
+.powerToolsCardInner {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  flex: 1;
+  position: relative;
+  z-index: 1;
+}
+
+.powerToolsIconWrap {
+  width: 48px; height: 48px;
+  border-radius: 13px;
+  background: rgba(99,179,237,0.10);
+  border: 1px solid rgba(99,179,237,0.2);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 0 16px rgba(99,179,237,0.10);
+}
+
+.powerToolsIcon { font-size: 24px; }
+
+.powerToolsCardContent { flex: 1; }
+
+.powerToolsCardTop {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.powerToolsCardName {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  font-family: var(--font-display);
+}
+
+.powerToolsCardDesc {
+  font-size: 12.5px;
+  color: var(--text2);
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+
+.powerToolsCats {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.powerToolsCats span {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(99,179,237,0.85);
+  background: rgba(99,179,237,0.08);
+  border: 1px solid rgba(99,179,237,0.18);
+  padding: 3px 10px;
+  border-radius: 100px;
+}
+
+.powerToolsArrow {
+  font-size: 18px;
+  color: rgba(99,179,237,0.5);
+  position: relative;
+  z-index: 1;
+  transition: all 0.2s;
+  flex-shrink: 0;
+  margin-left: 12px;
+}
+
+.powerToolsCard:hover .powerToolsArrow {
+  color: rgba(99,179,237,0.9);
+  transform: translateX(4px);
+}
+
+/* ═══════════════════════════════════════════════
+   NEW HOMEPAGE STYLES — Quick Bar, Stats, Feature Cards
+   ═══════════════════════════════════════════════ */
+
+/* ── Quick Bar (Recently Used / Popular) below hero search ── */
+.quickBar {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 580px;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: left;
+}
+
+.quickBarLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.quickBarTools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.quickBarChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 100px;
+  color: var(--text);
+  font-size: 12.5px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background 0.18s, border-color 0.18s, transform 0.15s;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.quickBarChip:hover {
+  background: rgba(99,102,241,0.15);
+  border-color: rgba(99,102,241,0.4);
+  transform: translateY(-2px);
+  color: var(--text);
+}
+
+.quickBarClear {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 100px;
+  color: var(--text3);
+  font-size: 11px;
+  cursor: pointer;
+  padding: 4px 10px;
+  transition: color 0.15s, border-color 0.15s;
+  font-family: var(--font-body);
+}
+
+.quickBarClear:hover {
+  color: #ef4444;
+  border-color: rgba(239,68,68,0.3);
+}
+
+/* ── Stats Strip ── */
+.statsStrip {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 24px 24px 8px;
+}
+
+.statItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 0 28px;
+}
+
+.statNum {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.5px;
+  font-family: var(--font-display);
+}
+
+.statLabel {
+  font-size: 10.5px;
+  color: var(--text3);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+.statsStripDivider {
+  width: 1px;
+  height: 32px;
+  background: var(--border2);
+  flex-shrink: 0;
+}
+
+/* ── Feature Grid (4 beautiful cards) ── */
+.featureGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  padding: 16px 0 48px;
+}
+
+.featureCard {
+  position: relative;
+  overflow: hidden;
+  border-radius: 22px;
+  padding: 22px 20px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-decoration: none;
+  color: var(--text);
+  border: 1px solid rgba(255,255,255,0.07);
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+  min-height: 185px;
+  cursor: pointer;
+}
+
+.featureCard:hover {
+  transform: translateY(-5px) scale(1.01);
+}
+
+/* Per-card gradient backgrounds */
+.fcBg {
+  position: absolute;
+  inset: 0;
+  border-radius: 22px;
+  z-index: 0;
+  transition: opacity 0.22s;
+}
+
+.featureCardInvoice { background: rgba(245,158,11,0.03); }
+.featureCardResume  { background: rgba(59,130,246,0.03); }
+.featureCardGovt   { background: rgba(16,185,129,0.03); }
+.featureCardTools  { background: rgba(139,92,246,0.03); }
+
+.featureCardInvoice .fcBg { background: linear-gradient(140deg, rgba(245,158,11,0.13) 0%, rgba(239,68,68,0.06) 100%); }
+.featureCardResume .fcBg  { background: linear-gradient(140deg, rgba(59,130,246,0.13) 0%, rgba(99,102,241,0.06) 100%); }
+.featureCardGovt .fcBg    { background: linear-gradient(140deg, rgba(16,185,129,0.13) 0%, rgba(6,182,212,0.06) 100%); }
+.featureCardTools .fcBg   { background: linear-gradient(140deg, rgba(139,92,246,0.13) 0%, rgba(168,85,247,0.06) 100%); }
+
+/* Hover glow borders */
+.featureCardInvoice:hover { border-color: rgba(245,158,11,0.4);  box-shadow: 0 20px 50px rgba(245,158,11,0.13); }
+.featureCardResume:hover  { border-color: rgba(59,130,246,0.4);  box-shadow: 0 20px 50px rgba(59,130,246,0.13); }
+.featureCardGovt:hover    { border-color: rgba(16,185,129,0.4);  box-shadow: 0 20px 50px rgba(16,185,129,0.13); }
+.featureCardTools:hover   { border-color: rgba(139,92,246,0.4);  box-shadow: 0 20px 50px rgba(139,92,246,0.13); }
+
+/* Decorative glowing blob top-right */
+.fcCornerAccent {
+  position: absolute;
+  top: -24px;
+  right: -24px;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  opacity: 0.18;
+  z-index: 0;
+  transition: opacity 0.22s;
+}
+.featureCard:hover .fcCornerAccent { opacity: 0.32; }
+
+.featureCardInvoice .fcCornerAccent { background: #f59e0b; }
+.featureCardResume .fcCornerAccent  { background: #3b82f6; }
+.featureCardGovt .fcCornerAccent    { background: #10b981; }
+.featureCardTools .fcCornerAccent   { background: #8b5cf6; }
+
+/* All inner elements sit above bg layers */
+.fcTop, .fcBody, .fcFooter { position: relative; z-index: 1; }
+
+.fcTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.fcIconRing {
+  width: 44px;
+  height: 44px;
+  border-radius: 13px;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  transition: transform 0.2s;
+}
+.featureCard:hover .fcIconRing { transform: scale(1.08) rotate(-4deg); }
+
+/* Badges */
+.fcBadge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 100px;
+  letter-spacing: 0.05em;
+  background: rgba(245,158,11,0.18);
+  color: #fbbf24;
+  border: 1px solid rgba(245,158,11,0.28);
+}
+.fcBadgeBlue   { background: rgba(59,130,246,0.18);  color: #60a5fa; border-color: rgba(59,130,246,0.28); }
+.fcBadgeLive   { background: rgba(239,68,68,0.14);   color: #f87171; border-color: rgba(239,68,68,0.24); }
+.fcBadgePurple { background: rgba(139,92,246,0.18);  color: #a78bfa; border-color: rgba(139,92,246,0.28); }
+
+/* Body */
+.fcBody { flex: 1; }
+
+.fcTitle {
+  font-size: 15.5px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 5px;
+  line-height: 1.25;
+  font-family: var(--font-display);
+}
+
+.fcDesc {
+  font-size: 12px;
+  color: var(--text2);
+  margin: 0;
+  line-height: 1.55;
+}
+
+/* Footer row: tags + arrow */
+.fcFooter {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.fcTag {
+  font-size: 10.5px;
+  color: var(--text3);
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  padding: 2px 8px;
+  border-radius: 100px;
+  white-space: nowrap;
+}
+
+.fcArrow {
+  margin-left: auto;
+  font-size: 15px;
+  color: var(--text3);
+  transition: transform 0.2s ease, color 0.2s ease;
+  flex-shrink: 0;
+}
+.featureCard:hover .fcArrow {
+  transform: translateX(4px);
+  color: var(--text);
+}
+
+/* ── Mobile responsive ── */
+@media (max-width: 600px) {
+  .featureGrid {
+    grid-template-columns: 1fr;
+  }
+  .statsStrip {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .statItem { padding: 0 14px; }
+  .quickBar { max-width: 100%; }
 }

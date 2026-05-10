@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import Navbar from './components/Navbar'
 import HomePage from './pages/HomePage'
+import AllToolsPage from './pages/AllToolsPage'
 import PricingPage from './pages/PricingPage'
 import SplashScreen from './components/SplashScreen'
 import { useBackButton } from './hooks/useBackButton'
@@ -82,6 +83,7 @@ import IpLookup from './pages/tools/IpLookup'
 // Converter Tools
 import CurrencyConverter from './pages/tools/CurrencyConverter'
 import BarcodeGenerator from './pages/tools/BarcodeGenerator'
+import GovtJobsPage from './pages/GovtJobsPage'
 
 function ComingSoon({ name }) {
   return (
@@ -117,7 +119,8 @@ function AppInner() {
       <main style={{ flex: 1 }}>
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/all-tools" element={<HomePage />} />
+          <Route path="/all-tools" element={<AllToolsPage />} />
+          <Route path="/tools" element={<AllToolsPage />} />
           <Route path="/pricing" element={<PricingPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/billing" element={<BillingPage />} />
@@ -217,6 +220,9 @@ function AppInner() {
           {/* Converter */}
           <Route path="/tools/currency-converter" element={<CurrencyConverter />} />
           <Route path="/tools/barcode-generator" element={<BarcodeGenerator />} />
+
+          {/* Govt Jobs */}
+          <Route path="/govt-jobs" element={<GovtJobsPage />} />
 
           <Route path="*" element={<ComingSoon name="Page Not Found" />} />
         </Routes>

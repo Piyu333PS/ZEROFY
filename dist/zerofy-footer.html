@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Footer Component – Zerofy</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #0e0e10;
+    font-family: 'DM Sans', sans-serif;
+    min-height: 200vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+  /* ==========================================
+     ZEROFY FOOTER — Copy everything below
+     ========================================== */
+  .zerofy-footer {
+    background: #111115;
+    border-top: 1px solid rgba(255,255,255,0.07);
+    padding: 56px 6vw 32px;
+    font-family: 'DM Sans', sans-serif;
+    color: #e8e8f0;
+  }
+  .zf-top {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 40px;
+    padding-bottom: 48px;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+  }
+  .zf-brand .logo {
+    font-family: 'Syne', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: #e8e8f0;
+    letter-spacing: -0.5px;
+    margin-bottom: 14px;
+    display: block;
+  }
+  .zf-brand .logo span { color: #7b6ef6; }
+  .zf-brand p {
+    font-size: 13.5px;
+    color: #888898;
+    line-height: 1.7;
+    max-width: 260px;
+    margin-bottom: 20px;
+  }
+  .zf-badges {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .zf-badge {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 6px;
+    padding: 5px 10px;
+    font-size: 11px;
+    color: #888898;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .zf-badge .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #22c55e;
+    display: inline-block;
+  }
+  .zf-col h4 {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: #e8e8f0;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 16px;
+  }
+  .zf-col ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .zf-col ul li a {
+    font-size: 13.5px;
+    color: #888898;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .zf-col ul li a:hover { color: #e8e8f0; }
+  .zf-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 28px;
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+  .zf-bottom .copyright {
+    font-size: 12.5px;
+    color: #555568;
+  }
+  .zf-bottom .copyright strong { color: #7b6ef6; font-weight: 500; }
+  .zf-legal-links {
+    display: flex;
+    gap: 20px;
+  }
+  .zf-legal-links a {
+    font-size: 12.5px;
+    color: #555568;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .zf-legal-links a:hover { color: #888898; }
+  .zf-payment-icons {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .zf-payment-icons .pay-badge {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 5px;
+    padding: 4px 8px;
+    font-size: 10px;
+    font-weight: 600;
+    color: #888898;
+    letter-spacing: 0.4px;
+  }
+  .zf-razorpay {
+    font-size: 11px;
+    color: #555568;
+    margin-top: 6px;
+  }
+  @media (max-width: 768px) {
+    .zf-top {
+      grid-template-columns: 1fr 1fr;
+    }
+    .zf-brand {
+      grid-column: 1 / -1;
+    }
+    .zf-bottom {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+  @media (max-width: 480px) {
+    .zf-top {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- DEMO: shows the footer at the bottom of the page -->
+<!-- In your actual website, just copy the <footer class="zerofy-footer">...</footer> block -->
+
+<footer class="zerofy-footer">
+  <div class="zf-top">
+
+    <!-- Brand Column -->
+    <div class="zf-brand">
+      <span class="logo">Zero<span>fy</span></span>
+      <p>Simple, powerful tools for invoicing, file processing, and more. One plan. Everything unlocked. No hidden fees.</p>
+      <div class="zf-badges">
+        <span class="zf-badge"><span class="dot"></span> All Systems Operational</span>
+        <span class="zf-badge">🔒 Secure Payments</span>
+      </div>
+      <div class="zf-payment-icons" style="margin-top:14px;">
+        <span class="pay-badge">UPI</span>
+        <span class="pay-badge">VISA</span>
+        <span class="pay-badge">MC</span>
+        <span class="pay-badge">RuPay</span>
+        <span class="pay-badge">NetBanking</span>
+      </div>
+      <p class="zf-razorpay">Payments secured by Razorpay</p>
+    </div>
+
+    <!-- Product Column -->
+    <div class="zf-col">
+      <h4>Product</h4>
+      <ul>
+        <li><a href="/tools">All Tools</a></li>
+        <li><a href="/invoice">Invoice Generator</a></li>
+        <li><a href="/pdf">PDF Tools</a></li>
+        <li><a href="/pricing">Pricing</a></li>
+        <li><a href="/changelog">What's New</a></li>
+      </ul>
+    </div>
+
+    <!-- Support Column -->
+    <div class="zf-col">
+      <h4>Support</h4>
+      <ul>
+        <li><a href="/help">Help Center</a></li>
+        <li><a href="/contact">Contact Us</a></li>
+        <li><a href="mailto:support@zerofy.co.in">Email Support</a></li>
+        <li><a href="/refund">Refund Policy</a></li>
+        <li><a href="/status">System Status</a></li>
+      </ul>
+    </div>
+
+    <!-- Legal Column -->
+    <div class="zf-col">
+      <h4>Legal</h4>
+      <ul>
+        <li><a href="/privacy-policy">Privacy Policy</a></li>
+        <li><a href="/terms">Terms &amp; Conditions</a></li>
+        <li><a href="/cookie-policy">Cookie Policy</a></li>
+        <li><a href="/cancellation">Cancellation Policy</a></li>
+      </ul>
+    </div>
+
+  </div>
+
+  <!-- Bottom Bar -->
+  <div class="zf-bottom">
+    <p class="copyright">
+      © 2025 <strong>Zerofy</strong>. All rights reserved. Made with ♥ in Jaipur, Rajasthan 🇮🇳
+    </p>
+    <div class="zf-legal-links">
+      <a href="/privacy-policy">Privacy</a>
+      <a href="/terms">Terms</a>
+      <a href="/refund">Refunds</a>
+      <a href="mailto:support@zerofy.co.in">Contact</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

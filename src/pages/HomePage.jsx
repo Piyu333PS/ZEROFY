@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from 'react'
-import { Link } from 'react-router-dom'
-import { CATEGORIES, TOOLS, POPULAR_TOOLS } from '../tools/toolsData'
+import { useState, useEffect } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { TOOLS, POPULAR_TOOLS } from '../tools/toolsData'
 import styles from './HomePage.module.css'
 
 const RECENT_TOOLS_KEY = 'zerofy_recent_tools'
@@ -10,9 +10,7 @@ function getRecentToolIds() {
   try {
     const stored = localStorage.getItem(RECENT_TOOLS_KEY)
     return stored ? JSON.parse(stored) : []
-  } catch {
-    return []
-  }
+  } catch { return [] }
 }
 
 export function trackToolUsage(toolId) {
@@ -23,97 +21,32 @@ export function trackToolUsage(toolId) {
   } catch {}
 }
 
-function ToolCard({ tool }) {
-  const isReady = tool.status === 'ready'
-
-  const content = (
-    <>
-      {!isReady && <div className={styles.comingOverlay} />}
-      <div className={styles.toolCardInner}>
-        <div className={styles.toolIconWrap}>
-          <span className={styles.toolIcon}>{tool.icon}</span>
-        </div>
-        <div className={styles.toolName}>{tool.name}</div>
-        <div className={styles.toolDesc}>{tool.desc}</div>
-      </div>
-      {!isReady && (
-        <div className={styles.comingBadgeWrap}>
-          <span className={styles.comingBadge}>
-            <span className={styles.comingDot} />
-            Coming Soon
-          </span>
-        </div>
-      )}
-      {isReady && <div className={styles.readyArrow}>→</div>}
-    </>
-  )
-
-  if (!isReady) {
-    return <div className={`${styles.toolCard} ${styles.coming}`}>{content}</div>
-  }
-
-  return (
-    <Link to={tool.route} className={styles.toolCard} onClick={() => trackToolUsage(tool.id)}>
-      {content}
-    </Link>
-  )
-}
-
-const STATUS_TABS = [
-  { id: 'live',   label: '✅ Live Tools' },
-  { id: 'coming', label: '🕐 Coming Soon' },
-  { id: 'all',    label: 'All' },
-]
-
 export default function HomePage() {
-  const [activecat, setActivecat]       = useState('all')
-  const [search, setSearch]             = useState('')
-  const [statusFilter, setStatusFilter] = useState('live')
+  const navigate = useNavigate()
+  const [search, setSearch] = useState('')
   const [recentToolIds, setRecentToolIds] = useState(() => getRecentToolIds())
 
-  // Refresh recent tools when page gains focus (user comes back from a tool)
   useEffect(() => {
     const onFocus = () => setRecentToolIds(getRecentToolIds())
     window.addEventListener('focus', onFocus)
     return () => window.removeEventListener('focus', onFocus)
   }, [])
 
-  const filtered = TOOLS.filter(t => {
-    const matchCat    = activecat === 'all' || t.cat === activecat
-    const matchSearch = !search || t.name.toLowerCase().includes(search.toLowerCase()) || t.desc.toLowerCase().includes(search.toLowerCase())
-    const matchStatus =
-      statusFilter === 'all'    ? true :
-      statusFilter === 'live'   ? t.status === 'ready' :
-      statusFilter === 'coming' ? t.status !== 'ready' :
-      true
-    return matchCat && matchSearch && matchStatus
-  })
-
-  const comingSoonCount = TOOLS.filter(t => t.status !== 'ready').length
-
-  const recentTools = recentToolIds
-    .map(id => TOOLS.find(t => t.id === id))
-    .filter(Boolean)
-
+  const recentTools = recentToolIds.map(id => TOOLS.find(t => t.id === id)).filter(Boolean)
   const hasRecentTools = recentTools.length > 0
   const popularTools = TOOLS.filter(t => POPULAR_TOOLS.includes(t.id))
   const shownTools = hasRecentTools ? recentTools : popularTools
-  const sectionLabel = hasRecentTools ? '🕐 Recently Used' : '🔥 Popular Tools'
-  const isSearching = search.length > 0
 
-  const displayTools = isSearching
-    ? TOOLS.filter(t => {
-        const matchCat = activecat === 'all' || t.cat === activecat
-        return matchCat && (
-          t.name.toLowerCase().includes(search.toLowerCase()) ||
-          t.desc.toLowerCase().includes(search.toLowerCase())
-        )
-      })
-    : filtered
+  const handleSearchKeyDown = (e) => {
+    if (e.key === 'Enter' && search.trim()) {
+      navigate(`/tools?q=${encodeURIComponent(search.trim())}`)
+    }
+  }
 
   return (
     <div className={styles.page}>
-      {/* Hero */}
+
+      {/* ── Hero ── */}
       <section className={styles.hero}>
         <div className={styles.heroGlow} />
         <div className="page-wrapper">
@@ -134,175 +67,134 @@ export default function HomePage() {
               placeholder="Search any tool... like 'compress PDF' or 'cut MP3'"
               value={search}
               onChange={e => setSearch(e.target.value)}
+              onKeyDown={handleSearchKeyDown}
               className={styles.heroSearchInput}
             />
           </div>
 
+          {/* ── Recently Used / Popular — RIGHT BELOW HERO SEARCH ── */}
+          <div className={styles.quickBar}>
+            <div className={styles.quickBarLabel}>
+              {hasRecentTools ? '🕐 Recently Used' : '🔥 Popular'}
+            </div>
+            <div className={styles.quickBarTools}>
+              {shownTools.slice(0, 6).map(t => (
+                <Link
+                  key={t.id}
+                  to={t.route}
+                  className={styles.quickBarChip}
+                  onClick={() => trackToolUsage(t.id)}
+                >
+                  <span>{t.icon}</span>
+                  <span>{t.name}</span>
+                </Link>
+              ))}
+              {hasRecentTools && (
+                <button
+                  className={styles.quickBarClear}
+                  onClick={() => { localStorage.removeItem(RECENT_TOOLS_KEY); setRecentToolIds([]) }}
+                >✕ Clear</button>
+              )}
+            </div>
+          </div>
         </div>
       </section>
 
-
-      {/* Pro Features Section */}
-      <div className="page-wrapper">
-        <section className={styles.proSection}>
-          <div className={styles.proSectionHeader}>
-            <span className={styles.proCrownIcon}>👑</span>
-            <h2 className={styles.proSectionTitle}>Professional Suite</h2>
-            <span className={styles.proSectionBadge}>PRO</span>
-          </div>
-          <p className={styles.proSectionSub}>Powerful tools built for professionals — create, manage, and deliver.</p>
-          <div className={styles.proGrid}>
-            <Link to="/tools/invoice-maker" className={styles.proCard} onClick={() => trackToolUsage("invoice-maker")}>
-              <div className={styles.proCardGlow} />
-              <div className={styles.proCardInner}>
-                <div className={styles.proIconWrap}><span className={styles.proIcon}>🧾</span></div>
-                <div className={styles.proCardContent}>
-                  <div className={styles.proCardTop}>
-                    <span className={styles.proCardName}>Invoice Maker</span>
-                    <span className={styles.proCardBadge}>PRO</span>
-                  </div>
-                  <p className={styles.proCardDesc}>Generate professional GST invoices instantly. Download as PDF, share with clients.</p>
-                  <div className={styles.proCardFeatures}><span>✓ GST ready</span><span>✓ PDF export</span><span>✓ Custom branding</span></div>
-                </div>
-              </div>
-              <div className={styles.proCardArrow}>→</div>
-            </Link>
-            <Link to="/tools/resume-builder" className={styles.proCard} onClick={() => trackToolUsage("resume-builder")}>
-              <div className={styles.proCardGlow} />
-              <div className={styles.proCardInner}>
-                <div className={styles.proIconWrap}><span className={styles.proIcon}>📄</span></div>
-                <div className={styles.proCardContent}>
-                  <div className={styles.proCardTop}>
-                    <span className={styles.proCardName}>Resume Builder</span>
-                    <span className={styles.proCardBadge}>PRO</span>
-                  </div>
-                  <p className={styles.proCardDesc}>Build stunning resumes with professional templates. ATS-friendly, download-ready.</p>
-                  <div className={styles.proCardFeatures}><span>✓ ATS friendly</span><span>✓ Multiple templates</span><span>✓ PDF export</span></div>
-                </div>
-              </div>
-              <div className={styles.proCardArrow}>→</div>
-            </Link>
-          </div>
-        </section>
+      {/* ── Stats Strip ── */}
+      <div className={styles.statsStrip}>
+        <div className={styles.statItem}><span className={styles.statNum}>70+</span><span className={styles.statLabel}>Tools</span></div>
+        <div className={styles.statDivider} />
+        <div className={styles.statItem}><span className={styles.statNum}>100%</span><span className={styles.statLabel}>Free</span></div>
+        <div className={styles.statDivider} />
+        <div className={styles.statItem}><span className={styles.statNum}>0</span><span className={styles.statLabel}>Signup needed</span></div>
+        <div className={styles.statDivider} />
+        <div className={styles.statItem}><span className={styles.statNum}>∞</span><span className={styles.statLabel}>Usage</span></div>
       </div>
 
+      {/* ── 4 Feature Cards (new design) ── */}
       <div className="page-wrapper">
-        {/* Popular / Recently Used Tools */}
-        {!isSearching && activecat === 'all' && statusFilter === 'live' && (
-          <section className={styles.section}>
-            <h2 className={styles.sectionTitle}>
-              <span className={styles.fire}>{hasRecentTools ? '🕐' : '🔥'}</span>
-              {hasRecentTools ? 'Recently Used' : 'Popular Tools'}
-              {hasRecentTools && (
-                <button
-                  className={styles.clearRecentBtn}
-                  onClick={() => {
-                    localStorage.removeItem(RECENT_TOOLS_KEY)
-                    setRecentToolIds([])
-                  }}
-                  title="Clear history"
-                >
-                  Clear
-                </button>
-              )}
-            </h2>
-            <div className={styles.popularGrid}>
-              {shownTools.map(t => (
-                <Link
-                  to={t.route}
-                  key={t.id}
-                  className={styles.popularCard}
-                  onClick={() => trackToolUsage(t.id)}
-                >
-                  <span className={styles.popularIcon}>{t.icon}</span>
-                  <span className={styles.popularName}>{t.name}</span>
-                  <span className={styles.popularArrow}>→</span>
-                </Link>
-              ))}
-            </div>
-          </section>
-        )}
+        <div className={styles.featureGrid}>
 
-        {/* Category Tabs */}
-        <section className={styles.section}>
-          <div className={styles.catTabs}>
-            <button
-              className={`${styles.catTab} ${activecat === 'all' ? styles.catActive : ''}`}
-              onClick={() => setActivecat('all')}
-            >
-              All
-            </button>
-            {CATEGORIES.map(c => (
-              <button
-                key={c.id}
-                className={`${styles.catTab} ${activecat === c.id ? styles.catActive : ''}`}
-                onClick={() => setActivecat(c.id)}
-                style={activecat === c.id ? { '--cat-color': c.color, '--cat-dim': c.dim } : {}}
-              >
-                {c.icon} {c.label}
-              </button>
-            ))}
-          </div>
-        </section>
-
-        {/* Status Filter Tabs */}
-        {!isSearching && (
-          <section className={styles.statusTabsSection}>
-            <div className={styles.statusTabs}>
-              {STATUS_TABS.map(s => (
-                <button
-                  key={s.id}
-                  className={`${styles.statusTab} ${statusFilter === s.id ? styles.statusActive : ''}`}
-                  onClick={() => setStatusFilter(s.id)}
-                >
-                  {s.label}
-                  {s.id === 'coming' && (
-                    <span className={styles.statusBadge}>{comingSoonCount}</span>
-                  )}
-                </button>
-              ))}
+          {/* Card 1 – Invoice Maker */}
+          <Link to="/tools/invoice-maker" className={`${styles.featureCard} ${styles.featureCardInvoice}`} onClick={() => trackToolUsage('invoice-maker')}>
+            <div className={styles.fcBg} />
+            <div className={styles.fcCornerAccent} />
+            <div className={styles.fcTop}>
+              <div className={styles.fcIconRing}>🧾</div>
+              <span className={styles.fcBadge}>PRO</span>
             </div>
-          </section>
-        )}
-
-        {/* Tools Grid */}
-        <section className={styles.section}>
-          {isSearching && (
-            <p className={styles.searchResult}>
-              {displayTools.length} result{displayTools.length !== 1 ? 's' : ''} for "{search}"
-            </p>
-          )}
-
-          {displayTools.length > 0 ? (
-            <div className={styles.toolsGrid}>
-              {displayTools.map(t => <ToolCard key={t.id} tool={t} />)}
+            <div className={styles.fcBody}>
+              <h3 className={styles.fcTitle}>Invoice Maker</h3>
+              <p className={styles.fcDesc}>GST-ready professional invoices. PDF export in seconds.</p>
             </div>
-          ) : (
-            <div className={styles.noResults}>
-              <div className={styles.noResultsIcon}>🔍</div>
-              <div>No tools found</div>
-              <div style={{ fontSize: 14, color: 'var(--text3)', marginTop: 8 }}>
-                {isSearching ? 'Try different keywords' : 'Try a different filter'}
-              </div>
+            <div className={styles.fcFooter}>
+              <span className={styles.fcTag}>✓ GST ready</span>
+              <span className={styles.fcTag}>✓ PDF export</span>
+              <span className={styles.fcArrow}>→</span>
             </div>
-          )}
+          </Link>
 
-          {!isSearching && statusFilter === 'live' && (
-            <div className={styles.comingSoonNudge}>
-              <span>🚀</span>
-              <span>
-                <strong>{comingSoonCount} more tools</strong> are on the way —{' '}
-                <button
-                  className={styles.nudgeLink}
-                  onClick={() => setStatusFilter('coming')}
-                >
-                  View Coming Soon →
-                </button>
-              </span>
+          {/* Card 2 – Resume Builder */}
+          <Link to="/tools/resume-builder" className={`${styles.featureCard} ${styles.featureCardResume}`} onClick={() => trackToolUsage('resume-builder')}>
+            <div className={styles.fcBg} />
+            <div className={styles.fcCornerAccent} />
+            <div className={styles.fcTop}>
+              <div className={styles.fcIconRing}>📄</div>
+              <span className={`${styles.fcBadge} ${styles.fcBadgeBlue}`}>PRO</span>
             </div>
-          )}
-        </section>
+            <div className={styles.fcBody}>
+              <h3 className={styles.fcTitle}>Resume Builder</h3>
+              <p className={styles.fcDesc}>ATS-friendly resumes with pro templates. Download-ready.</p>
+            </div>
+            <div className={styles.fcFooter}>
+              <span className={styles.fcTag}>✓ ATS friendly</span>
+              <span className={styles.fcTag}>✓ Templates</span>
+              <span className={styles.fcArrow}>→</span>
+            </div>
+          </Link>
+
+          {/* Card 3 – Govt Jobs */}
+          <Link to="/govt-jobs" className={`${styles.featureCard} ${styles.featureCardGovt}`}>
+            <div className={styles.fcBg} />
+            <div className={styles.fcCornerAccent} />
+            <div className={styles.fcTop}>
+              <div className={styles.fcIconRing}>🏛️</div>
+              <span className={`${styles.fcBadge} ${styles.fcBadgeLive}`}>🔴 Live</span>
+            </div>
+            <div className={styles.fcBody}>
+              <h3 className={styles.fcTitle}>Govt Jobs Portal</h3>
+              <p className={styles.fcDesc}>SSC · Railway · Bank · RPSC · Police — daily updates.</p>
+            </div>
+            <div className={styles.fcFooter}>
+              <span className={styles.fcTag}>🚂 Railway</span>
+              <span className={styles.fcTag}>📋 SSC</span>
+              <span className={styles.fcArrow}>→</span>
+            </div>
+          </Link>
+
+          {/* Card 4 – All Tools */}
+          <Link to="/tools" className={`${styles.featureCard} ${styles.featureCardTools}`}>
+            <div className={styles.fcBg} />
+            <div className={styles.fcCornerAccent} />
+            <div className={styles.fcTop}>
+              <div className={styles.fcIconRing}>⚡</div>
+              <span className={`${styles.fcBadge} ${styles.fcBadgePurple}`}>{TOOLS.filter(t => t.status === 'ready').length}+ Live</span>
+            </div>
+            <div className={styles.fcBody}>
+              <h3 className={styles.fcTitle}>All Power Tools</h3>
+              <p className={styles.fcDesc}>PDF, Video, Audio, Image, Dev tools — sab ek jagah.</p>
+            </div>
+            <div className={styles.fcFooter}>
+              <span className={styles.fcTag}>📄 PDF</span>
+              <span className={styles.fcTag}>🎬 Video</span>
+              <span className={styles.fcTag}>🖼️ Image</span>
+              <span className={styles.fcArrow}>→</span>
+            </div>
+          </Link>
+
+        </div>
       </div>
+
     </div>
   )
 }
