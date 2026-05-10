@@ -153,31 +153,32 @@ function parseXMLItems(xml, src) {
 
 async function fetchRSSFeed(src) {
   const proxies = [
-    // Proxy 1: corsproxy.io
-    async () => {
-      const r = await fetch(
-        `https://corsproxy.io/?${encodeURIComponent(src.feedUrl)}`,
-        { signal: AbortSignal.timeout(10000) }
-      )
-      if (!r.ok) throw new Error(`HTTP ${r.status}`)
-      const xml = await r.text()
-      return parseXMLItems(xml, src)
-    },
-    // Proxy 2: allorigins raw
+    // Proxy 1: allorigins raw (most reliable in prod)
     async () => {
       const r = await fetch(
         `https://api.allorigins.win/raw?url=${encodeURIComponent(src.feedUrl)}`,
-        { signal: AbortSignal.timeout(10000) }
+        { signal: AbortSignal.timeout(12000) }
       )
       if (!r.ok) throw new Error(`HTTP ${r.status}`)
       const xml = await r.text()
       return parseXMLItems(xml, src)
     },
-    // Proxy 3: rss2json (fallback)
+    // Proxy 2: allorigins JSON wrapper
+    async () => {
+      const r = await fetch(
+        `https://api.allorigins.win/get?url=${encodeURIComponent(src.feedUrl)}`,
+        { signal: AbortSignal.timeout(12000) }
+      )
+      if (!r.ok) throw new Error(`HTTP ${r.status}`)
+      const data = await r.json()
+      if (!data.contents) throw new Error('No contents')
+      return parseXMLItems(data.contents, src)
+    },
+    // Proxy 3: rss2json (reliable fallback)
     async () => {
       const r = await fetch(
         `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(src.feedUrl)}&count=50`,
-        { signal: AbortSignal.timeout(10000) }
+        { signal: AbortSignal.timeout(12000) }
       )
       const data = await r.json()
       if (!data.items?.length) throw new Error('No items')
@@ -187,6 +188,26 @@ async function fetchRSSFeed(src) {
         sourceColor: src.color,
         lastDate: extractLastDate(item.title || '', item.description || ''),
       }))
+    },
+    // Proxy 4: corsproxy.io
+    async () => {
+      const r = await fetch(
+        `https://corsproxy.io/?${encodeURIComponent(src.feedUrl)}`,
+        { signal: AbortSignal.timeout(12000) }
+      )
+      if (!r.ok) throw new Error(`HTTP ${r.status}`)
+      const xml = await r.text()
+      return parseXMLItems(xml, src)
+    },
+    // Proxy 5: thingproxy
+    async () => {
+      const r = await fetch(
+        `https://thingproxy.freeboard.io/fetch/${src.feedUrl}`,
+        { signal: AbortSignal.timeout(12000) }
+      )
+      if (!r.ok) throw new Error(`HTTP ${r.status}`)
+      const xml = await r.text()
+      return parseXMLItems(xml, src)
     },
   ]
 
@@ -367,10 +388,14 @@ export default function GovtJobsPage() {
         .filter(isJobActive)
 
       if (allJobs.length === 0 && successCount === 0) {
-        setError('All sources failed to load. Please check your internet connection and try again.')
+        setError('Unable to load jobs right now. This may be due to network restrictions. Please try again in a moment.')
       } else {
         setJobs(allJobs)
         setLastUpdated(new Date())
+        // Show partial warning if some sources failed
+        if (successCount < RSS_SOURCES.length && successCount > 0) {
+          console.info(`Loaded from ${successCount}/${RSS_SOURCES.length} sources`)
+        }
       }
     } catch {
       setError('Could not load jobs. Please check your internet connection.')

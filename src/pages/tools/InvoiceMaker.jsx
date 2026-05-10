@@ -23409,9 +23409,9 @@ function BizModal({ businesses, onSave, onClose }) {
 
 /* ─── Upgrade Payment Flow (Razorpay inline) ─────────────────── */
 const UPGRADE_PLANS = [
-  { id: 'monthly',   label: '₹19/month',   desc: `Monthly`,   amount: 19,  badge: null,          days: 30 },
-  { id: 'quarterly', label: '₹49/quarter', desc: `Quarterly`, amount: 49,  badge: '🔥 Popular',  days: 90 },
-  { id: 'yearly',    label: '₹199/year',   desc: `Yearly`,    amount: 199, badge: '💰 Best Value', days: 365 },
+  { id: 'monthly',   label: '₹49/month',   desc: `Monthly`,   amount: 49,  badge: null,           days: 30 },
+  { id: 'quarterly', label: '₹129/quarter', desc: `Quarterly`, amount: 129, badge: '🔥 Popular',  days: 90 },
+  { id: 'yearly',    label: '₹399/year',   desc: `Yearly`,    amount: 399, badge: '💰 Best Value', days: 365 },
 ]
 
 function UpgradePaymentFlow({ token, API, onSuccess, onClose }) {
