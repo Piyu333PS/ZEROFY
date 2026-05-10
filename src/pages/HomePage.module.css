@@ -3,7 +3,7 @@
 /* ── Hero ────────────────────────────────── */
 .hero {
   position: relative;
-  padding: 90px 0 70px;
+  padding: 60px 0 44px;
   text-align: center;
   overflow: hidden;
 }
@@ -48,34 +48,6 @@
   50% { opacity: 1; transform: scale(1.1); }
 }
 
-.heroBadge {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 32px;
-  position: relative;
-  z-index: 1;
-  background: none;
-  border: none;
-  padding: 0;
-  overflow: visible;
-}
-
-@media (min-width: 701px) { .heroBadge { height: 420px; } }
-
-@media (max-width: 900px) and (min-width: 701px) {
-  .heroBadge { height: 330px; overflow: hidden; }
-  .heroBadge > div {
-    transform: scale(0.78);
-    transform-origin: top center;
-    position: absolute;
-    top: 0;
-  }
-}
-
-@media (max-width: 700px) {
-  .heroBadge { height: auto; overflow: visible; margin-bottom: 24px; }
-}
 
 .heroTitle {
   font-family: var(--font-display);
@@ -158,10 +130,10 @@
 
 .heroSearchInput {
   width: 100%;
-  background: rgba(255,255,255,0.04);
+  background: var(--surface);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1.5px solid rgba(255,255,255,0.10);
+  border: 1.5px solid var(--border);
   border-radius: 100px;
   padding: 16px 24px 16px 52px;
   font-size: 15px;
@@ -171,9 +143,9 @@
 }
 
 .heroSearchInput:focus {
-  border-color: rgba(99,179,237,0.5);
-  background: rgba(255,255,255,0.07);
-  box-shadow: 0 0 0 4px rgba(99,179,237,0.12), 0 8px 32px rgba(0,0,0,0.2);
+  border-color: var(--accent);
+  background: var(--surface2);
+  box-shadow: 0 0 0 4px var(--accent-glow), 0 8px 32px rgba(0,0,0,0.1);
 }
 
 .heroSearchInput::placeholder { color: var(--text3); }
@@ -210,7 +182,7 @@
 .clearRecentBtn {
   margin-left: auto;
   background: none;
-  border: 1px solid rgba(255,255,255,0.10);
+  border: 1px solid var(--border);
   border-radius: 100px;
   color: var(--text3);
   font-size: 11px;
@@ -238,11 +210,11 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  background: rgba(255,255,255,0.045);
+  background: var(--surface);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255,255,255,0.10);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 4px 16px rgba(0,0,0,0.2);
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
   border-radius: var(--radius);
   padding: 13px 15px;
   text-decoration: none;
@@ -255,16 +227,16 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(99,179,237,0.10) 0%, rgba(167,139,250,0.07) 100%);
+  background: linear-gradient(135deg, var(--accent-glow) 0%, var(--purple-glow) 100%);
   opacity: 0;
   transition: opacity 0.22s;
 }
 
 .popularCard:hover {
-  border-color: rgba(99,179,237,0.35);
+  border-color: var(--border2);
   transform: translateY(-2px);
-  background: rgba(255,255,255,0.07);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 10px 32px rgba(0,0,0,0.35), 0 0 0 1px rgba(99,179,237,0.15);
+  background: var(--surface2);
+  box-shadow: 0 10px 32px rgba(0,0,0,0.12), 0 0 0 1px var(--accent-glow2);
 }
 
 .popularCard:hover::before { opacity: 1; }
@@ -281,17 +253,17 @@
   padding: 7px 16px;
   font-size: 13px;
   font-weight: 500;
-  background: rgba(255,255,255,0.04);
+  background: var(--surface);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255,255,255,0.08);
+  border: 1px solid var(--border);
   border-radius: 100px;
   color: var(--text2);
   cursor: pointer;
   transition: all 0.2s;
 }
 
-.catTab:hover { border-color: rgba(99,179,237,0.3); color: var(--text); background: rgba(99,179,237,0.07); }
+.catTab:hover { border-color: var(--border2); color: var(--text); background: var(--accent-glow2); }
 
 .catActive {
   background: rgba(99,179,237,0.12) !important;
@@ -308,13 +280,11 @@
 
 /* ─── GLASS TOOL CARD ─── */
 .toolCard {
-  background: rgba(255,255,255,0.042);
+  background: var(--surface);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255,255,255,0.09);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.10),
-    0 4px 16px rgba(0,0,0,0.25);
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
   border-radius: var(--radius-lg);
   text-decoration: none;
   transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
@@ -353,14 +323,13 @@
 }
 
 .toolCard:not(.coming):hover {
-  background: rgba(255,255,255,0.068);
-  border-color: rgba(99,179,237,0.28);
+  background: var(--surface2);
+  border-color: var(--border2);
   transform: translateY(-3px);
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.16),
-    0 16px 40px rgba(0,0,0,0.40),
-    0 0 0 1px rgba(99,179,237,0.10),
-    0 0 28px rgba(99,179,237,0.07);
+    0 16px 40px rgba(0,0,0,0.12),
+    0 0 0 1px var(--accent-glow2),
+    0 0 28px var(--accent-glow2);
 }
 
 .toolCard:not(.coming):hover::before { opacity: 1; }
@@ -370,9 +339,10 @@
 
 .toolCard.coming {
   cursor: default;
-  background: rgba(255,255,255,0.015);
-  border: 1px dashed rgba(255,255,255,0.06);
+  background: var(--surface);
+  border: 1px dashed var(--border);
   box-shadow: none;
+  opacity: 0.6;
 }
 .toolCard.coming::before { opacity: 0.2; }
 
@@ -400,11 +370,10 @@
 .toolIconWrap {
   width: 40px; height: 40px;
   border-radius: 11px;
-  background: rgba(255,255,255,0.07);
+  background: var(--surface2);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255,255,255,0.10);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
+  border: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -419,8 +388,8 @@
 }
 
 .coming .toolIconWrap {
-  background: rgba(255,255,255,0.025);
-  border-color: rgba(255,255,255,0.05);
+  background: var(--surface);
+  border-color: var(--border);
   box-shadow: none;
 }
 
@@ -460,8 +429,8 @@
   text-transform: uppercase;
   letter-spacing: 0.8px;
   color: var(--text3);
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.07);
+  background: var(--surface);
+  border: 1px solid var(--border);
   padding: 3px 9px 3px 7px;
   border-radius: 100px;
 }
@@ -488,8 +457,8 @@
   gap: 6px;
   padding: 7px 16px;
   border-radius: 100px;
-  border: 1px solid rgba(255,255,255,0.08);
-  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  background: var(--surface);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   color: var(--text2);
@@ -501,9 +470,9 @@
 }
 
 .statusTab:hover {
-  border-color: rgba(167,139,250,0.35);
+  border-color: var(--purple2);
   color: var(--text);
-  background: rgba(167,139,250,0.07);
+  background: var(--purple-glow);
 }
 
 .statusActive {
@@ -564,4 +533,167 @@
 @media (max-width: 400px) {
   .toolsGrid   { grid-template-columns: repeat(2, 1fr); gap: 8px; }
   .popularGrid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+}
+
+/* ── PRO FEATURES SECTION ── */
+.proSection {
+  margin: 36px 0 48px;
+}
+
+.proSectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.proCrownIcon { font-size: 20px; }
+
+.proSectionTitle {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.proSectionBadge {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #000;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  padding: 2px 8px;
+  border-radius: 100px;
+}
+
+.proSectionSub {
+  font-size: 13.5px;
+  color: var(--text2);
+  margin-bottom: 20px;
+}
+
+.proGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+.proCard {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: rgba(245, 158, 11, 0.04);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  border-radius: 16px;
+  padding: 20px 22px;
+  text-decoration: none;
+  overflow: hidden;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow:
+    inset 0 1px 0 rgba(245, 158, 11, 0.12),
+    0 4px 20px rgba(0, 0, 0, 0.25);
+}
+
+.proCard:hover {
+  border-color: rgba(245, 158, 11, 0.55);
+  background: rgba(245, 158, 11, 0.07);
+  transform: translateY(-2px);
+  box-shadow:
+    inset 0 1px 0 rgba(245, 158, 11, 0.2),
+    0 12px 36px rgba(0, 0, 0, 0.35),
+    0 0 0 1px rgba(245, 158, 11, 0.2),
+    0 0 32px rgba(245, 158, 11, 0.08);
+}
+
+.proCardGlow {
+  position: absolute;
+  top: -40px; right: -40px;
+  width: 160px; height: 160px;
+  background: radial-gradient(circle, rgba(245, 158, 11, 0.12) 0%, transparent 70%);
+  pointer-events: none;
+  border-radius: 50%;
+}
+
+.proCardInner {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  flex: 1;
+  position: relative;
+  z-index: 1;
+}
+
+.proIconWrap {
+  width: 48px; height: 48px;
+  border-radius: 13px;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.1);
+}
+
+.proIcon { font-size: 24px; }
+
+.proCardContent { flex: 1; }
+
+.proCardTop {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.proCardName {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  font-family: var(--font-display);
+}
+
+.proCardBadge {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #000;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  padding: 2px 7px;
+  border-radius: 100px;
+}
+
+.proCardDesc {
+  font-size: 12.5px;
+  color: var(--text2);
+  line-height: 1.5;
+  margin-bottom: 10px;
+}
+
+.proCardFeatures {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.proCardFeatures span {
+  font-size: 11px;
+  color: rgba(245, 158, 11, 0.8);
+  font-weight: 500;
+}
+
+.proCardArrow {
+  font-size: 18px;
+  color: rgba(245, 158, 11, 0.5);
+  position: relative;
+  z-index: 1;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.proCard:hover .proCardArrow {
+  color: rgba(245, 158, 11, 0.9);
+  transform: translateX(4px);
+}
+
+@media (max-width: 640px) {
+  .proGrid { grid-template-columns: 1fr; }
 }

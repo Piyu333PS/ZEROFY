@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { CATEGORIES, TOOLS, POPULAR_TOOLS } from '../tools/toolsData'
 import styles from './HomePage.module.css'
-import ZerofyLogoAnimation from '../components/ZerofyLogoAnimation'
 
 const RECENT_TOOLS_KEY = 'zerofy_recent_tools'
 const MAX_RECENT = 8
@@ -118,9 +117,6 @@ export default function HomePage() {
       <section className={styles.hero}>
         <div className={styles.heroGlow} />
         <div className="page-wrapper">
-          <div className={styles.heroBadge}>
-            <ZerofyLogoAnimation />
-          </div>
           <div className={`${styles.heroEyebrow} fade-up`}>
             <span className={styles.eyebrowDot} />
             All-in-one productivity platform
@@ -144,6 +140,51 @@ export default function HomePage() {
 
         </div>
       </section>
+
+
+      {/* Pro Features Section */}
+      <div className="page-wrapper">
+        <section className={styles.proSection}>
+          <div className={styles.proSectionHeader}>
+            <span className={styles.proCrownIcon}>👑</span>
+            <h2 className={styles.proSectionTitle}>Professional Suite</h2>
+            <span className={styles.proSectionBadge}>PRO</span>
+          </div>
+          <p className={styles.proSectionSub}>Powerful tools built for professionals — create, manage, and deliver.</p>
+          <div className={styles.proGrid}>
+            <Link to="/tools/invoice-maker" className={styles.proCard} onClick={() => trackToolUsage("invoice-maker")}>
+              <div className={styles.proCardGlow} />
+              <div className={styles.proCardInner}>
+                <div className={styles.proIconWrap}><span className={styles.proIcon}>🧾</span></div>
+                <div className={styles.proCardContent}>
+                  <div className={styles.proCardTop}>
+                    <span className={styles.proCardName}>Invoice Maker</span>
+                    <span className={styles.proCardBadge}>PRO</span>
+                  </div>
+                  <p className={styles.proCardDesc}>Generate professional GST invoices instantly. Download as PDF, share with clients.</p>
+                  <div className={styles.proCardFeatures}><span>✓ GST ready</span><span>✓ PDF export</span><span>✓ Custom branding</span></div>
+                </div>
+              </div>
+              <div className={styles.proCardArrow}>→</div>
+            </Link>
+            <Link to="/tools/resume-builder" className={styles.proCard} onClick={() => trackToolUsage("resume-builder")}>
+              <div className={styles.proCardGlow} />
+              <div className={styles.proCardInner}>
+                <div className={styles.proIconWrap}><span className={styles.proIcon}>📄</span></div>
+                <div className={styles.proCardContent}>
+                  <div className={styles.proCardTop}>
+                    <span className={styles.proCardName}>Resume Builder</span>
+                    <span className={styles.proCardBadge}>PRO</span>
+                  </div>
+                  <p className={styles.proCardDesc}>Build stunning resumes with professional templates. ATS-friendly, download-ready.</p>
+                  <div className={styles.proCardFeatures}><span>✓ ATS friendly</span><span>✓ Multiple templates</span><span>✓ PDF export</span></div>
+                </div>
+              </div>
+              <div className={styles.proCardArrow}>→</div>
+            </Link>
+          </div>
+        </section>
+      </div>
 
       <div className="page-wrapper">
         {/* Popular / Recently Used Tools */}

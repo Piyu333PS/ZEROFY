@@ -108,18 +108,18 @@ function ComingSoon({ name }) {
 
 
 
-function AppInner({ theme, toggleTheme }) {
+function AppInner() {
   useBackButton()
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <Navbar theme={theme} toggleTheme={toggleTheme} />
+      <Navbar />
       <main style={{ flex: 1 }}>
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/all-tools" element={<HomePage />} />
           <Route path="/pricing" element={<PricingPage />} />
-          <Route path="/settings" element={<SettingsPage theme={theme} toggleTheme={toggleTheme} />} />
+          <Route path="/settings" element={<SettingsPage />} />
           <Route path="/billing" element={<BillingPage />} />
           <Route path="/refund" element={<RefundPage />} />
           <Route path="/contact" element={<ContactPage />} />
@@ -229,22 +229,16 @@ function AppInner({ theme, toggleTheme }) {
 export default function App() {
   const [showSplash, setShowSplash] = useState(true)
 
-  const [theme, setTheme] = useState(() => {
-    return localStorage.getItem('zerofy-theme') || 'dark'
-  })
-
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme)
-    localStorage.setItem('zerofy-theme', theme)
-  }, [theme])
-
-  const toggleTheme = () => setTheme(t => t === 'dark' ? 'light' : 'dark')
+    document.documentElement.setAttribute('data-theme', 'dark')
+    localStorage.setItem('zerofy-theme', 'dark')
+  }, [])
 
   return (
     <BrowserRouter>
       <AuthProvider>
         {showSplash && <SplashScreen onDone={() => setShowSplash(false)} />}
-        <AppInner theme={theme} toggleTheme={toggleTheme} />
+        <AppInner />
       </AuthProvider>
     </BrowserRouter>
   )

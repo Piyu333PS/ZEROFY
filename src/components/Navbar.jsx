@@ -68,7 +68,7 @@ function UserDropdown({ user, logout, onClose, navigate }) {
   )
 }
 
-export default function Navbar({ theme, toggleTheme }) {
+export default function Navbar() {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState([])
   const [menuOpen, setMenuOpen] = useState(false)
@@ -180,9 +180,6 @@ export default function Navbar({ theme, toggleTheme }) {
               </div>
             )}
 
-            <button className={styles.themeBtn} onClick={toggleTheme} aria-label="Toggle theme">
-              {theme === 'dark' ? '☀️' : '🌙'}
-            </button>
           </div>
 
           {/* Mobile Actions */}

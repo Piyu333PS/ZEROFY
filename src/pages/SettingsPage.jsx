@@ -104,29 +104,6 @@ export default function SettingsPage({ theme, toggleTheme }) {
           <p style={{ color: 'var(--text2)', fontSize: 14, marginTop: 6 }}>{user.email}</p>
         </div>
 
-        {/* Theme Toggle */}
-        <div style={cardStyle}>
-          <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 16, marginTop: 0 }}>🎨 Appearance</h2>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div>
-              <div style={{ fontSize: 14, color: 'var(--text)', fontWeight: 500 }}>Theme</div>
-              <div style={{ fontSize: 12, color: 'var(--text3)', marginTop: 2 }}>
-                Currently: {theme === 'dark' ? '🌙 Dark' : '☀️ Light'}
-              </div>
-            </div>
-            <button
-              onClick={toggleTheme}
-              style={{
-                padding: '9px 20px', borderRadius: 10, border: '1px solid var(--border2)',
-                background: 'var(--surface)', color: 'var(--text)', cursor: 'pointer',
-                fontSize: 14, fontWeight: 600
-              }}
-            >
-              {theme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode'}
-            </button>
-          </div>
-        </div>
-
         {/* Change Email */}
         <div style={cardStyle}>
           <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 20, marginTop: 0 }}>📧 Change Email</h2>
