@@ -152,35 +152,25 @@ function parseXMLItems(xml, src) {
 }
 
 async function fetchRSSFeed(src) {
-  const proxies = [
-    // Proxy 1: allorigins raw (most reliable in prod)
-    async () => {
-      const r = await fetch(
-        `https://api.allorigins.win/raw?url=${encodeURIComponent(src.feedUrl)}`,
-        { signal: AbortSignal.timeout(12000) }
-      )
-      if (!r.ok) throw new Error(`HTTP ${r.status}`)
-      const xml = await r.text()
-      return parseXMLItems(xml, src)
-    },
-    // Proxy 2: allorigins JSON wrapper
-    async () => {
-      const r = await fetch(
-        `https://api.allorigins.win/get?url=${encodeURIComponent(src.feedUrl)}`,
-        { signal: AbortSignal.timeout(12000) }
-      )
-      if (!r.ok) throw new Error(`HTTP ${r.status}`)
-      const data = await r.json()
-      if (!data.contents) throw new Error('No contents')
-      return parseXMLItems(data.contents, src)
-    },
-    // Proxy 3: rss2json (reliable fallback)
-    async () => {
-      const r = await fetch(
+  // Use our own Vercel API route — no CORS issues in production
+  const apiUrl = `/api/rss?url=${encodeURIComponent(src.feedUrl)}`
+
+  try {
+    const r = await fetch(apiUrl, { signal: AbortSignal.timeout(15000) })
+    if (!r.ok) throw new Error(`API returned ${r.status}`)
+    const xml = await r.text()
+    const items = parseXMLItems(xml, src)
+    if (items.length > 0) return items
+    throw new Error('No items parsed')
+  } catch (e) {
+    console.warn(`API fetch failed for ${src.name}:`, e.message)
+    // Fallback: rss2json (works without CORS)
+    try {
+      const r2 = await fetch(
         `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(src.feedUrl)}&count=50`,
-        { signal: AbortSignal.timeout(12000) }
+        { signal: AbortSignal.timeout(15000) }
       )
-      const data = await r.json()
+      const data = await r2.json()
       if (!data.items?.length) throw new Error('No items')
       return data.items.map(item => ({
         ...item,
@@ -188,38 +178,11 @@ async function fetchRSSFeed(src) {
         sourceColor: src.color,
         lastDate: extractLastDate(item.title || '', item.description || ''),
       }))
-    },
-    // Proxy 4: corsproxy.io
-    async () => {
-      const r = await fetch(
-        `https://corsproxy.io/?${encodeURIComponent(src.feedUrl)}`,
-        { signal: AbortSignal.timeout(12000) }
-      )
-      if (!r.ok) throw new Error(`HTTP ${r.status}`)
-      const xml = await r.text()
-      return parseXMLItems(xml, src)
-    },
-    // Proxy 5: thingproxy
-    async () => {
-      const r = await fetch(
-        `https://thingproxy.freeboard.io/fetch/${src.feedUrl}`,
-        { signal: AbortSignal.timeout(12000) }
-      )
-      if (!r.ok) throw new Error(`HTTP ${r.status}`)
-      const xml = await r.text()
-      return parseXMLItems(xml, src)
-    },
-  ]
-
-  for (const proxy of proxies) {
-    try {
-      const items = await proxy()
-      if (items.length > 0) return items
-    } catch (e) {
-      console.warn(`Proxy failed for ${src.name}:`, e.message)
+    } catch (e2) {
+      console.warn(`Fallback also failed for ${src.name}:`, e2.message)
+      throw new Error(`All methods failed for ${src.name}`)
     }
   }
-  throw new Error(`All proxies failed for ${src.name}`)
 }
 
 
@@ -388,14 +351,10 @@ export default function GovtJobsPage() {
         .filter(isJobActive)
 
       if (allJobs.length === 0 && successCount === 0) {
-        setError('Unable to load jobs right now. This may be due to network restrictions. Please try again in a moment.')
+        setError('All sources failed to load. Please check your internet connection and try again.')
       } else {
         setJobs(allJobs)
         setLastUpdated(new Date())
-        // Show partial warning if some sources failed
-        if (successCount < RSS_SOURCES.length && successCount > 0) {
-          console.info(`Loaded from ${successCount}/${RSS_SOURCES.length} sources`)
-        }
       }
     } catch {
       setError('Could not load jobs. Please check your internet connection.')
