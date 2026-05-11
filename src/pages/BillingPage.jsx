@@ -15,6 +15,8 @@ export default function BillingPage() {
   const navigate = useNavigate()
   const [info, setInfo] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [cancelLoading, setCancelLoading] = useState(false) // 🆕
+  const [cancelMsg, setCancelMsg] = useState('')            // 🆕
 
   useEffect(() => {
     if (!token) { navigate('/'); return }
@@ -40,6 +42,32 @@ export default function BillingPage() {
     const diff = new Date(expiry) - new Date()
     return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)))
   }
+
+  // 🆕 Auto Pay cancel handler
+  const handleCancelAutoP = async () => {
+    if (!window.confirm('Auto Pay cancel karna chahte ho? Expiry tak Pro access rahega.')) return
+    setCancelLoading(true)
+    setCancelMsg('')
+    try {
+      const res = await fetch(`${API}/api/payment/cancel-subscription`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
+      })
+      const data = await res.json()
+      if (res.ok && data.success) {
+        setCancelMsg(data.message)
+        setInfo(prev => ({ ...prev, subscriptionStatus: 'cancelled' }))
+      } else {
+        setCancelMsg(data.error || 'Kuch error aaya, dobara try karo.')
+      }
+    } catch {
+      setCancelMsg('Network error. Please try again.')
+    }
+    setCancelLoading(false)
+  }
+
+  const isAutoActive = info?.subscriptionStatus === 'active'
+  const isHalted = info?.subscriptionStatus === 'halted'
 
   const cardStyle = {
     background: 'var(--bg2, #1a1a2e)',
@@ -87,20 +115,43 @@ export default function BillingPage() {
                     </div>
                   )}
                 </div>
-                <div style={{
-                  padding: '5px 14px', borderRadius: 100, fontSize: 12, fontWeight: 700,
-                  background: info?.isPro ? 'rgba(251,191,36,0.12)' : 'rgba(148,163,184,0.1)',
-                  color: info?.isPro ? '#fbbf24' : 'var(--text3)',
-                  border: `1px solid ${info?.isPro ? 'rgba(251,191,36,0.3)' : 'rgba(148,163,184,0.2)'}`,
-                }}>
-                  {info?.isPro ? '✦ Active' : 'Free'}
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
+                  <div style={{
+                    padding: '5px 14px', borderRadius: 100, fontSize: 12, fontWeight: 700,
+                    background: info?.isPro ? 'rgba(251,191,36,0.12)' : 'rgba(148,163,184,0.1)',
+                    color: info?.isPro ? '#fbbf24' : 'var(--text3)',
+                    border: `1px solid ${info?.isPro ? 'rgba(251,191,36,0.3)' : 'rgba(148,163,184,0.2)'}`,
+                  }}>
+                    {info?.isPro ? '✦ Active' : 'Free'}
+                  </div>
+                  {/* 🆕 Auto Pay badge */}
+                  {isAutoActive && (
+                    <div style={{
+                      padding: '4px 12px', borderRadius: 100, fontSize: 11, fontWeight: 700,
+                      background: 'rgba(52,211,153,0.12)', color: '#34D399',
+                      border: '1px solid rgba(52,211,153,0.3)',
+                    }}>
+                      🔄 Auto Pay On
+                    </div>
+                  )}
+                  {isHalted && (
+                    <div style={{
+                      padding: '4px 12px', borderRadius: 100, fontSize: 11, fontWeight: 700,
+                      background: 'rgba(248,113,113,0.12)', color: '#F87171',
+                      border: '1px solid rgba(248,113,113,0.3)',
+                    }}>
+                      ⚠️ Payment Failed
+                    </div>
+                  )}
                 </div>
               </div>
 
               {info?.isPro && info?.proExpiry && (
                 <div style={{ marginTop: 20, display: 'flex', gap: 16, flexWrap: 'wrap' }}>
                   <div style={{ background: 'rgba(255,255,255,0.04)', borderRadius: 10, padding: '12px 16px', flex: 1, minWidth: 120 }}>
-                    <div style={{ fontSize: 11, color: 'var(--text3)', marginBottom: 4 }}>Expires On</div>
+                    <div style={{ fontSize: 11, color: 'var(--text3)', marginBottom: 4 }}>
+                      {isAutoActive ? 'Next Renewal' : 'Expires On'}
+                    </div>
                     <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{formatDate(info.proExpiry)}</div>
                   </div>
                   <div style={{ background: 'rgba(255,255,255,0.04)', borderRadius: 10, padding: '12px 16px', flex: 1, minWidth: 120 }}>
@@ -109,6 +160,37 @@ export default function BillingPage() {
                       {daysLeft(info.proExpiry)} days
                     </div>
                   </div>
+                </div>
+              )}
+
+              {/* 🆕 Auto Pay cancel button */}
+              {isAutoActive && (
+                <div style={{ marginTop: 16 }}>
+                  <button
+                    onClick={handleCancelAutoP}
+                    disabled={cancelLoading}
+                    style={{
+                      background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.25)',
+                      color: '#F87171', borderRadius: 10, padding: '9px 18px',
+                      fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                      opacity: cancelLoading ? 0.6 : 1,
+                    }}
+                  >
+                    {cancelLoading ? '⏳ Cancelling...' : '✕ Cancel Auto Pay'}
+                  </button>
+                  {cancelMsg && (
+                    <div style={{ marginTop: 10, fontSize: 13, color: '#34D399', lineHeight: 1.5 }}>
+                      ✓ {cancelMsg}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* 🆕 Halted state — payment update karo */}
+              {isHalted && (
+                <div style={{ marginTop: 16, padding: '12px 16px', background: 'rgba(248,113,113,0.08)', borderRadius: 10, fontSize: 13, color: '#F87171' }}>
+                  ⚠️ Last payment fail hua. UPI/Card update karo:
+                  <Link to="/pricing" style={{ color: '#60A5FA', marginLeft: 6 }}>Reactivate →</Link>
                 </div>
               )}
             </div>
@@ -155,6 +237,8 @@ export default function BillingPage() {
                 <div style={{ marginTop: 20, padding: '12px 16px', background: 'rgba(52,211,153,0.06)', borderRadius: 10, fontSize: 13, color: 'var(--text3)' }}>
                   {daysLeft(info?.proExpiry) <= 7 && daysLeft(info?.proExpiry) > 0 ? (
                     <span style={{ color: '#F87171' }}>⚠️ Plan {daysLeft(info?.proExpiry)} days left until expiry! <Link to="/pricing" style={{ color: '#60A5FA' }}>Renew Now →</Link></span>
+                  ) : isAutoActive ? (
+                    <span>🔄 Auto renew active — koi action nahi chahiye</span>
                   ) : (
                     <span>Plan renew karne ke liye <Link to="/pricing" style={{ color: '#60A5FA' }}>Pricing page pe jao →</Link></span>
                   )}
@@ -164,7 +248,7 @@ export default function BillingPage() {
               <div style={{ ...cardStyle, borderColor: 'rgba(167,139,250,0.25)', background: 'linear-gradient(135deg, rgba(96,165,250,0.04), rgba(167,139,250,0.06))' }}>
                 <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 8, marginTop: 0 }}>⚡ Upgrade to Pro</h2>
                 <p style={{ fontSize: 13, color: 'var(--text2)', marginBottom: 20, lineHeight: 1.6 }}>
-                  Unlimited invoices, all tools unlocked, no limits — starting at just ₹19/month.
+                  Unlimited invoices, all tools unlocked, no limits — starting at just ₹49/month.
                 </p>
                 <Link to="/pricing" style={{
                   display: 'inline-block', padding: '11px 28px', borderRadius: 12,

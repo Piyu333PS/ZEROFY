@@ -91,35 +91,46 @@ const faqs = [
   },
 ]
 
-const PLAN_AMOUNTS = { monthly: 49, quarterly: 129, yearly: 399 }
-const PLAN_DAYS = { monthly: 30, quarterly: 90, yearly: 365 }
-
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000'
+
+// Razorpay script ek baar load karo
+const loadRazorpay = () => new Promise((resolve, reject) => {
+  if (window.Razorpay) return resolve()
+  const s = document.createElement('script')
+  s.src = 'https://checkout.razorpay.com/v1/checkout.js'
+  s.onload = resolve
+  s.onerror = () => reject(new Error('Failed to load payment gateway'))
+  document.head.appendChild(s)
+})
 
 export default function PricingPage() {
   const [openFaq, setOpenFaq] = useState(null)
-  const [payLoading, setPayLoading] = useState(null) // planId jo process ho raha hai
+  const [payLoading, setPayLoading] = useState(null)
   const [payError, setPayError] = useState('')
   const [showAuthPrompt, setShowAuthPrompt] = useState(false)
   const [pendingPlan, setPendingPlan] = useState(null)
+  const [autoPayEnabled, setAutoPayEnabled] = useState(true) // 🆕 Auto Pay toggle
   const navigate = useNavigate()
   const { token, user } = useAuth()
 
   const handlePlanClick = async (planId) => {
-    // Agar login nahi hai to login prompt dikhao
     if (!token) {
       setPendingPlan(planId)
       setShowAuthPrompt(true)
       return
     }
-    await startPayment(planId)
+    if (autoPayEnabled) {
+      await startAutoPayment(planId)
+    } else {
+      await startPayment(planId)
+    }
   }
 
+  // ─── Manual (one-time) payment — purana code same ───────────────
   const startPayment = async (planId) => {
     setPayLoading(planId)
     setPayError('')
     try {
-      // 1. Backend se order create karo
       const orderRes = await fetch(`${API}/api/payment/create-order`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
@@ -128,18 +139,8 @@ export default function PricingPage() {
       const orderData = await orderRes.json()
       if (!orderRes.ok) throw new Error(orderData.error || 'Failed to create order')
 
-      // 2. Razorpay script load karo agar nahi hai
-      if (!window.Razorpay) {
-        await new Promise((resolve, reject) => {
-          const s = document.createElement('script')
-          s.src = 'https://checkout.razorpay.com/v1/checkout.js'
-          s.onload = resolve
-          s.onerror = () => reject(new Error('Failed to load payment gateway'))
-          document.head.appendChild(s)
-        })
-      }
+      await loadRazorpay()
 
-      // 3. Razorpay checkout kholo
       const rzp = new window.Razorpay({
         key: orderData.keyId,
         amount: orderData.amount,
@@ -149,7 +150,6 @@ export default function PricingPage() {
         order_id: orderData.orderId,
         theme: { color: '#8B7FFF' },
         handler: async (response) => {
-          // 4. Payment verify karo
           const verifyRes = await fetch(`${API}/api/payment/verify`, {
             method: 'POST',
             headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
@@ -162,11 +162,66 @@ export default function PricingPage() {
           })
           const verifyData = await verifyRes.json()
           if (verifyRes.ok && verifyData.success) {
-            // Success! Home pe bhejo ya current page reload karo
             alert('🎉 ' + verifyData.message)
             navigate('/')
           } else {
             setPayError('Payment verification failed. Please contact support.')
+          }
+          setPayLoading(null)
+        },
+        modal: { ondismiss: () => setPayLoading(null) }
+      })
+      rzp.on('payment.failed', (r) => {
+        setPayError(r.error?.description || 'Payment fail ho gayi.')
+        setPayLoading(null)
+      })
+      rzp.open()
+    } catch (err) {
+      setPayError(err.message || 'Something went wrong. Please try again.')
+      setPayLoading(null)
+    }
+  }
+
+  // ─── 🆕 Auto Pay (subscription) payment ─────────────────────────
+  const startAutoPayment = async (planId) => {
+    setPayLoading(planId)
+    setPayError('')
+    try {
+      // 1. Subscription create karo backend pe
+      const subRes = await fetch(`${API}/api/payment/create-subscription`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ planId })
+      })
+      const subData = await subRes.json()
+      if (!subRes.ok) throw new Error(subData.error || 'Subscription create nahi hua')
+
+      await loadRazorpay()
+
+      // 2. Razorpay subscription checkout kholo
+      const rzp = new window.Razorpay({
+        key: subData.keyId,
+        subscription_id: subData.subscriptionId,  // order_id ki jagah subscription_id
+        name: 'Zerofy Pro',
+        description: `${subData.planName} — Auto Pay`,
+        theme: { color: '#8B7FFF' },
+        handler: async (response) => {
+          // 3. Pehli payment verify karo
+          const verifyRes = await fetch(`${API}/api/payment/verify-subscription`, {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_subscription_id: response.razorpay_subscription_id,
+              razorpay_signature: response.razorpay_signature,
+            })
+          })
+          const verifyData = await verifyRes.json()
+          if (verifyRes.ok && verifyData.success) {
+            alert('🎉 ' + verifyData.message)
+            navigate('/')
+          } else {
+            setPayError('Subscription verification failed. Please contact support.')
           }
           setPayLoading(null)
         },
@@ -256,11 +311,62 @@ export default function PricingPage() {
           color: 'var(--text2, #94a3b8)',
           fontSize: 17,
           maxWidth: 460,
-          margin: '0 auto',
+          margin: '0 auto 28px',
           lineHeight: 1.65,
         }}>
           One Pro plan. Three flexible billing options. No hidden fees, no surprises.
         </p>
+
+        {/* 🆕 Auto Pay Toggle */}
+        <div style={{
+          display: 'inline-flex', alignItems: 'center', gap: 12,
+          background: 'rgba(255,255,255,0.04)',
+          border: '1px solid rgba(255,255,255,0.1)',
+          borderRadius: 100, padding: '8px 20px',
+        }}>
+          <span style={{ fontSize: 13, color: autoPayEnabled ? 'var(--text2)' : '#f1f5f9', fontWeight: autoPayEnabled ? 400 : 600 }}>
+            One-time
+          </span>
+
+          {/* Toggle switch */}
+          <div
+            onClick={() => setAutoPayEnabled(!autoPayEnabled)}
+            style={{
+              width: 44, height: 24, borderRadius: 12, cursor: 'pointer',
+              background: autoPayEnabled ? '#8B7FFF' : 'rgba(255,255,255,0.15)',
+              position: 'relative', transition: 'background 0.2s', flexShrink: 0,
+            }}
+          >
+            <div style={{
+              position: 'absolute', top: 3,
+              left: autoPayEnabled ? 23 : 3,
+              width: 18, height: 18, borderRadius: '50%',
+              background: '#fff', transition: 'left 0.2s',
+            }} />
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ fontSize: 13, color: autoPayEnabled ? '#f1f5f9' : 'var(--text2)', fontWeight: autoPayEnabled ? 600 : 400 }}>
+              Auto Pay
+            </span>
+            {autoPayEnabled && (
+              <span style={{
+                fontSize: 11, fontWeight: 700, padding: '2px 8px',
+                borderRadius: 100, background: 'rgba(52,211,153,0.15)',
+                color: '#34D399', border: '1px solid rgba(52,211,153,0.3)',
+              }}>
+                Recommended
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Auto Pay info */}
+        {autoPayEnabled && (
+          <div style={{ marginTop: 12, fontSize: 12, color: '#64748b' }}>
+            🔄 Automatically renews — cancel anytime from billing page
+          </div>
+        )}
       </div>
 
       {/* Plans Grid */}
@@ -327,7 +433,7 @@ export default function PricingPage() {
                 {plan.name}
               </div>
               <div style={{ color: 'var(--text2, #94a3b8)', fontSize: 13, lineHeight: 1.5 }}>
-                {plan.desc}
+                {autoPayEnabled ? `Auto renews every ${plan.period.replace('/', '')}` : plan.desc}
               </div>
             </div>
 
@@ -371,7 +477,9 @@ export default function PricingPage() {
               onMouseEnter={e => { e.currentTarget.style.opacity = '0.85'; e.currentTarget.style.transform = 'scale(0.98)' }}
               onMouseLeave={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.transform = 'scale(1)' }}
             >
-              {payLoading === plan.id ? '⏳ Processing...' : plan.cta}
+              {payLoading === plan.id
+                ? '⏳ Processing...'
+                : autoPayEnabled ? `🔄 Start Auto Pay` : plan.cta}
             </button>
 
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 11 }}>
