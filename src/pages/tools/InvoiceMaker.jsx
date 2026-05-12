@@ -21951,6 +21951,54 @@ const GOODS_HSN = [
   { hsn: "86090090", desc: "Other", gst: 12 }
 ]
 
+/* ─── UQC Codes ──────────────────────────────────────────────── */
+const UQC_CODES = [
+  { code: 'BAG', label: 'BAGS' },
+  { code: 'BAL', label: 'BALE' },
+  { code: 'BDL', label: 'BUNDLES' },
+  { code: 'BKL', label: 'BUCKLES' },
+  { code: 'BOU', label: 'BILLIONS OF UNITS' },
+  { code: 'BOX', label: 'BOX' },
+  { code: 'BTL', label: 'BOTTLES' },
+  { code: 'BUN', label: 'BUNCHES' },
+  { code: 'CAN', label: 'CANS' },
+  { code: 'CBM', label: 'CUBIC METER' },
+  { code: 'CCM', label: 'CUBIC CENTIMETER' },
+  { code: 'CMS', label: 'CENTIMETER' },
+  { code: 'CTN', label: 'CARTONS' },
+  { code: 'DOZ', label: 'DOZEN' },
+  { code: 'DRM', label: 'DRUM' },
+  { code: 'GGR', label: 'GREAT GROSS' },
+  { code: 'GMS', label: 'GRAMS' },
+  { code: 'GRS', label: 'GROSS' },
+  { code: 'GYD', label: 'GROSS YARDS' },
+  { code: 'KGS', label: 'KILOGRAMS' },
+  { code: 'KLR', label: 'KILOLITER' },
+  { code: 'KME', label: 'KILOMETRE' },
+  { code: 'MLT', label: 'MILLILITRE' },
+  { code: 'MTR', label: 'METERS' },
+  { code: 'MTS', label: 'METRIC TONS' },
+  { code: 'NOS', label: 'NUMBERS' },
+  { code: 'PAC', label: 'PACKS' },
+  { code: 'PCS', label: 'PIECES' },
+  { code: 'PKS', label: 'PAIRS' },
+  { code: 'QTL', label: 'QUINTAL' },
+  { code: 'ROL', label: 'ROLLS' },
+  { code: 'SET', label: 'SETS' },
+  { code: 'SQF', label: 'SQUARE FEET' },
+  { code: 'SQM', label: 'SQUARE METERS' },
+  { code: 'SQY', label: 'SQUARE YARDS' },
+  { code: 'TBS', label: 'TABLETS' },
+  { code: 'TGM', label: 'TEN GROSS' },
+  { code: 'THD', label: 'THOUSANDS' },
+  { code: 'TON', label: 'TONNES' },
+  { code: 'TUB', label: 'TUBES' },
+  { code: 'UGS', label: 'US GALLONS' },
+  { code: 'UNT', label: 'UNITS' },
+  { code: 'YDS', label: 'YARDS' },
+  { code: 'OTH', label: 'OTHERS' },
+]
+
 const SERVICES_SAC = [
   { sac: "99", desc: "All Services", gst: 18 },
   { sac: "9954", desc: "Construction Services", gst: 18 },
@@ -22647,7 +22695,7 @@ const TEMPLATES = [
   { key: 'minimal', label: 'Minimal', accent: '#1a1a2e' },
 ]
 
-const defaultItem = () => ({ id: uid(), type: 'goods', hsnSac: '', desc: ``, qty: '', rate: '', gstRate: 18 })
+const defaultItem = () => ({ id: uid(), type: 'goods', hsnSac: '', desc: ``, qty: '', uqc: 'PCS', rate: '', gstRate: 18 })
 
 /* ─── CSS ────────────────────────────────────────────────────── */
 const CSS = `
@@ -22792,13 +22840,13 @@ select.inp option { background: #252338; color: #F0EEFF; }
 
 /* Items table */
 .items-head {
-  display: grid; grid-template-columns: 100px 1fr 90px 80px 60px 100px 32px;
-  gap: 8px; padding: 0 4px 8px; border-bottom: 2px solid rgba(139,127,255,0.3);
+  display: grid; grid-template-columns: 88px minmax(140px,1fr) 110px 88px 80px 64px 88px 32px;
+  gap: 6px; padding: 0 4px 8px; border-bottom: 2px solid rgba(139,127,255,0.3);
   font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #9A96C0;
 }
 .item-row {
-  display: grid; grid-template-columns: 100px 1fr 90px 80px 60px 100px 32px;
-  gap: 8px; align-items: start; margin-top: 8px; animation: fadeIn 0.2s ease;
+  display: grid; grid-template-columns: 88px minmax(140px,1fr) 110px 88px 80px 64px 88px 32px;
+  gap: 6px; align-items: start; margin-top: 8px; animation: fadeIn 0.2s ease;
   padding: 6px 4px; border-bottom: 1px solid rgba(255,255,255,0.06); border-radius: 6px;
   transition: background 0.12s;
 }
@@ -23106,7 +23154,9 @@ function Preview({ inv, items, currency, discPct, taxPct, template, status }) {
           )}
           <div style={{ marginTop: 6, display: 'flex', flexDirection: 'column', gap: 2 }}>
             {inv.bizPhone && <div style={{ fontSize: 10.5, color: '#5A578A' }}>📞 {inv.bizPhone}</div>}
+            {inv.bizAltPhone && <div style={{ fontSize: 10.5, color: '#5A578A' }}>📞 {inv.bizAltPhone} <span style={{ fontSize: 9, color: '#9492C0' }}>(alt)</span></div>}
             {inv.bizEmail && <div style={{ fontSize: 10.5, color: '#5A578A' }}>✉ {inv.bizEmail}</div>}
+            {inv.bizAltEmail && <div style={{ fontSize: 10.5, color: '#5A578A' }}>✉ {inv.bizAltEmail} <span style={{ fontSize: 9, color: '#9492C0' }}>(alt)</span></div>}
             {inv.bizGst   && <div style={{ fontSize: 10.5, color: '#5A578A', fontWeight: 600 }}>GSTIN: {inv.bizGst}</div>}
           </div>
         </div>
@@ -23205,6 +23255,7 @@ function Preview({ inv, items, currency, discPct, taxPct, template, status }) {
               <th style={{ padding: '10px 12px', textAlign: 'left', color: '#fff', fontWeight: 700, fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.1em', width: 28 }}>#</th>
               <th style={{ padding: '10px 12px', textAlign: 'left', color: '#fff', fontWeight: 700, fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Description</th>
               <th style={{ padding: '10px 12px', textAlign: 'center', color: '#fff', fontWeight: 700, fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.1em', width: 70 }}>HSN/SAC</th>
+              <th style={{ padding: '10px 12px', textAlign: 'center', color: '#fff', fontWeight: 700, fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.1em', width: 50 }}>UQC</th>
               <th style={{ padding: '10px 12px', textAlign: 'center', color: '#fff', fontWeight: 700, fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.1em', width: 40 }}>Qty</th>
               <th style={{ padding: '10px 12px', textAlign: 'right', color: '#fff', fontWeight: 700, fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.1em', width: 90 }}>Rate</th>
               <th style={{ padding: '10px 12px', textAlign: 'center', color: '#fff', fontWeight: 700, fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.1em', width: 50 }}>GST%</th>
@@ -23235,6 +23286,7 @@ function Preview({ inv, items, currency, discPct, taxPct, template, status }) {
                     </div>
                   </td>
                   <td style={{ padding: '10px 12px', textAlign: 'center', fontFamily: 'monospace', fontSize: 10, color: '#6B6A9A' }}>{it.hsnSac || '—'}</td>
+                  <td style={{ padding: '10px 12px', textAlign: 'center', fontFamily: 'monospace', fontSize: 10, color: '#6B6A9A' }}>{it.uqc || 'PCS'}</td>
                   <td style={{ padding: '10px 12px', textAlign: 'center', fontWeight: 600 }}>{it.qty}</td>
                   <td style={{ padding: '10px 12px', textAlign: 'right', fontFamily: 'monospace', fontSize: 10.5 }}>{fmt(parseFloat(it.rate) || 0, currency)}</td>
                   <td style={{ padding: '10px 12px', textAlign: 'center', fontSize: 10 }}>
@@ -23350,7 +23402,7 @@ function Preview({ inv, items, currency, discPct, taxPct, template, status }) {
 
 /* ─── Business Modal ─────────────────────────────────────────── */
 function BizModal({ businesses, onSave, onClose }) {
-  const empty = { name: '', email: '', phone: '', gst: '', addr: '', prefix: 'INV' }
+  const empty = { name: '', email: '', phone: '', altPhone: '', altEmail: '', gst: '', addr: '', prefix: 'INV' }
   const [editing, setEditing] = useState(null)
   const [form, setForm] = useState(empty)
   const set = (k) => (e) => setForm(f => ({ ...f, [k]: e.target.value }))
@@ -23390,6 +23442,8 @@ function BizModal({ businesses, onSave, onClose }) {
               <div className="field"><label className="lbl">Phone</label><input className="inp" value={form.phone} onChange={set('phone')} placeholder="+91 98000 00000" /></div>
               <div className="field"><label className="lbl">GSTIN / PAN</label><input className="inp" value={form.gst} onChange={set('gst')} placeholder="22AAAAA0000A1Z5" /></div>
               <div className="field"><label className="lbl">Invoice Prefix</label><input className="inp" value={form.prefix} onChange={set('prefix')} placeholder="INV" /></div>
+              <div className="field"><label className="lbl">Alt. Phone <span style={{ fontSize: 9, color: 'var(--text3)' }}>(optional)</span></label><input className="inp" value={form.altPhone || ''} onChange={set('altPhone')} placeholder="+91 98000 00001" /></div>
+              <div className="field"><label className="lbl">Alt. Email <span style={{ fontSize: 9, color: 'var(--text3)' }}>(optional)</span></label><input className="inp" value={form.altEmail || ''} onChange={set('altEmail')} placeholder="alt@company.com" /></div>
             </div>
             <div className="field"><label className="lbl">Address</label><textarea className="inp" value={form.addr} onChange={set('addr')} placeholder="Street, City, State, PIN" /></div>
             <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
@@ -23680,7 +23734,7 @@ export default function InvoiceMaker() {
   }, [token])
 
   const [f, setF] = useState({
-    bizName: '', bizEmail: '', bizPhone: '', bizGst: '', bizAddr: '',
+    bizName: '', bizEmail: '', bizPhone: '', bizAltPhone: '', bizAltEmail: '', bizGst: '', bizAddr: '',
     clientName: '', clientEmail: '', clientPhone: '', clientGst: '', clientAddr: '',
     notes: '', date: today(),
   })
@@ -23708,7 +23762,7 @@ export default function InvoiceMaker() {
     setActiveBizId(id)
     const biz = businesses.find(b => b.id === id)
     if (!biz) return
-    setF(p => ({ ...p, bizName: biz.name, bizEmail: biz.email || '', bizPhone: biz.phone || '', bizGst: biz.gst || '', bizAddr: biz.addr || '' }))
+    setF(p => ({ ...p, bizName: biz.name, bizEmail: biz.email || '', bizPhone: biz.phone || '', bizAltPhone: biz.altPhone || '', bizAltEmail: biz.altEmail || '', bizGst: biz.gst || '', bizAddr: biz.addr || '' }))
     setInvNo(genInvNo(biz))
   }
 
@@ -23772,7 +23826,7 @@ export default function InvoiceMaker() {
       bizId: activeBizId, bizName: f.bizName,
       clientName: f.clientName, clientEmail: f.clientEmail,
       clientAddr: f.clientAddr, clientPhone: f.clientPhone, clientGst: f.clientGst,
-      bizEmail: f.bizEmail, bizPhone: f.bizPhone, bizAddr: f.bizAddr, bizGst: f.bizGst,
+      bizEmail: f.bizEmail, bizPhone: f.bizPhone, bizAltPhone: f.bizAltPhone || '', bizAltEmail: f.bizAltEmail || '', bizAddr: f.bizAddr, bizGst: f.bizGst,
       date: f.date, notes: f.notes,
       total: fmt(total, currency),
       status: 'sent',
@@ -24056,6 +24110,8 @@ export default function InvoiceMaker() {
               <div className="field"><label className="lbl">Email</label><input className="inp" value={f.bizEmail} onChange={sf('bizEmail')} placeholder="hello@company.com" /></div>
               <div className="field"><label className="lbl">Phone</label><input className="inp" value={f.bizPhone} onChange={e => { const v = e.target.value.replace(/\D/g, '').slice(0, 10); setF(p => ({ ...p, bizPhone: v })) }} placeholder="10-digit number" maxLength={10} inputMode="numeric" pattern="[0-9]*" /></div>
               <div className="field"><label className="lbl">GSTIN / PAN</label><input className="inp" value={f.bizGst} onChange={sf('bizGst')} placeholder="22AAAAA0000A1Z5" /></div>
+              <div className="field"><label className="lbl">Alt. Phone <span style={{ fontSize: 9, color: 'var(--text3)' }}>(optional)</span></label><input className="inp" value={f.bizAltPhone} onChange={sf('bizAltPhone')} placeholder="+91 98000 00001" /></div>
+              <div className="field"><label className="lbl">Alt. Email <span style={{ fontSize: 9, color: 'var(--text3)' }}>(optional)</span></label><input className="inp" value={f.bizAltEmail} onChange={sf('bizAltEmail')} placeholder="alt@company.com" /></div>
               <div className="field"><label className="lbl">Address</label><textarea className="inp" rows={2} value={f.bizAddr} onChange={sf('bizAddr')} placeholder="Street, City, State, PIN" /></div>
             </div>
             <div className="ig-card">
@@ -24069,7 +24125,7 @@ export default function InvoiceMaker() {
           </div>
 
           {/* Items */}
-          <div className="ig-card">
+          <div className="ig-card" style={{ overflowX: 'auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
               <div className="sec-label" style={{ margin: 0 }}><span className="sec-dot" style={{ background: 'var(--yellow)' }} />Line Items</div>
               <button className="btn btn-sm btn-accent" onClick={() => setItems(p => [...p, defaultItem()])}>+ Add Item</button>
@@ -24079,6 +24135,7 @@ export default function InvoiceMaker() {
               <div>Description</div>
               <div>HSN / SAC</div>
               <div style={{ textAlign: 'center' }}>GST %</div>
+              <div style={{ textAlign: 'center' }}>UQC</div>
               <div style={{ textAlign: 'center' }}>Qty</div>
               <div style={{ textAlign: 'right' }}>Rate</div>
               <div />
@@ -24138,6 +24195,18 @@ export default function InvoiceMaker() {
                     placeholder="Custom %"
                     title="Type any GST rate manually"
                   />
+                </div>
+                {/* UQC */}
+                <div>
+                  <select className="inp" value={it.uqc || 'PCS'}
+                    onChange={e => updateItem(it.id, 'uqc', e.target.value)}
+                    style={{ textAlign: 'center', fontSize: 11, padding: '7px 4px' }}
+                    title="Unit Quantity Code"
+                  >
+                    {UQC_CODES.map(u => (
+                      <option key={u.code} value={u.code}>{u.code}</option>
+                    ))}
+                  </select>
                 </div>
                 {/* Qty */}
                 <div>
