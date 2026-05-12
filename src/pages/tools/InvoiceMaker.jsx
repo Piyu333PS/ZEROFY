@@ -22886,12 +22886,12 @@ select.inp option { background: #252338; color: #F0EEFF; }
 
 /* Items table */
 .items-head {
-  display: grid; grid-template-columns: 88px minmax(140px,1fr) 110px 88px 80px 64px 88px 32px;
+  display: grid; grid-template-columns: 88px minmax(140px,1fr) 110px 88px 80px 64px 88px 90px 32px;
   gap: 6px; padding: 0 4px 8px; border-bottom: 2px solid rgba(139,127,255,0.3);
   font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #9A96C0;
 }
 .item-row {
-  display: grid; grid-template-columns: 88px minmax(140px,1fr) 110px 88px 80px 64px 88px 32px;
+  display: grid; grid-template-columns: 88px minmax(140px,1fr) 110px 88px 80px 64px 88px 90px 32px;
   gap: 6px; align-items: start; margin-top: 8px; animation: fadeIn 0.2s ease;
   padding: 6px 4px; border-bottom: 1px solid rgba(255,255,255,0.06); border-radius: 6px;
   transition: background 0.12s;
@@ -23332,7 +23332,7 @@ function Preview({ inv, items, currency, discPct, taxPct, template, status }) {
                     </div>
                   </td>
                   <td style={{ padding: '10px 12px', textAlign: 'center', fontFamily: 'monospace', fontSize: 10, color: '#6B6A9A' }}>{it.hsnSac || '—'}</td>
-                  <td style={{ padding: '10px 12px', textAlign: 'center', fontFamily: 'monospace', fontSize: 10, color: '#6B6A9A' }}>{it.uqc || 'PCS'}</td>
+                  <td style={{ padding: '10px 12px', textAlign: 'center', fontFamily: 'monospace', fontSize: 10, color: '#6B6A9A' }}>{(UQC_CODES.find(u => u.code === it.uqc) || { label: 'PIECES' }).label}</td>
                   <td style={{ padding: '10px 12px', textAlign: 'center', fontWeight: 600 }}>{it.qty}</td>
                   <td style={{ padding: '10px 12px', textAlign: 'right', fontFamily: 'monospace', fontSize: 10.5 }}>{fmt(parseFloat(it.rate) || 0, currency)}</td>
                   <td style={{ padding: '10px 12px', textAlign: 'center', fontSize: 10 }}>
@@ -24184,6 +24184,7 @@ export default function InvoiceMaker() {
               <div style={{ textAlign: 'center' }}>UQC</div>
               <div style={{ textAlign: 'center' }}>Qty</div>
               <div style={{ textAlign: 'right' }}>Rate</div>
+              <div style={{ textAlign: 'right' }}>Amount</div>
               <div />
             </div>
             {items.map(it => (
@@ -24250,7 +24251,7 @@ export default function InvoiceMaker() {
                     title="Unit Quantity Code"
                   >
                     {UQC_CODES.map(u => (
-                      <option key={u.code} value={u.code}>{u.code}</option>
+                      <option key={u.code} value={u.code}>{u.label}</option>
                     ))}
                   </select>
                 </div>
@@ -24266,6 +24267,16 @@ export default function InvoiceMaker() {
                   <input className="inp" type="number" min="0" value={it.rate}
                     onChange={e => updateItem(it.id, 'rate', e.target.value)}
                     placeholder="0.00" style={{ textAlign: 'right' }} />
+                </div>
+                {/* Amount (auto) */}
+                <div style={{ paddingTop: 8, textAlign: 'right' }}>
+                  <span style={{
+                    fontFamily: "'JetBrains Mono', monospace",
+                    fontSize: 12, fontWeight: 700,
+                    color: (parseFloat(it.qty) || 0) * (parseFloat(it.rate) || 0) > 0 ? 'var(--accent)' : 'var(--text3)'
+                  }}>
+                    {fmt((parseFloat(it.qty) || 0) * (parseFloat(it.rate) || 0), currency)}
+                  </span>
                 </div>
                 {/* Remove */}
                 <div style={{ paddingTop: 8 }}>
