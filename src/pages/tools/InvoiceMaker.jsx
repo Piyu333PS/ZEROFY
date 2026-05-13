@@ -23931,7 +23931,35 @@ export default function InvoiceMaker() {
     setShowSuccessModal(false)
   }
 
-  const printInvoice = () => {
+  const printInvoice = async () => {
+    // Login check
+    if (!token) {
+      pendingGenerate.current = true
+      setShowAuthModal(true)
+      return
+    }
+
+    // Limit check — same shared counter as generateInvoice
+    if (!isPro) {
+      try {
+        const res = await fetch(`${API}/api/invoices/generate`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
+        })
+        const data = await res.json()
+        if (res.status === 403 && data.error === 'free_limit_reached') {
+          setShowUpgradeModal(true)
+          return
+        }
+        if (res.ok) {
+          setInvoiceCount(data.invoiceCount)
+        }
+      } catch (err) {
+        console.error('Invoice count error (preview):', err)
+        return
+      }
+    }
+
     const el = document.getElementById('ig-print-zone')
     if (!el) return
     const t = TEMPLATES.find(t => t.key === template) || TEMPLATES[0]
@@ -24426,7 +24454,7 @@ export default function InvoiceMaker() {
                       style={{ fontSize: 14, padding: '10px 24px', opacity: generating ? 0.7 : 1 }}>
                       {generating ? '⏳ Generating…' : '⚡ Generate & Print'}
                     </button>
-                    <button className="btn btn-green btn-sm" onClick={() => document.getElementById('ig-print-zone') && printInvoice()}>
+                    <button className="btn btn-green btn-sm" onClick={printInvoice}>
                       👁 Preview PDF
                     </button>
                   </div>
