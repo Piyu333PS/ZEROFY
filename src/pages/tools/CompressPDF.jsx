@@ -123,12 +123,12 @@ export default function CompressPDF() {
     try {
       const arrayBuffer = await file.arrayBuffer()
 
-      // Load pdfjs with matching worker version
-      const pdfjsLib = await import('pdfjs-dist')
+      // Load pdf-lib and pdfjs from ESM CDN with pinned versions (no bundler needed)
+      const { PDFDocument } = await import('https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/+esm')
+      const pdfjsLib = await import('https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/build/pdf.min.mjs')
+      // Use matching worker from same CDN to avoid "fake worker" / fetch errors
       pdfjsLib.GlobalWorkerOptions.workerSrc =
-        `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`
-
-      const { PDFDocument } = await import('pdf-lib')
+        'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/build/pdf.worker.min.mjs'
 
       // Quality & scale settings per level
       const settings = {
