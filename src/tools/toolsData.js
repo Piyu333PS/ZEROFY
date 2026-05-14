@@ -57,6 +57,7 @@ export const TOOLS = [
   { id: 'image-converter',  cat: 'image', name: 'Image Converter',   desc: 'Convert between JPG, PNG, WebP, and AVIF',              icon: '🔄', status: 'ready',  route: '/tools/image-converter' },
   { id: 'image-resizer',    cat: 'image', name: 'Image Resizer',     desc: 'Set a custom width and height for any image',           icon: '📐', status: 'ready',  route: '/tools/image-resizer' },
   { id: 'image-cropper',    cat: 'image', name: 'Image Cropper',     desc: 'Select an area and crop with precision',                icon: '✂️', status: 'ready',  route: '/tools/image-cropper' },
+  { id: 'passport-size',    cat: 'image', name: 'Passport Size Photo', desc: 'Resize photo to passport, visa, ID size & add text',  icon: '🪪', status: 'ready',  route: '/tools/passport-size' },
   { id: 'bg-remover',       cat: 'image', name: 'BG Remover',        desc: 'AI-powered background removal in seconds',              icon: '🪄', status: 'coming', route: '/tools/bg-remover' },
   { id: 'watermark-image',  cat: 'image', name: 'Watermark Image',   desc: 'Add a logo or text overlay to your image',              icon: '💧', status: 'ready',  route: '/tools/watermark-image' },
   { id: 'rotate-flip',      cat: 'image', name: 'Rotate & Flip',     desc: 'Rotate 90°, 180°, or mirror your image',               icon: '🔄', status: 'ready',  route: '/tools/rotate-flip' },
