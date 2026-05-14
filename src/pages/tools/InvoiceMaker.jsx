@@ -5,10 +5,39 @@ import AuthModal from '../../components/AuthModal'
 /* ─── Utilities ──────────────────────────────────────────────── */
 const uid = () => Math.random().toString(36).slice(2, 9)
 const today = () => new Date().toISOString().slice(0, 10)
-const LS_BIZ = 'zerofy_businesses_v2'
-const LS_INV = 'zerofy_invoices_v2'
-const lsGet = (k, fb) => { try { return JSON.parse(localStorage.getItem(k)) ?? fb } catch { return fb } }
-const lsSet = (k, v) => localStorage.setItem(k, JSON.stringify(v))
+// ─── Cloud API Helpers ────────────────────────────────────────
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000'
+
+const apiFetch = (path, token, options = {}) =>
+  fetch(`${API_BASE}${path}`, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+      ...(options.headers || {})
+    },
+    body: options.body ? JSON.stringify(options.body) : undefined
+  }).then(r => r.json())
+
+// Businesses
+const fetchBusinesses = (token) =>
+  apiFetch('/api/invoices/businesses', token).then(d => d.businesses || []).catch(() => [])
+
+const saveBusinesses = (businesses, token) =>
+  apiFetch('/api/invoices/businesses', token, { method: 'PUT', body: { businesses } }).catch(() => {})
+
+// Invoices
+const fetchInvoices = (token) =>
+  apiFetch('/api/invoices', token).then(d => d.invoices || []).catch(() => [])
+
+const saveInvoice = (invoice, token) =>
+  apiFetch('/api/invoices', token, { method: 'POST', body: invoice }).catch(() => {})
+
+const updateInvoice = (id, data, token) =>
+  apiFetch(`/api/invoices/${id}`, token, { method: 'PUT', body: data }).catch(() => {})
+
+const deleteInvoice = (id, token) =>
+  apiFetch(`/api/invoices/${id}`, token, { method: 'DELETE' }).catch(() => {})
 const fmt = (n, sym = '₹') => `${sym}${Number(n || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 
 /* ─── GST Data ───────────────────────────────────────────────── */
@@ -23738,8 +23767,9 @@ function UpgradePaymentFlow({ token, API, onSuccess, onClose }) {
 export default function InvoiceMaker() {
   useCSS()
 
-  const [businesses, setBusinesses] = useState(() => lsGet(LS_BIZ, []))
-  const [savedInvoices, setSavedInvoices] = useState(() => lsGet(LS_INV, []))
+  const [businesses, setBusinesses] = useState([])
+  const [savedInvoices, setSavedInvoices] = useState([])
+  const [cloudLoaded, setCloudLoaded] = useState(false)
   const [activeBizId, setActiveBizId] = useState(null)
   const [status, setStatus] = useState('draft')
   const [showBizModal, setShowBizModal] = useState(false)
@@ -23786,8 +23816,24 @@ export default function InvoiceMaker() {
   })
   const sf = k => e => setF(p => ({ ...p, [k]: e.target.value }))
 
-  useEffect(() => lsSet(LS_BIZ, businesses), [businesses])
-  useEffect(() => lsSet(LS_INV, savedInvoices), [savedInvoices])
+  // ── Cloud Load on login ────────────────────────────────────
+  useEffect(() => {
+    if (!token) return
+    Promise.all([
+      fetchBusinesses(token),
+      fetchInvoices(token)
+    ]).then(([bizData, invData]) => {
+      setBusinesses(bizData)
+      setSavedInvoices(invData)
+      setCloudLoaded(true)
+    })
+  }, [token])
+
+  // ── Cloud Save businesses on change ───────────────────────
+  useEffect(() => {
+    if (!token || !cloudLoaded) return
+    saveBusinesses(businesses, token)
+  }, [businesses, token, cloudLoaded])
 
   const genInvNo = useCallback((biz) => {
     const prefix = biz?.prefix || 'INV'
@@ -23881,6 +23927,11 @@ export default function InvoiceMaker() {
     }
     const updatedInvoices = [inv, ...savedInvoices.filter(i => i.no !== invNo)].slice(0, 100)
     setSavedInvoices(updatedInvoices)
+
+    // ── Cloud mein save karo ──────────────────────────────────
+    if (token) {
+      saveInvoice(inv, token)
+    }
 
     printInvoice()
 
@@ -24340,7 +24391,14 @@ export default function InvoiceMaker() {
             <div className="saved-list">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
                 <div className="sec-label" style={{ margin: 0 }}><span className="sec-dot" />Recent Invoices ({savedInvoices.length})</div>
-                <button className="btn btn-sm btn-ghost" onClick={() => { if (window.confirm('Clear all saved invoices?')) setSavedInvoices([]) }}>Clear</button>
+                <button className="btn btn-sm btn-ghost" onClick={async () => {
+                  if (window.confirm('Clear all saved invoices?')) {
+                    if (token) {
+                      await Promise.all(savedInvoices.map(inv => deleteInvoice(inv._id || inv.id, token)))
+                    }
+                    setSavedInvoices([])
+                  }
+                }}>Clear</button>
               </div>
               {savedInvoices.slice(0, 5).map(inv => (
                 <div key={inv.id} className="saved-item" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 8 }}>
