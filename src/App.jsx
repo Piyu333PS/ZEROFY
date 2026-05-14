@@ -69,6 +69,8 @@ import RegexTester from './pages/tools/RegexTester'
 import CssMinifier from './pages/tools/CssMinifier'
 import NumberBase from './pages/tools/NumberBase'
 
+import PassportSizeMaker from './pages/tools/PassportSizeMaker'
+
 // New Tools
 import ImagesToPdf from './pages/tools/ImagesToPdf'
 import MetadataRemover from './pages/tools/MetadataRemover'
@@ -161,6 +163,7 @@ function AppInner() {
           <Route path="/tools/heic-converter" element={<HeicConverter />} />
           <Route path="/tools/document-scanner" element={<DocumentScanner />} />
           <Route path="/tools/bg-remover" element={<ComingSoon name="BG Remover (AI)" />} />
+          <Route path="/tools/passport-size" element={<PassportSizeMaker />} />
           <Route path="/tools/meme-maker" element={<ComingSoon name="Meme Maker" />} />
 
           {/* Audio */}
