@@ -11,13 +11,16 @@ const NAV_ITEMS = [
 ]
 
 export default function DashboardLayout() {
-  const { user, loading } = useAuth()
+  const { user, initializing } = useAuth()
   const navigate = useNavigate()
 
   useEffect(() => {
-    if (!loading && !user) navigate('/')
-  }, [user, loading, navigate])
+    if (!initializing && !user) navigate('/')
+  }, [user, initializing, navigate])
 
+  // Jab tak localStorage se session check nahi ho jata, kuch mat dikhao —
+  // isse pehle hi "not logged in" maan ke home pe redirect nahi hoga
+  if (initializing) return null
   if (!user) return null
 
   return (
