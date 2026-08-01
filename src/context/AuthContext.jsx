@@ -9,12 +9,16 @@ export function AuthProvider({ children }) {
   const [token, setToken] = useState(() => localStorage.getItem('zerofy-token'))
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  // Initial page-load par localStorage se session check ho raha hai — jab tak ye true hai,
+  // auth-gated pages (jaise dashboard) ko decide nahi karna chahiye ki user logged in hai ya nahi
+  const [initializing, setInitializing] = useState(true)
 
   useEffect(() => {
     if (token) {
       const saved = localStorage.getItem('zerofy-user')
       if (saved) setUser(JSON.parse(saved))
     }
+    setInitializing(false)
   }, [])
 
   const saveSession = (data) => {
@@ -103,7 +107,7 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, error, login, register, logout, googleLogin, setError }}>
+    <AuthContext.Provider value={{ user, token, loading, initializing, error, login, register, logout, googleLogin, setError }}>
       {children}
     </AuthContext.Provider>
   )
