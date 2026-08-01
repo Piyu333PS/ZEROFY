@@ -815,11 +815,21 @@ export default function InvoiceMaker() {
 
   const loadBusiness = id => {
     setActiveBizId(id)
+    localStorage.setItem('zerofy-last-biz-id', id)
     const biz = businesses.find(b => b.id === id)
     if (!biz) return
     setF(p => ({ ...p, bizName: biz.name, bizEmail: biz.email || '', bizPhone: biz.phone || '', bizAltPhone: biz.altPhone || '', bizAltEmail: biz.altEmail || '', bizGst: biz.gst || '', bizAddr: biz.addr || '' }))
     setInvNo(genInvNo(biz))
   }
+
+  // Naya invoice khulte hi pichhli baar use hui business automatically select ho jaye,
+  // taaki har baar business details dobara type na karni padein
+  useEffect(() => {
+    if (!cloudLoaded || activeBizId || businesses.length === 0) return
+    const lastId = localStorage.getItem('zerofy-last-biz-id')
+    const toLoad = businesses.find(b => b.id === lastId) || businesses[0]
+    if (toLoad) loadBusiness(toLoad.id)
+  }, [cloudLoaded, businesses]) // eslint-disable-line
 
   const handleBizSave = (biz, deleteId) => {
     if (deleteId) { setBusinesses(p => p.filter(b => b.id !== deleteId)); if (activeBizId === deleteId) setActiveBizId(null); return }
