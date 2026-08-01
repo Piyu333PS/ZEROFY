@@ -43,6 +43,10 @@ import RingtoneMaker from './pages/tools/RingtoneMaker'
 
 // Document Tools
 import InvoiceMaker from './pages/tools/InvoiceMaker'
+import DashboardLayout from './components/dashboard/DashboardLayout'
+import DashboardHome from './pages/dashboard/DashboardHome'
+import CustomersPage from './pages/dashboard/CustomersPage'
+import PaymentsPage from './pages/dashboard/PaymentsPage'
 import ResumeBuilder from './pages/tools/ResumeBuilder'
 import SettingsPage from './pages/SettingsPage'
 import BillingPage from './pages/BillingPage'
@@ -188,6 +192,13 @@ function AppInner() {
           <Route path="/tools/change-speed" element={<ComingSoon name="Change Speed" />} />
           <Route path="/tools/resize-video" element={<ComingSoon name="Resize Video" />} />
           <Route path="/tools/remove-audio" element={<ComingSoon name="Remove Audio" />} />
+
+          {/* Billing dashboard */}
+          <Route path="/app" element={<DashboardLayout />}>
+            <Route index element={<DashboardHome />} />
+            <Route path="customers" element={<CustomersPage />} />
+            <Route path="payments" element={<PaymentsPage />} />
+          </Route>
 
           {/* Document */}
           <Route path="/tools/invoice-maker" element={<InvoiceMaker />} />
