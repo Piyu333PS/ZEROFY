@@ -1,0 +1,358 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap');
+
+.page {
+  --ink:        #12263F;
+  --ink-soft:   #24405F;
+  --ink-dim:    #5C7189;
+  --paper:      #F4F5F1;
+  --paper-card: #FFFFFF;
+  --line:       #DDE1D9;
+  --stamp:      #0B6E4F;
+  --stamp-dim:  rgba(11,110,79,0.10);
+  --danger:     #B3261E;
+  --danger-dim: rgba(179,38,30,0.08);
+
+  display: grid;
+  grid-template-columns: minmax(0, 480px) 1fr;
+  min-height: 100vh;
+  font-family: 'Inter', sans-serif;
+  color: var(--ink);
+  background: var(--paper);
+}
+
+/* ── Left: form side ── */
+.formSide {
+  background: var(--paper-card);
+  border-right: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 40px;
+}
+
+.formInner {
+  width: 100%;
+  max-width: 360px;
+}
+
+.logoRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.logoMark {
+  width: 34px; height: 34px;
+  border-radius: 8px;
+  background: var(--ink);
+  color: #fff;
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+  font-size: 18px;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.logoText {
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+  font-size: 20px;
+  letter-spacing: 1px;
+  color: var(--ink);
+}
+
+.logoSub {
+  font-size: 12.5px;
+  color: var(--ink-dim);
+  margin: 0 0 36px 44px;
+}
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 3px;
+  margin-bottom: 28px;
+}
+
+.tab {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 8px 0;
+  font-size: 13.5px;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  color: var(--ink-dim);
+  border-radius: 7px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.tabActive {
+  background: var(--paper-card);
+  color: var(--ink);
+  box-shadow: 0 1px 3px rgba(18,38,63,0.12);
+}
+
+.heading {
+  font-family: 'Fraunces', serif;
+  font-weight: 500;
+  font-size: 26px;
+  letter-spacing: -0.3px;
+  margin: 0 0 6px;
+  color: var(--ink);
+}
+
+.subheading {
+  font-size: 13.5px;
+  color: var(--ink-dim);
+  line-height: 1.55;
+  margin: 0 0 24px;
+}
+
+.googleWrap { margin-bottom: 18px; display: flex; justify-content: center; }
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.divider span { flex: 1; height: 1px; background: var(--line); }
+.divider p { font-size: 12px; color: var(--ink-dim); white-space: nowrap; margin: 0; }
+
+.form { display: flex; flex-direction: column; gap: 16px; }
+
+.label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.input {
+  font-family: 'Inter', sans-serif;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 11px 14px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 400;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.input:focus {
+  border-color: var(--stamp);
+  box-shadow: 0 0 0 3px var(--stamp-dim);
+  background: var(--paper-card);
+}
+
+.input::placeholder { color: #9AA6AF; }
+
+.passWrap { position: relative; }
+
+.showBtn {
+  position: absolute;
+  right: 12px; top: 50%;
+  transform: translateY(-50%);
+  background: none; border: none;
+  font-size: 12px; font-weight: 600;
+  color: var(--ink-dim);
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+}
+.showBtn:hover { color: var(--ink); }
+
+.errorBox {
+  background: var(--danger-dim);
+  border: 1px solid rgba(179,38,30,0.25);
+  border-radius: 9px;
+  padding: 10px 13px;
+  font-size: 12.5px;
+  color: var(--danger);
+}
+
+.submitBtn {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 9px;
+  background: var(--ink);
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+  font-size: 14.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+  margin-top: 4px;
+}
+.submitBtn:hover:not(:disabled) { background: var(--ink-soft); }
+.submitBtn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.switchLine {
+  text-align: center;
+  font-size: 13px;
+  color: var(--ink-dim);
+  margin-top: 24px;
+}
+
+.switchBtn {
+  background: none; border: none;
+  color: var(--stamp);
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  padding: 0;
+}
+.switchBtn:hover { text-decoration: underline; }
+
+/* ── Right: ledger visual ── */
+.visualSide {
+  background: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  position: relative;
+  overflow: hidden;
+}
+
+.visualSide::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
+  background-size: 100% 44px, 44px 100%;
+  pointer-events: none;
+}
+
+.visualInner {
+  position: relative;
+  max-width: 420px;
+}
+
+.visualEyebrow {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--stamp);
+  margin: 0 0 14px;
+}
+
+.visualHeading {
+  font-family: 'Fraunces', serif;
+  font-weight: 500;
+  font-size: 38px;
+  line-height: 1.12;
+  color: #fff;
+  margin: 0 0 14px;
+  letter-spacing: -0.5px;
+}
+
+.visualSub {
+  font-size: 14.5px;
+  line-height: 1.65;
+  color: rgba(255,255,255,0.62);
+  margin: 0 0 36px;
+  max-width: 360px;
+}
+
+/* Invoice mockup card */
+.invoiceCard {
+  background: var(--paper-card);
+  border-radius: 12px;
+  padding: 22px 24px 20px;
+  box-shadow: 0 30px 60px rgba(0,0,0,0.35);
+  position: relative;
+  transform: rotate(-1.2deg);
+  color: var(--ink);
+}
+
+.stamp {
+  position: absolute;
+  top: 18px; right: 22px;
+  border: 2px solid var(--stamp);
+  color: var(--stamp);
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.15em;
+  padding: 4px 10px;
+  border-radius: 4px;
+  transform: rotate(8deg);
+  opacity: 0.85;
+}
+
+.invoiceHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.invoiceLabel {
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-dim);
+  margin-bottom: 3px;
+}
+
+.invoiceNo {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.invoiceLogo {
+  width: 30px; height: 30px;
+  border-radius: 7px;
+  background: var(--ink);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Inter', sans-serif;
+}
+
+.invoiceRule { height: 1px; background: var(--line); margin: 10px 0; }
+
+.lineItem, .lineItemMuted, .lineItemTotal {
+  display: flex;
+  justify-content: space-between;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12.5px;
+  padding: 4px 0;
+}
+
+.lineItem { color: var(--ink); font-weight: 500; }
+.lineItemMuted { color: var(--ink-dim); font-size: 12px; }
+.lineItemTotal {
+  color: var(--stamp);
+  font-weight: 600;
+  font-size: 13.5px;
+  padding-top: 8px;
+  margin-top: 4px;
+  border-top: 1px solid var(--line);
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .page { grid-template-columns: 1fr; }
+  .visualSide { display: none; }
+  .formSide { border-right: none; padding: 40px 24px; }
+}
