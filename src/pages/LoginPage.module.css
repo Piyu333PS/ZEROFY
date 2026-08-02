@@ -13,7 +13,7 @@
   --danger-dim: rgba(179,38,30,0.08);
 
   display: grid;
-  grid-template-columns: minmax(0, 480px) 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
   min-height: 100vh;
   font-family: 'Inter', sans-serif;
   color: var(--ink);
@@ -32,7 +32,7 @@
 
 .formInner {
   width: 100%;
-  max-width: 360px;
+  max-width: 400px;
 }
 
 .logoRow {
