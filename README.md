@@ -1,227 +1,70 @@
-# ⚡ Zerofy — Zero Limits. Infinite Tools.
+# Zerofy Invoice Generator — Bug Fix Package
 
-> 70+ free tools: PDF, Video, Audio, Image, Developer, aur bahut kuch.
+## How to apply
+1. Copy the `src/` files in this package into your `ZEROFY` repo at the same
+   paths, overwriting the existing ones (2 files are brand new):
+   - `src/pages/tools/InvoiceMaker.jsx` (modified)
+   - `src/pages/dashboard/DashboardHome.jsx` (modified)
+   - `src/pages/dashboard/DashboardHome.module.css` (modified)
+   - `src/components/invoice/InvoicePreview.jsx` (**new**)
+   - `src/utils/invoiceShare.js` (**new**)
+2. Merge `package.json`'s two new dependencies into your repo's `package.json`:
+   - `jspdf`
+   - `html2canvas`
+3. Run `npm install` then `npm run build` (or `npm run dev`) as usual.
 
----
+`CHANGES.diff` has the full unified diff for the modified files if you'd
+rather review/apply it with `git apply`.
 
-## 🚀 Quick Start (5 minutes mein run karo)
+## What was fixed (maps to your numbered list)
 
-### Prerequisites
-- **Node.js 18+** install karo: https://nodejs.org
-- **VS Code** (recommended): https://code.visualstudio.com
+**1) Business details gayab ho jaate the after navigating back**
+Business details typed directly into the "From (Your Business)" form were
+never actually saved anywhere — they only got remembered if you explicitly
+used the "🏢 Businesses → + Add" flow. Now, every time you hit **Generate &
+Print**, the business you typed is auto saved/updated in your businesses
+list (matched by name), and set as the "last used" business — so it's
+there the next time you open Invoice Generator.
 
-### Setup
-```bash
-# 1. Project folder mein jao
-cd zerofy
+**2) Removed the "Preview PDF" button**
+Only **Generate & Print** remains next to Live Preview.
 
-# 2. Dependencies install karo
-npm install
+**3) Preview / WhatsApp / Email were all doing the same thing**
+Root cause: WhatsApp/Email used to grab whatever invoice preview happened
+to already be open in the page (often the current draft, not the invoice
+you actually clicked). They now render the *exact* invoice you clicked,
+independent of what's on screen — via a new shared
+`renderInvoiceMarkup(inv)` helper.
+- **Preview** → just opens the preview modal, nothing else.
+- **WhatsApp / Email** → generate a real PDF and use the Web Share API to
+  auto-attach it when the browser/device supports it (this is the only way
+  a browser can auto-attach a file into WhatsApp/Mail — there's no API to
+  push a file into `wa.me` or `mailto:` links directly). Where Web Share
+  isn't available (mostly desktop), it falls back to downloading the PDF
+  and opening WhatsApp/Mail with the message pre-filled, same as before.
 
-# 3. Development server start karo
-npm run dev
-```
+**4) Next tab (print window) made the app feel stuck**
+`Generate & Print` no longer waits for the print tab/dialog — it fires the
+print tab in the background and immediately continues in the main tab.
 
-Browser mein khulega: **http://localhost:5173**
+**5) Removed the "Generate New Invoice / Edit This Invoice" modal**
+`Generate & Print` now redirects straight to the Dashboard (`/app`) right
+after saving + opening the print tab. No modal in the way.
 
----
+**6) Dashboard's Recent Invoices now have Preview/WhatsApp/Email actions**
+Each row in the Dashboard's Recent Invoices table now has 👁 Preview, 💬
+WhatsApp and ✉️ Email buttons, using the same shared logic as the Invoice
+Generator page, so you can reprint or reshare an already-generated invoice
+straight from the dashboard.
 
-## 📁 Project Structure
-
-```
-zerofy/
-├── src/
-│   ├── App.jsx              ← Main app + all routes
-│   ├── main.jsx             ← Entry point
-│   ├── index.css            ← Global styles
-│   │
-│   ├── components/          ← Reusable components
-│   │   ├── Navbar.jsx       ← Search + navigation
-│   │   ├── FileUpload.jsx   ← Drag & drop uploader
-│   │   └── ToolLayout.jsx   ← Tool page wrapper
-│   │
-│   ├── pages/               ← All pages
-│   │   ├── HomePage.jsx     ← Main page with all tools
-│   │   └── tools/           ← Individual tool pages
-│   │       ├── MergePDF.jsx
-│   │       ├── ImageCompressor.jsx
-│   │       ├── Mp3Trimmer.jsx
-│   │       ├── WordCounter.jsx
-│   │       └── ... (aur bahut)
-│   │
-│   └── tools/
-│       └── toolsData.js     ← Sabhi tools ki list
-│
-├── index.html
-├── package.json
-└── vite.config.js
-```
-
----
-
-## ✅ Abhi Working Tools
-
-| Tool | Category | Status |
-|------|----------|--------|
-| Merge PDF | PDF | ✅ Working |
-| PDF → JPG | PDF | ✅ Working |
-| Image Compressor | Image | ✅ Working |
-| MP3 Trimmer | Audio | ✅ Working |
-| Word Counter | Document | ✅ Working |
-| Text to Speech | Document | ✅ Working |
-| Speech to Text | Document | ✅ Working |
-| Diff Checker | Document | ✅ Working |
-| JSON Formatter | Developer | ✅ Working |
-| Password Generator | Developer | ✅ Working |
-| Color Picker | Developer | ✅ Working |
-| QR Code Maker | Developer | ✅ Working |
-| Unit Converter | Converter | ✅ Working |
-
----
-
-## ➕ Naya Tool Kaise Add Karo
-
-### Step 1: Tool file banao
-```jsx
-// src/pages/tools/MyNewTool.jsx
-import ToolLayout from '../../components/ToolLayout'
-import styles from '../ToolPage.module.css'
-
-export default function MyNewTool() {
-  return (
-    <ToolLayout icon="🔧" name="My New Tool" desc="Tool ka description">
-      {/* Yahan apna tool ka UI banao */}
-    </ToolLayout>
-  )
-}
-```
-
-### Step 2: toolsData.js mein add karo
-```js
-// src/tools/toolsData.js mein TOOLS array mein add karo:
-{ 
-  id: 'my-new-tool', 
-  cat: 'developer',          // category
-  name: 'My New Tool', 
-  desc: 'Kya karta hai ye tool', 
-  icon: '🔧', 
-  status: 'ready',           // 'ready' ya 'coming'
-  route: '/tools/my-new-tool' 
-}
-```
-
-### Step 3: App.jsx mein route add karo
-```jsx
-// src/App.jsx mein:
-import MyNewTool from './pages/tools/MyNewTool'
-// ...Routes ke andar:
-<Route path="/tools/my-new-tool" element={<MyNewTool />} />
-```
-
-**Bas! Tool ready.**
-
----
-
-## 🎨 Design System
-
-```css
-/* Color Variables */
---accent: #6c63ff        /* Purple - primary */
---green: #00d4aa         /* Green - success */
---orange: #ff6b35        /* Orange */
---pink: #ff4d9e          /* Pink */
---blue: #4d9eff          /* Blue */
-
-/* Typography */
---font-display: 'Syne'   /* Headings ke liye */
---font-body: 'DM Sans'   /* Body text ke liye */
-
-/* Spacing */
---radius: 12px
---radius-lg: 20px
-```
-
----
-
-## 📱 Android App Kaise Banao
-
-Isi React codebase se Android app banane ke 2 aasaan tarike hain:
-
-### Option 1: Capacitor (Recommended)
-```bash
-npm install @capacitor/core @capacitor/cli @capacitor/android
-npx cap init Zerofy com.zerofy.app
-npm run build
-npx cap add android
-npx cap sync
-npx cap open android  # Android Studio mein khulega
-```
-
-### Option 2: PWA (Progressive Web App)
-```bash
-npm install vite-plugin-pwa
-# vite.config.js mein PWA plugin add karo
-# Users "Install App" button se install kar sakte hain
-```
-
----
-
-## 🚀 Deploy Kaise Karo (Free)
-
-### Vercel (Sabse Aasaan)
-```bash
-npm install -g vercel
-vercel
-# Bas! URL mil jayega
-```
-
-### Netlify
-```bash
-npm run build
-# dist/ folder netlify.com pe drag & drop karo
-```
-
----
-
-## 🔮 Aage Kya Banana Hai (Priority List)
-
-1. **Video Tools** — FFmpeg.wasm integrate karo (browser mein video processing)
-2. **PDF Compress** — pdf-lib se optimize karo  
-3. **Image Resizer/Cropper** — Canvas API se
-4. **Base64 / URL Encoder** — Pure JS, easy to build
-5. **Markdown Editor** — marked.js library use karo
-6. **Currency Converter** — Free exchange rate API
-7. **Audio Recorder** — MediaRecorder API (browser built-in)
-
----
-
-## 📦 Key Libraries
-
-| Library | Use |
-|---------|-----|
-| `react-router-dom` | Page routing |
-| `react-dropzone` | File drag & drop |
-| `pdf-lib` | PDF manipulation |
-| `browser-image-compression` | Image compress |
-| `lucide-react` | Icons |
-
----
-
-## 💡 Video Tools ke liye (Advanced)
-
-Video processing ke liye **server-side** ya **FFmpeg.wasm** chahiye:
-
-```bash
-npm install @ffmpeg/ffmpeg @ffmpeg/util
-```
-
-```js
-import { FFmpeg } from '@ffmpeg/ffmpeg'
-const ffmpeg = new FFmpeg()
-await ffmpeg.load()
-// Ab video convert/cut/compress kar sako ge browser mein hi
-```
-
----
-
-Made with ❤️ | Zerofy v1.0
+## Note on the "auto-attachment" for WhatsApp/Email
+Browsers don't let a webpage push a file into WhatsApp Web or a mail app
+through `wa.me`/`mailto:` links — that's a platform limitation, not
+something Zerofy can code around. The Web Share API (`navigator.share`)
+is the only browser-native way to hand a real file to another app, and
+it only works when the browser/OS combination supports sharing files
+(most mobile browsers; some desktop browsers on Windows 11/macOS). I
+added real client-side PDF generation (via `jspdf` + `html2canvas`) so
+that whenever Web Share is available, the PDF is genuinely attached —
+otherwise it falls back to "download + open app with message" like
+before.
