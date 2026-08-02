@@ -66,9 +66,10 @@
 
 .tableHead, .tableRow {
   display: grid;
-  grid-template-columns: 1fr 1fr 1.4fr 1fr 100px;
+  grid-template-columns: 1fr 1fr 1.4fr 1fr 100px 170px;
   padding: 12px 16px;
   font-size: 13px;
+  align-items: center;
 }
 
 .tableHead {
