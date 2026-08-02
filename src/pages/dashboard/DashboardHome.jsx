@@ -16,10 +16,13 @@ const icons = {
   customers: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="9" cy="8" r="3.2"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><path d="M17 4.2a3.2 3.2 0 010 6.2M21.5 20c0-3-2-5.2-5-5.8"/></svg>,
   search: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>,
   plus: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M12 5v14M5 12h14"/></svg>,
+  profile: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 20c0-4.14 3.36-7 7.5-7s7.5 2.86 7.5 7"/></svg>,
+  card: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="M2.5 10h19"/></svg>,
+  logout: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>,
 }
 
 export default function DashboardHome() {
-  const { token, user } = useAuth()
+  const { token, user, logout } = useAuth()
   const navigate = useNavigate()
 
   const [stats, setStats] = useState(null)
@@ -27,6 +30,7 @@ export default function DashboardHome() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [query, setQuery] = useState('')
+  const [menuOpen, setMenuOpen] = useState(false)
 
   useEffect(() => {
     if (!token) return
@@ -89,7 +93,41 @@ export default function DashboardHome() {
           <button className={styles.primaryBtn} onClick={() => navigate('/tools/invoice-maker')}>
             {icons.plus} New Invoice
           </button>
-          <div className={styles.avatar}>{initials(greetName)}</div>
+
+          <div className={styles.userMenuWrap}>
+            <button
+              className={styles.avatar}
+              onClick={() => setMenuOpen(o => !o)}
+              aria-label="Account menu"
+            >
+              {initials(greetName)}
+            </button>
+
+            {menuOpen && (
+              <>
+                <div className={styles.menuOverlay} onClick={() => setMenuOpen(false)} />
+                <div className={styles.userMenu}>
+                  <div className={styles.userMenuHead}>
+                    <div className={styles.userMenuEmail}>{user?.email}</div>
+                    <div className={styles.userMenuPlan}>{user?.isPro ? '✦ Pro plan' : 'Free plan'}</div>
+                  </div>
+
+                  <button className={styles.userMenuItem} onClick={() => { setMenuOpen(false); navigate('/settings') }}>
+                    <span className={styles.userMenuIcon}>{icons.profile}</span> Profile
+                  </button>
+                  <button className={styles.userMenuItem} onClick={() => { setMenuOpen(false); navigate('/billing') }}>
+                    <span className={styles.userMenuIcon}>{icons.card}</span> Billing
+                  </button>
+
+                  <div className={styles.userMenuDivider} />
+
+                  <button className={`${styles.userMenuItem} ${styles.userMenuDanger}`} onClick={() => { setMenuOpen(false); logout() }}>
+                    <span className={styles.userMenuIcon}>{icons.logout}</span> Logout
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
 
