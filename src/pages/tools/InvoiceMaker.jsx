@@ -471,14 +471,32 @@ export default function InvoiceMaker() {
   // ── Cloud Load on login ────────────────────────────────────
   useEffect(() => {
     if (!token) return
-    Promise.all([
-      fetchBusinesses(token),
-      fetchInvoices(token)
-    ]).then(([bizData, invData]) => {
-      setBusinesses(bizData)
-      setSavedInvoices(invData)
-      setCloudLoaded(true)
-    })
+    let cancelled = false
+    let attempt = 0
+
+    const load = () => {
+      attempt++
+      Promise.all([
+        fetchBusinesses(token),
+        fetchInvoices(token)
+      ]).then(([bizData, invData]) => {
+        if (cancelled) return
+        console.log(`Zerofy: cloud load attempt ${attempt} — businesses:`, bizData.length, 'invoices:', invData.length)
+        if (bizData.length === 0 && attempt === 1) {
+          console.warn('Zerofy: businesses list khaali aayi, retry kar rahe hain...')
+          setTimeout(load, 1200)
+          return
+        }
+        setBusinesses(bizData)
+        setSavedInvoices(invData)
+        setCloudLoaded(true)
+      }).catch(err => {
+        console.error('Zerofy: cloud data load fail hua', err)
+        if (!cancelled) setCloudLoaded(true)
+      })
+    }
+    load()
+    return () => { cancelled = true }
   }, [token])
 
   // ── Cloud Save businesses on change ───────────────────────
@@ -514,9 +532,13 @@ export default function InvoiceMaker() {
   // Naya invoice khulte hi pichhli baar use hui business automatically select ho jaye,
   // taaki har baar business details dobara type na karni padein
   useEffect(() => {
-    if (!cloudLoaded || activeBizId || businesses.length === 0) return
+    if (!cloudLoaded || activeBizId || businesses.length === 0) {
+      console.log('Zerofy: auto-select skip —', { cloudLoaded, activeBizId, businessCount: businesses.length })
+      return
+    }
     const lastId = localStorage.getItem('zerofy-last-biz-id')
     const toLoad = businesses.find(b => b.id === lastId) || businesses[0]
+    console.log('Zerofy: auto-selecting business —', toLoad?.name)
     if (toLoad) loadBusiness(toLoad.id)
   }, [cloudLoaded, businesses]) // eslint-disable-line
 
