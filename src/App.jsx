@@ -1,7 +1,8 @@
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import Navbar from './components/Navbar'
-import HomePage from './pages/HomePage'
+import LoginPage from './pages/LoginPage'
+import { useAuth } from './context/AuthContext'
 import AllToolsPage from './pages/AllToolsPage'
 import PricingPage from './pages/PricingPage'
 import SplashScreen from './components/SplashScreen'
@@ -116,15 +117,24 @@ function ComingSoon({ name }) {
 
 
 
+function RootGate() {
+  const { user, initializing } = useAuth()
+  if (initializing) return null
+  if (user) return <Navigate to="/app" replace />
+  return <LoginPage />
+}
+
 function AppInner() {
   useBackButton()
+  const location = useLocation()
+  const isLoginScreen = location.pathname === '/'
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <Navbar />
+      {!isLoginScreen && <Navbar />}
       <main style={{ flex: 1 }}>
         <Routes>
-          <Route path="/" element={<HomePage />} />
+          <Route path="/" element={<RootGate />} />
           <Route path="/all-tools" element={<AllToolsPage />} />
           <Route path="/tools" element={<AllToolsPage />} />
           <Route path="/pricing" element={<PricingPage />} />
@@ -241,7 +251,7 @@ function AppInner() {
           <Route path="*" element={<ComingSoon name="Page Not Found" />} />
         </Routes>
       </main>
-      <Footer />
+      {!isLoginScreen && <Footer />}
     </div>
   )
 }
