@@ -1,8 +1,11 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import AuthModal from '../../components/AuthModal'
 import { GOODS_HSN, UQC_CODES, SERVICES_SAC, CURRENCIES, TEMPLATES } from '../../data/invoiceCodes'
 import { CSS } from '../../data/invoiceMakerStyles'
+import { InvoicePreview } from '../../components/invoice/InvoicePreview'
+import { openPrintWindow, shareViaWhatsApp as shareInvoiceViaWhatsApp, shareViaEmail as shareInvoiceViaEmail } from '../../utils/invoiceShare'
 
 /* ─── Utilities ──────────────────────────────────────────────── */
 const uid = () => Math.random().toString(36).slice(2, 9)
@@ -121,319 +124,6 @@ function CodePicker({ type, value, onSelect }) {
           )}
         </div>
       )}
-    </div>
-  )
-}
-
-/* ─── Professional Invoice Preview ───────────────────────────── */
-function Preview({ inv, items, currency, discPct, taxPct, template, status }) {
-  const sub = items.reduce((s, i) => s + (i.qty || 0) * (parseFloat(i.rate) || 0), 0)
-  const disc = sub * (discPct / 100)
-  const gstTotal = items.reduce((s, i) => s + (i.qty || 0) * (parseFloat(i.rate) || 0) * ((i.gstRate || 0) / 100), 0)
-  const total = sub - disc + gstTotal
-  const t = TEMPLATES.find(t => t.key === template) || TEMPLATES[0]
-  const acc = t.accent
-  const accLight = acc + '14'
-  const accMid = acc + '28'
-
-  const statusColors = { draft: '#818CF8', sent: '#38BDF8', paid: '#34D399', overdue: '#F87171', cancelled: '#9CA3AF' }
-  const sc = statusColors[status] || statusColors.draft
-
-  const filteredItems = items.filter(i => i.desc || i.rate)
-
-  // number to words (Indian system)
-  const numToWords = (n) => {
-    const a = ['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen']
-    const b = ['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety']
-    if (n === 0) return 'Zero'
-    const h = (x) => {
-      if (x < 20) return a[x]
-      if (x < 100) return b[Math.floor(x/10)] + (x%10 ? ' ' + a[x%10] : '')
-      return a[Math.floor(x/100)] + ' Hundred' + (x%100 ? ' ' + h(x%100) : '')
-    }
-    let r = '', num = Math.floor(n)
-    if (num >= 10000000) { r += h(Math.floor(num/10000000)) + ' Crore '; num %= 10000000 }
-    if (num >= 100000)   { r += h(Math.floor(num/100000))   + ' Lakh ';  num %= 100000 }
-    if (num >= 1000)     { r += h(Math.floor(num/1000))     + ' Thousand '; num %= 1000 }
-    if (num > 0)          r += h(num)
-    return r.trim() + ' Only'
-  }
-
-  return (
-    <div style={{
-      background: '#fff',
-      fontFamily: "'Plus Jakarta Sans', sans-serif",
-      color: '#1a1a2e',
-      position: 'relative',
-      minHeight: 700,
-    }}>
-      {/* TOP COLOR BAR */}
-      <div style={{ height: 6, background: `linear-gradient(90deg, ${acc}, ${acc}99)` }} />
-
-      {/* HEADER */}
-      <div style={{
-        display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
-        padding: '28px 32px 20px',
-        borderBottom: `1px solid ${accMid}`,
-        background: accLight,
-      }}>
-        {/* Left — Seller */}
-        <div style={{ flex: 1 }}>
-          <div style={{
-            fontSize: 22, fontWeight: 800, color: acc,
-            letterSpacing: '-0.02em', marginBottom: 6, lineHeight: 1.1
-          }}>
-            {inv.bizName || 'Your Business'}
-          </div>
-          {inv.bizAddr && (
-            <div style={{ fontSize: 10.5, color: '#5A578A', lineHeight: 1.7, whiteSpace: 'pre-line', maxWidth: 220 }}>
-              {inv.bizAddr}
-            </div>
-          )}
-          <div style={{ marginTop: 6, display: 'flex', flexDirection: 'column', gap: 2 }}>
-            {inv.bizPhone && <div style={{ fontSize: 10.5, color: '#5A578A' }}>📞 {inv.bizPhone}</div>}
-            {inv.bizAltPhone && <div style={{ fontSize: 10.5, color: '#5A578A' }}>📞 {inv.bizAltPhone} <span style={{ fontSize: 9, color: '#9492C0' }}>(alt)</span></div>}
-            {inv.bizEmail && <div style={{ fontSize: 10.5, color: '#5A578A' }}>✉ {inv.bizEmail}</div>}
-            {inv.bizAltEmail && <div style={{ fontSize: 10.5, color: '#5A578A' }}>✉ {inv.bizAltEmail} <span style={{ fontSize: 9, color: '#9492C0' }}>(alt)</span></div>}
-            {inv.bizGst   && <div style={{ fontSize: 10.5, color: '#5A578A', fontWeight: 600 }}>GSTIN: {inv.bizGst}</div>}
-          </div>
-        </div>
-
-        {/* Right — Invoice meta */}
-        <div style={{ textAlign: 'right', flexShrink: 0 }}>
-          <div style={{
-            fontSize: 32, fontWeight: 900, color: acc,
-            letterSpacing: '-0.03em', lineHeight: 1, marginBottom: 8,
-            textTransform: 'uppercase'
-          }}>INVOICE</div>
-          <div style={{
-            fontFamily: 'monospace', fontSize: 13, fontWeight: 700,
-            color: '#1a1a2e', marginBottom: 8, letterSpacing: '0.04em'
-          }}>{inv.no || 'INV-2026-001'}</div>
-          <div style={{ fontSize: 10, color: '#5A578A', marginBottom: 4 }}>
-            <span style={{ fontWeight: 600 }}>Date: </span>{inv.date || today()}
-          </div>
-          <div style={{ marginTop: 8 }}>
-            <span style={{
-              background: sc + '22', color: sc, fontSize: 9, fontWeight: 800,
-              padding: '4px 10px', borderRadius: 20, textTransform: 'uppercase',
-              letterSpacing: '0.1em', border: `1px solid ${sc}44`
-            }}>{status}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* BILL TO / FROM CARDS */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0, margin: '0', borderBottom: `1px solid ${accMid}` }}>
-        {/* Bill To */}
-        <div style={{ padding: '18px 32px', borderRight: `1px solid ${accMid}` }}>
-          <div style={{
-            fontSize: 9, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.14em',
-            color: acc, marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6
-          }}>
-            <div style={{ width: 18, height: 2, background: acc, borderRadius: 2 }} />
-            Bill To
-          </div>
-          <div style={{ fontSize: 13, fontWeight: 800, color: '#1a1a2e', marginBottom: 4 }}>
-            {inv.clientName || '—'}
-          </div>
-          {inv.clientAddr && (
-            <div style={{ fontSize: 10.5, color: '#5A578A', lineHeight: 1.7, whiteSpace: 'pre-line', marginBottom: 4 }}>
-              {inv.clientAddr}
-            </div>
-          )}
-          {inv.clientPhone && <div style={{ fontSize: 10.5, color: '#5A578A' }}>📞 {inv.clientPhone}</div>}
-          {inv.clientEmail && <div style={{ fontSize: 10.5, color: '#5A578A' }}>✉ {inv.clientEmail}</div>}
-          {inv.clientGst   && <div style={{ fontSize: 10.5, color: '#5A578A', fontWeight: 600, marginTop: 2 }}>GSTIN: {inv.clientGst}</div>}
-        </div>
-
-        {/* Invoice Summary Box */}
-        <div style={{ padding: '18px 32px', background: accLight }}>
-          <div style={{
-            fontSize: 9, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.14em',
-            color: acc, marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6
-          }}>
-            <div style={{ width: 18, height: 2, background: acc, borderRadius: 2 }} />
-            Invoice Summary
-          </div>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
-            <tbody>
-              <tr>
-                <td style={{ padding: '3px 0', color: '#5A578A' }}>Invoice No.</td>
-                <td style={{ padding: '3px 0', textAlign: 'right', fontWeight: 700, fontFamily: 'monospace', color: '#1a1a2e' }}>{inv.no || '—'}</td>
-              </tr>
-              <tr>
-                <td style={{ padding: '3px 0', color: '#5A578A' }}>Issue Date</td>
-                <td style={{ padding: '3px 0', textAlign: 'right', fontWeight: 600, color: '#1a1a2e' }}>{inv.date || today()}</td>
-              </tr>
-              <tr>
-                <td style={{ padding: '3px 0', color: '#5A578A' }}>Currency</td>
-                <td style={{ padding: '3px 0', textAlign: 'right', fontWeight: 600, color: '#1a1a2e' }}>{currency === '₹' ? 'INR' : currency}</td>
-              </tr>
-              {discPct > 0 && (
-                <tr>
-                  <td style={{ padding: '3px 0', color: '#5A578A' }}>Discount</td>
-                  <td style={{ padding: '3px 0', textAlign: 'right', fontWeight: 600, color: '#34D399' }}>{discPct}%</td>
-                </tr>
-              )}
-              <tr style={{ borderTop: `1px solid ${accMid}` }}>
-                <td style={{ padding: '6px 0 2px', fontWeight: 800, fontSize: 12, color: '#1a1a2e' }}>Amount Due</td>
-                <td style={{ padding: '6px 0 2px', textAlign: 'right', fontWeight: 900, fontSize: 14, color: acc, fontFamily: 'monospace' }}>{fmt(total, currency)}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* ITEMS TABLE */}
-      <div style={{ padding: '24px 32px 0' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
-          <thead>
-            <tr style={{ background: acc }}>
-              <th style={{ padding: '10px 12px', textAlign: 'left', color: '#fff', fontWeight: 700, fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.1em', width: 28 }}>#</th>
-              <th style={{ padding: '10px 12px', textAlign: 'left', color: '#fff', fontWeight: 700, fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Description</th>
-              <th style={{ padding: '10px 12px', textAlign: 'center', color: '#fff', fontWeight: 700, fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.1em', width: 70 }}>HSN/SAC</th>
-              <th style={{ padding: '10px 12px', textAlign: 'center', color: '#fff', fontWeight: 700, fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.1em', width: 50 }}>UQC</th>
-              <th style={{ padding: '10px 12px', textAlign: 'center', color: '#fff', fontWeight: 700, fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.1em', width: 40 }}>Qty</th>
-              <th style={{ padding: '10px 12px', textAlign: 'right', color: '#fff', fontWeight: 700, fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.1em', width: 90 }}>Rate</th>
-              <th style={{ padding: '10px 12px', textAlign: 'center', color: '#fff', fontWeight: 700, fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.1em', width: 50 }}>GST%</th>
-              <th style={{ padding: '10px 12px', textAlign: 'center', color: '#fff', fontWeight: 700, fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.1em', width: 60 }}>GST Amt</th>
-              <th style={{ padding: '10px 12px', textAlign: 'right', color: '#fff', fontWeight: 700, fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.1em', width: 95 }}>Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredItems.length === 0 && (
-              <tr>
-                <td colSpan={8} style={{ padding: '20px', textAlign: 'center', color: '#9492C0', fontSize: 11 }}>No items added yet</td>
-              </tr>
-            )}
-            {filteredItems.map((it, idx) => {
-              const taxable = (it.qty || 0) * (parseFloat(it.rate) || 0)
-              const gstAmt = taxable * (it.gstRate / 100)
-              const rowTotal = taxable + gstAmt
-              return (
-                <tr key={it.id} style={{
-                  background: idx % 2 === 0 ? '#fff' : accLight,
-                  borderBottom: `1px solid ${accMid}`
-                }}>
-                  <td style={{ padding: '10px 12px', color: '#9492C0', fontWeight: 600, fontSize: 10 }}>{idx + 1}</td>
-                  <td style={{ padding: '10px 12px' }}>
-                    <div style={{ fontWeight: 600, fontSize: 11, color: '#1a1a2e' }}>{it.desc || '—'}</div>
-                    <div style={{ fontSize: 9, color: '#9492C0', marginTop: 2, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                      {it.type === 'goods' ? '🟡 Goods' : '🔵 Service'}
-                    </div>
-                  </td>
-                  <td style={{ padding: '10px 12px', textAlign: 'center', fontFamily: 'monospace', fontSize: 10, color: '#6B6A9A' }}>{it.hsnSac || '—'}</td>
-                  <td style={{ padding: '10px 12px', textAlign: 'center', fontFamily: 'monospace', fontSize: 10, color: '#6B6A9A' }}>{(UQC_CODES.find(u => u.code === it.uqc) || { label: 'PIECES' }).label}</td>
-                  <td style={{ padding: '10px 12px', textAlign: 'center', fontWeight: 600 }}>{it.qty}</td>
-                  <td style={{ padding: '10px 12px', textAlign: 'right', fontFamily: 'monospace', fontSize: 10.5 }}>{fmt(parseFloat(it.rate) || 0, currency)}</td>
-                  <td style={{ padding: '10px 12px', textAlign: 'center', fontSize: 10 }}>
-                    <span style={{
-                      background: acc + '18', color: acc, fontWeight: 700,
-                      padding: '2px 6px', borderRadius: 4, fontSize: 9
-                    }}>{it.gstRate}%</span>
-                  </td>
-                  <td style={{ padding: '10px 12px', textAlign: 'center', fontFamily: 'monospace', fontSize: 10, color: '#6B6A9A' }}>{fmt(gstAmt, currency)}</td>
-                  <td style={{ padding: '10px 12px', textAlign: 'right', fontFamily: 'monospace', fontWeight: 800, fontSize: 11, color: '#1a1a2e' }}>{fmt(rowTotal, currency)}</td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
-      </div>
-
-      {/* TOTALS + NOTES */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 220px', gap: 24, padding: '16px 32px 24px', alignItems: 'start' }}>
-        {/* Left — Amount words + Notes */}
-        <div>
-          <div style={{
-            background: accLight, border: `1px solid ${accMid}`,
-            borderRadius: 8, padding: '12px 14px', marginBottom: 12
-          }}>
-            <div style={{ fontSize: 9, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', color: acc, marginBottom: 4 }}>Amount in Words</div>
-            <div style={{ fontSize: 11, color: '#1a1a2e', fontWeight: 500, fontStyle: 'italic', lineHeight: 1.5 }}>
-              {currency}{numToWords(total)}
-            </div>
-          </div>
-          {inv.notes && (
-            <div style={{ background: '#fffbf0', border: '1px solid #f5e6b0', borderRadius: 8, padding: '12px 14px' }}>
-              <div style={{ fontSize: 9, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#B8860B', marginBottom: 4 }}>Notes & Payment Details</div>
-              <div style={{ fontSize: 10.5, color: '#5A578A', lineHeight: 1.7, whiteSpace: 'pre-line' }}>{inv.notes}</div>
-            </div>
-          )}
-        </div>
-
-        {/* Right — Totals breakdown */}
-        <div style={{ border: `1px solid ${accMid}`, borderRadius: 8, overflow: 'hidden' }}>
-          <div style={{ background: acc + '10', padding: '8px 14px', borderBottom: `1px solid ${accMid}` }}>
-            <div style={{ fontSize: 9, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', color: acc }}>Summary</div>
-          </div>
-          <div style={{ padding: '10px 14px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: 11, color: '#5A578A' }}>
-              <span>Subtotal</span>
-              <span style={{ fontFamily: 'monospace' }}>{fmt(sub, currency)}</span>
-            </div>
-            {disc > 0 && (
-              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: 11, color: '#34D399' }}>
-                <span>Discount ({discPct}%)</span>
-                <span style={{ fontFamily: 'monospace' }}>−{fmt(disc, currency)}</span>
-              </div>
-            )}
-            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: 11, color: '#5A578A' }}>
-              <span>GST (per HSN/SAC)</span>
-              <span style={{ fontFamily: 'monospace' }}>{fmt(gstTotal, currency)}</span>
-            </div>
-            <div style={{
-              display: 'flex', justifyContent: 'space-between', padding: '10px 14px',
-              background: acc, borderRadius: 6, marginTop: 8,
-              fontSize: 13, fontWeight: 900, color: '#fff'
-            }}>
-              <span>Total</span>
-              <span style={{ fontFamily: 'monospace' }}>{fmt(total, currency)}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* FOOTER */}
-      <div style={{
-        borderTop: `2px solid ${accMid}`,
-        background: accLight,
-        padding: '14px 32px',
-        display: 'flex', justifyContent: 'space-between', alignItems: 'center'
-      }}>
-        <div style={{ fontSize: 9, color: '#9492C0' }}>
-          This is a computer-generated invoice
-        </div>
-        <div style={{ fontSize: 9, color: '#9492C0', textAlign: 'right' }}>
-          {inv.bizName && <span style={{ fontWeight: 700, color: acc }}>{inv.bizName}</span>}
-          {inv.bizGst && <span> · GSTIN: {inv.bizGst}</span>}
-        </div>
-      </div>
-
-      {/* Bottom accent line */}
-      <div style={{ height: 4, background: `linear-gradient(90deg, ${acc}99, ${acc})` }} />
-
-      {/* ZEROFY WATERMARK */}
-      <div style={{
-        padding: '8px 32px 12px',
-        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-        borderTop: '1px dashed #e8e5f5',
-        background: 'linear-gradient(180deg, #fafafe, #f5f3ff)',
-      }}>
-        <span style={{ fontSize: 8, color: '#aaa', letterSpacing: '0.04em', fontStyle: 'italic' }}>Created with</span>
-        <span style={{
-          fontSize: 11, fontWeight: 900, letterSpacing: '0.06em',
-          background: 'linear-gradient(90deg, #7C6FFF, #A78BFA)',
-          WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
-          fontFamily: "'Plus Jakarta Sans', sans-serif",
-        }}>ZEROFY</span>
-        <span style={{ fontSize: 8, color: '#bbb', letterSpacing: '0.01em' }}>Invoice Generator</span>
-        <span style={{ fontSize: 8, color: '#ccc' }}>·</span>
-        <a href="https://www.zerofy.co.in" style={{
-          fontSize: 8, color: '#8B7FFF', textDecoration: 'none', fontWeight: 600, letterSpacing: '0.02em'
-        }}>www.zerofy.co.in</a>
-      </div>
     </div>
   )
 }
@@ -729,6 +419,7 @@ function UpgradePaymentFlow({ token, API, onSuccess, onClose }) {
 /* ─── Main Component ─────────────────────────────────────────── */
 export default function InvoiceMaker() {
   useCSS()
+  const navigate = useNavigate()
 
   const [businesses, setBusinesses] = useState([])
   const [savedInvoices, setSavedInvoices] = useState([])
@@ -750,8 +441,6 @@ export default function InvoiceMaker() {
   const [previewInvoice, setPreviewInvoice] = useState(null) // saved invoice preview ke liye
   const [showShareModal, setShowShareModal] = useState(false)
   const [shareInvoice, setShareInvoice] = useState(null)
-  const [showSuccessModal, setShowSuccessModal] = useState(false)
-  const pendingReset = useRef(null)
   const pendingGenerate = useRef(false)
   const [invoiceCount, setInvoiceCount] = useState(0)
   const [isPro, setIsPro] = useState(false)
@@ -836,6 +525,30 @@ export default function InvoiceMaker() {
     setBusinesses(p => p.find(b => b.id === biz.id) ? p.map(b => b.id === biz.id ? biz : b) : [...p, biz])
   }
 
+  // Bug fix: business details typed directly in the form (without going through
+  // "+ Add Business") were never saved to the businesses list, so they'd vanish
+  // on the next visit. Auto-save/update the business whenever an invoice is
+  // generated, so it's remembered and auto-selected next time.
+  const upsertBusinessFromForm = () => {
+    const existing = businesses.find(b => b.id === activeBizId)
+      || businesses.find(b => b.name.trim().toLowerCase() === f.bizName.trim().toLowerCase())
+    const bizData = {
+      id: existing ? existing.id : uid(),
+      name: f.bizName.trim(),
+      email: f.bizEmail || '',
+      phone: f.bizPhone || '',
+      altPhone: f.bizAltPhone || '',
+      altEmail: f.bizAltEmail || '',
+      gst: f.bizGst || '',
+      addr: f.bizAddr || '',
+      prefix: existing?.prefix || 'INV',
+    }
+    setBusinesses(p => existing ? p.map(b => b.id === bizData.id ? bizData : b) : [...p, bizData])
+    setActiveBizId(bizData.id)
+    localStorage.setItem('zerofy-last-biz-id', bizData.id)
+    return bizData.id
+  }
+
   const updateItem = (id, k, v) => setItems(p => p.map(i => i.id === id ? { ...i, [k]: v } : i))
   const removeItem = id => setItems(p => p.length > 1 ? p.filter(i => i.id !== id) : p)
 
@@ -886,9 +599,13 @@ export default function InvoiceMaker() {
     setGenerating(true)
     await new Promise(r => setTimeout(r, 600))
 
+    // Bug fix: persist the business details typed in the form so they're
+    // remembered next time, even if the user never opened "+ Add Business".
+    const bizId = upsertBusinessFromForm()
+
     const inv = {
       id: uid(), ts: Date.now(), no: invNo,
-      bizId: activeBizId, bizName: f.bizName,
+      bizId, bizName: f.bizName,
       clientName: f.clientName, clientEmail: f.clientEmail,
       clientAddr: f.clientAddr, clientPhone: f.clientPhone, clientGst: f.clientGst,
       bizEmail: f.bizEmail, bizPhone: f.bizPhone, bizAltPhone: f.bizAltPhone || '', bizAltEmail: f.bizAltEmail || '', bizAddr: f.bizAddr, bizGst: f.bizGst,
@@ -906,206 +623,29 @@ export default function InvoiceMaker() {
       saveInvoice(inv, token)
     }
 
-    printInvoice()
+    // Bug fix: print dialog opens in its own tab and no longer blocks the
+    // app — we don't wait on it, and we no longer show a modal that had to
+    // be dismissed before the rest of Zerofy became usable again.
+    openPrintWindow(inv)
 
-    // Pre-calculate next invoice number using the updated list to ensure correct sequence
-    const biz = businesses.find(b => b.id === activeBizId)
-    const prefix = biz?.prefix || 'INV'
-    const year = new Date().getFullYear()
-    const lastNum = updatedInvoices
-      .filter(i => i.bizId === (activeBizId || null))
-      .reduce((max, i) => {
-        const m = i.no?.match(/(\d+)$/)
-        return m ? Math.max(max, parseInt(m[1])) : max
-      }, 0)
-    const next = `${prefix}-${year}-${String(lastNum + 1).padStart(3, '0')}`
-
-    // Store reset function — runs on user choice
-    pendingReset.current = () => {
-      setF(p => ({
-        ...p,
-        clientName: '', clientEmail: '', clientPhone: '', clientGst: '', clientAddr: '',
-        notes: '', date: today(),
-      }))
-      setItems([defaultItem()])
-      setDiscPct(0)
-      setStatus('draft')
-      setInvNo(next)
-    }
-
-    setTimeout(() => {
-      setGenerating(false)
-      setShowSuccessModal(true)
-    }, 800)
+    setGenerating(false)
+    // Straight back to the dashboard — no confirmation modal in the way.
+    navigate('/app')
   }
 
-  const handleNewInvoice = () => {
-    setShowSuccessModal(false)
-    // Small timeout to let modal close animation complete
-    setTimeout(() => {
-      if (pendingReset.current) {
-        pendingReset.current()
-        pendingReset.current = null
-      }
-    }, 100)
-  }
-
-  const handleStayAndEdit = () => {
-    pendingReset.current = null
-    setShowSuccessModal(false)
-  }
-
-  const printInvoice = async () => {
-    // Login check
-    if (!token) {
-      pendingGenerate.current = true
-      setShowAuthModal(true)
-      return
-    }
-
-    // Limit check — same shared counter as generateInvoice
-    if (!isPro) {
-      try {
-        const res = await fetch(`${API}/api/invoices/generate`, {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
-        })
-        const data = await res.json()
-        if (res.status === 403 && data.error === 'free_limit_reached') {
-          setShowUpgradeModal(true)
-          return
-        }
-        if (res.ok) {
-          setInvoiceCount(data.invoiceCount)
-        }
-      } catch (err) {
-        console.error('Invoice count error (preview):', err)
-        return
-      }
-    }
-
-    const el = document.getElementById('ig-print-zone')
-    if (!el) return
-    const t = TEMPLATES.find(t => t.key === template) || TEMPLATES[0]
-    const acc = t.accent
-    const w = window.open('', '_blank')
-    w.document.write(`<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>${invNo}</title>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body {
-      width: 210mm;
-      min-height: 297mm;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      background: #fff;
-      color: #1a1a2e;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
-      color-adjust: exact;
-    }
-    body { padding: 0; }
-    .invoice-wrap {
-      width: 210mm;
-      min-height: 297mm;
-      background: #fff;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-    }
-    @media print {
-      @page {
-        size: A4 portrait;
-        margin: 0;
-      }
-      html, body { margin: 0; padding: 0; }
-      .invoice-wrap { page-break-after: avoid; }
-    }
-    table { border-collapse: collapse; }
-    .mono { font-family: 'Courier New', monospace; }
-  </style>
-</head>
-<body>
-  <div class="invoice-wrap">
-    ${el.innerHTML}
-  </div>
-</body>
-</html>`)
-    w.document.close()
-    w.focus()
-    setTimeout(() => w.print(), 900)
-  }
-
-  // Bug 4: Saved invoice ko print/download karne ke liye
-  const printSavedInvoice = (inv) => {
-    const t = TEMPLATES.find(t => t.key === inv.template) || TEMPLATES[0]
-    const tempDiv = document.createElement('div')
-    tempDiv.style.position = 'fixed'
-    tempDiv.style.left = '-9999px'
-    tempDiv.style.top = '0'
-    document.body.appendChild(tempDiv)
-
-    const { createRoot } = window.__reactDom || {}
-    // ReactDOM cannot be imported directly here, so render a hidden preview instead
+  // Bug fix: Preview now only opens the preview modal — it no longer shares
+  // or prints anything by itself, so it can't be confused with WhatsApp/Email.
+  const previewSavedInvoice = (inv) => {
     setPreviewInvoice(inv)
     setShowPreviewModal(true)
   }
 
-  // Generate and open PDF for sharing
-  const generatePDFForShare = async (inv) => {
-    // Use the saved invoice preview zone
-    return new Promise((resolve) => {
-      // Render invoice in a temporary hidden window
-      const w = window.open('', '_blank', 'width=900,height=1200')
-      if (!w) { resolve(null); return }
-      const el = document.getElementById('saved-preview-zone') || document.getElementById('ig-print-zone')
-      if (!el) { w.close(); resolve(null); return }
-      w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${inv.no}</title><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"><style>*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}html,body{width:210mm;min-height:297mm;font-family:'Plus Jakarta Sans',sans-serif;background:#fff;color:#1a1a2e;-webkit-print-color-adjust:exact;print-color-adjust:exact;}@media print{@page{size:A4 portrait;margin:0;}}table{border-collapse:collapse;}</style></head><body><div style="width:210mm;min-height:297mm;background:#fff;">${el.innerHTML}</div></body></html>`)
-      w.document.close()
-      w.focus()
-      setTimeout(() => { w.print(); resolve(w) }, 900)
-    })
-  }
-
-  // Bug 5: WhatsApp aur Email share — PDF download first, phir share
-  const shareViaWhatsApp = async (inv) => {
-    // First open PDF for download
-    const el = document.getElementById('saved-preview-zone') || document.getElementById('ig-print-zone')
-    if (el) {
-      const w = window.open('', '_blank')
-      if (w) {
-        w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${inv.no}</title><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"><style>*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}html,body{width:210mm;min-height:297mm;font-family:'Plus Jakarta Sans',sans-serif;background:#fff;color:#1a1a2e;-webkit-print-color-adjust:exact;print-color-adjust:exact;}@media print{@page{size:A4 portrait;margin:0;}}table{border-collapse:collapse;}</style><script>window.onload=function(){window.print();setTimeout(function(){window.close();},2000);}<\/script></head><body><div style="width:210mm;min-height:297mm;background:#fff;">${el.innerHTML}</div></body></html>`)
-        w.document.close()
-      }
-    }
-    // Open WhatsApp after PDF dialog
-    const msg = `Hi ${inv.clientName || 'Client'},\n\nYour invoice *${inv.no}* is ready!\n\n📋 *Invoice Details:*\nAmount: *${inv.total}*\nDate: ${inv.date}\nBusiness: ${inv.bizName || ''}\n\n📎 The PDF has been opened for download — please save it and attach to this message.\n\n_Generated by Zerofy Invoice Generator_\nhttps://www.zerofy.co.in`
-    setTimeout(() => {
-      const phone = inv.clientPhone ? `91${inv.clientPhone}` : ''
-      const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`
-      window.open(url, '_blank')
-    }, 1200)
-  }
-
-  const shareViaEmail = (inv) => {
-    // First open PDF for download
-    const el = document.getElementById('saved-preview-zone') || document.getElementById('ig-print-zone')
-    if (el) {
-      const w = window.open('', '_blank')
-      if (w) {
-        w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${inv.no}</title><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"><style>*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}html,body{width:210mm;min-height:297mm;font-family:'Plus Jakarta Sans',sans-serif;background:#fff;color:#1a1a2e;-webkit-print-color-adjust:exact;print-color-adjust:exact;}@media print{@page{size:A4 portrait;margin:0;}}table{border-collapse:collapse;}</style><script>window.onload=function(){window.print();setTimeout(function(){window.close();},2000);}<\/script></head><body><div style="width:210mm;min-height:297mm;background:#fff;">${el.innerHTML}</div></body></html>`)
-        w.document.close()
-      }
-    }
-    const subject = `Invoice ${inv.no} from ${inv.bizName || 'Zerofy'}`
-    const body = `Hi ${inv.clientName || 'Client'},\n\nPlease find your invoice details below:\n\nInvoice No: ${inv.no}\nDate: ${inv.date}\nAmount: ${inv.total}\n\nBusiness: ${inv.bizName || ''}\n\n📎 The PDF has been opened in your browser — please save it and attach it to this email before sending.\n\nThank you for your business!\n\nRegards,\n${inv.bizName || ''}`
-    setTimeout(() => {
-      window.location.href = `mailto:${inv.clientEmail || ''}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
-    }, 1200)
-  }
+  // Bug fix: WhatsApp/Email now render straight from the invoice object
+  // (via the shared invoiceShare utils) instead of grabbing whatever
+  // preview happened to be on screen — so they always act on the exact
+  // invoice that was clicked, and they no longer just "look like Preview".
+  const shareViaWhatsApp = (inv) => shareInvoiceViaWhatsApp(inv)
+  const shareViaEmail = (inv) => shareInvoiceViaEmail(inv)
 
   const statusMeta = { draft: '#818CF8', sent: '#38BDF8', paid: '#34D399', overdue: '#F87171', cancelled: '#9CA3AF' }
   const invData = { ...f, no: invNo }
@@ -1385,11 +925,11 @@ export default function InvoiceMaker() {
                       <span className="s-amt">{inv.total}</span>
                     </div>
                   </div>
-                  {/* Bug 4 & 5: Action buttons */}
+                  {/* Preview / WhatsApp / Email — each does its own distinct action now */}
                   <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                    <button className="btn btn-sm btn-green" onClick={() => printSavedInvoice(inv)}
+                    <button className="btn btn-sm btn-green" onClick={() => previewSavedInvoice(inv)}
                       style={{ fontSize: 11, padding: '4px 10px' }}>
-                      👁 Preview & Print
+                      👁 Preview
                     </button>
                     <button className="btn btn-sm" onClick={() => shareViaWhatsApp(inv)}
                       style={{ fontSize: 11, padding: '4px 10px', background: 'rgba(37,211,102,0.12)', borderColor: 'rgba(37,211,102,0.3)', color: '#25D366' }}>
@@ -1485,9 +1025,6 @@ export default function InvoiceMaker() {
                       style={{ fontSize: 14, padding: '10px 24px', opacity: generating ? 0.7 : 1 }}>
                       {generating ? '⏳ Generating…' : '⚡ Generate & Print'}
                     </button>
-                    <button className="btn btn-green btn-sm" onClick={printInvoice}>
-                      👁 Preview PDF
-                    </button>
                   </div>
                   <div style={{ fontSize: 11, color: 'var(--text3)', marginTop: 10 }}>
                   Saves to Sent → opens print / PDF dialog
@@ -1557,7 +1094,7 @@ export default function InvoiceMaker() {
             {/* Live preview */}
             <div className="sec-label" style={{ margin: '14px 0 10px' }}><span className="sec-dot" />Live Preview</div>
             <div className="prev-box" id="ig-print-zone">
-              <Preview inv={invData} items={items} currency={currency} discPct={discPct} taxPct={taxPct} template={template} status={status} />
+              <InvoicePreview inv={invData} items={items} currency={currency} discPct={discPct} taxPct={taxPct} template={template} status={status} />
             </div>
           </div>
         </div>
@@ -1586,16 +1123,7 @@ export default function InvoiceMaker() {
                 </div>
                 <div style={{ display: 'flex', gap: 8 }}>
                   <button
-                    onClick={() => {
-                      // Print this saved invoice
-                      const el = document.getElementById('saved-preview-zone')
-                      if (!el) return
-                      const w = window.open('', '_blank')
-                      w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${previewInvoice.no}</title><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"><style>*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}html,body{width:210mm;min-height:297mm;font-family:'Plus Jakarta Sans',sans-serif;background:#fff;color:#1a1a2e;-webkit-print-color-adjust:exact;print-color-adjust:exact;}@media print{@page{size:A4 portrait;margin:0;}}table{border-collapse:collapse;}</style></head><body><div style="width:210mm;min-height:297mm;background:#fff;">${el.innerHTML}</div></body></html>`)
-                      w.document.close()
-                      w.focus()
-                      setTimeout(() => w.print(), 900)
-                    }}
+                    onClick={() => openPrintWindow(previewInvoice)}
                     className="btn btn-green btn-sm"
                   >🖨️ Print / Download</button>
                   <button
@@ -1614,7 +1142,7 @@ export default function InvoiceMaker() {
               {/* Invoice Preview */}
               <div style={{ padding: 20 }}>
                 <div id="saved-preview-zone" style={{ background: '#fff', borderRadius: 8, overflow: 'hidden' }}>
-                  <Preview
+                  <InvoicePreview
                     inv={{ ...previewInvoice, no: previewInvoice.no }}
                     items={previewInvoice.items || []}
                     currency={previewInvoice.currency || '₹'}
@@ -1625,79 +1153,6 @@ export default function InvoiceMaker() {
                   />
                 </div>
               </div>
-            </div>
-          </div>
-        </>
-      )}
-
-      {/* ✅ Success Modal */}
-      {showSuccessModal && (
-        <>
-          <div onClick={handleStayAndEdit} style={{
-            position: 'fixed', inset: 0, zIndex: 2000,
-            background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(6px)'
-          }} />
-          <div style={{
-            position: 'fixed', inset: 0, zIndex: 2001,
-            display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16
-          }}>
-            <div style={{
-              background: '#1A1830',
-              border: '1px solid rgba(52,211,153,0.35)',
-              borderRadius: 20, padding: '36px 28px',
-              maxWidth: 400, width: '100%',
-              textAlign: 'center',
-              boxShadow: '0 24px 80px rgba(0,0,0,0.5)',
-              animation: 'slideUp 0.25s ease'
-            }}>
-              <div style={{
-                width: 64, height: 64, borderRadius: '50%',
-                background: 'rgba(52,211,153,0.15)',
-                border: '2px solid rgba(52,211,153,0.4)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 30, margin: '0 auto 16px'
-              }}>✅</div>
-              <h2 style={{
-                fontSize: 20, fontWeight: 800, marginBottom: 6,
-                background: 'linear-gradient(135deg, #34D399, #38BDF8)',
-                WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'
-              }}>Invoice Generated!</h2>
-              <p style={{ color: '#9A96C0', fontSize: 13, marginBottom: 24, lineHeight: 1.6 }}>
-                <span style={{ color: '#A78BFA', fontFamily: 'monospace', fontWeight: 700 }}>{invNo}</span> has been saved and the print dialog is open.
-              </p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                <button
-                  onClick={handleNewInvoice}
-                  style={{
-                    width: '100%', padding: '13px',
-                    borderRadius: 12, border: 'none',
-                    background: 'linear-gradient(135deg, #7C6FFF, #A78BFA)',
-                    color: '#fff', fontSize: 15, fontWeight: 700,
-                    cursor: 'pointer',
-                    boxShadow: '0 4px 18px rgba(124,111,255,0.4)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8
-                  }}
-                >
-                  ➕ Create New Invoice
-                </button>
-                <button
-                  onClick={handleStayAndEdit}
-                  style={{
-                    width: '100%', padding: '12px',
-                    borderRadius: 12,
-                    border: '1px solid rgba(255,255,255,0.12)',
-                    background: 'rgba(255,255,255,0.05)',
-                    color: '#B8B4E0', fontSize: 14, fontWeight: 600,
-                    cursor: 'pointer',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8
-                  }}
-                >
-                  ✏️ Edit This Invoice
-                </button>
-              </div>
-              <p style={{ color: '#5A5578', fontSize: 11, marginTop: 14 }}>
-                Edit this invoice or use it as a base for a duplicate
-              </p>
             </div>
           </div>
         </>
