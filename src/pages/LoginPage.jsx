@@ -66,7 +66,7 @@ export default function LoginPage() {
             <span className={styles.logoMark}>Z</span>
             <span className={styles.logoText}>ZEROFY</span>
           </div>
-          <p className={styles.logoSub}>Billing &amp; GST Suite</p>
+          <p className={styles.logoSub}>Billing Software</p>
 
           <div className={styles.tabs}>
             <button
@@ -149,10 +149,10 @@ export default function LoginPage() {
       {/* ── Right: Ledger visual ── */}
       <div className={styles.visualSide}>
         <div className={styles.visualInner}>
-          <p className={styles.visualEyebrow}>GST-compliant invoicing</p>
+          <p className={styles.visualEyebrow}>Billing, simplified</p>
           <h2 className={styles.visualHeading}>Invoices that<br />get paid faster.</h2>
           <p className={styles.visualSub}>
-            Create GST-ready invoices, track every payment, and manage clients — one ledger for your whole business.
+            Create professional invoices, track every payment, and manage clients — one place for your whole business.
           </p>
 
           <div className={styles.invoiceCard}>
@@ -169,7 +169,7 @@ export default function LoginPage() {
             <div className={styles.lineItem}><span>Hosting &amp; support</span><span>₹8,500.00</span></div>
             <div className={styles.invoiceRule} />
             <div className={styles.lineItemMuted}><span>Subtotal</span><span>₹53,500.00</span></div>
-            <div className={styles.lineItemMuted}><span>GST (18%)</span><span>₹9,630.00</span></div>
+            <div className={styles.lineItemMuted}><span>Tax</span><span>₹9,630.00</span></div>
             <div className={styles.lineItemTotal}><span>Total due</span><span>₹63,130.00</span></div>
           </div>
         </div>
