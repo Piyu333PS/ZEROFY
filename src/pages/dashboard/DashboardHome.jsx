@@ -75,7 +75,7 @@ export default function DashboardHome() {
       <p className={styles.sectionLabel}>Recent invoices</p>
       <div className={styles.table}>
         <div className={styles.tableHead}>
-          <span>Invoice</span><span>Client</span><span>Amount</span><span>Status</span>
+          <span>Business</span><span>Invoice</span><span>Client</span><span>Amount</span><span>Status</span>
         </div>
         {loading ? (
           <p className={styles.empty}>Loading...</p>
@@ -88,6 +88,7 @@ export default function DashboardHome() {
             const total = afterDisc + (afterDisc * (Number(inv.taxPct) || 0) / 100)
             return (
               <div key={inv._id} className={styles.tableRow}>
+                <span>{inv.bizName || '—'}</span>
                 <span>{inv.no}</span>
                 <span>{inv.clientName || '—'}</span>
                 <span>{fmt(total)}</span>
