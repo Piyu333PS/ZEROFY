@@ -1,28 +1,29 @@
-.wrap { font-family: var(--font-body); }
+.wrap { padding: 26px 34px 60px; font-family: var(--body); color: var(--ink); }
 
-.header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
-.title { font-family: var(--font-display); font-size: 24px; color: var(--text); }
+.header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; }
+.title { font-family: var(--display); font-size: 26px; font-weight: 600; letter-spacing: -0.3px; color: var(--ink); }
 
 .primaryBtn {
-  background: var(--grad);
+  background: var(--saffron);
   color: #fff;
   border: none;
-  padding: 10px 18px;
-  border-radius: var(--radius);
+  padding: 11px 18px;
+  border-radius: 10px;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 13.5px;
   cursor: pointer;
-  transition: var(--transition);
+  box-shadow: 0 6px 16px -6px rgba(232,147,60,0.6);
+  font-family: var(--body);
 }
 .primaryBtn:hover { opacity: 0.9; }
 .primaryBtn:disabled { opacity: 0.6; cursor: not-allowed; }
 
 .form {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
+  background: #fff;
+  border: 1px solid var(--paper-line);
+  border-radius: 14px;
   padding: 18px;
-  margin-bottom: 24px;
+  margin-bottom: 22px;
 }
 
 .formGrid {
@@ -35,45 +36,46 @@
 .wide { grid-column: 1 / -1; }
 
 .form input {
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  background: var(--paper-dim);
+  border: 1px solid var(--paper-line);
+  border-radius: 10px;
   padding: 10px 12px;
-  color: var(--text);
-  font-size: 14px;
-  font-family: var(--font-body);
+  color: var(--ink);
+  font-size: 13.5px;
+  font-family: var(--body);
 }
-.form input:focus { outline: none; border-color: var(--border2); }
+.form input::placeholder { color: var(--slate); }
+.form input:focus { outline: none; border-color: var(--saffron); }
 
-.error { color: var(--red); font-size: 13px; margin-bottom: 10px; }
+.error { color: var(--rust); font-size: 13px; margin-bottom: 10px; }
 
-.table {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-}
+.table { background: #fff; border: 1px solid var(--paper-line); border-radius: 14px; overflow: hidden; }
 
 .tableHead, .tableRow {
   display: grid;
   grid-template-columns: 1.2fr 1fr 1.4fr 1fr 80px;
   padding: 12px 16px;
-  font-size: 13px;
+  font-size: 13.5px;
   align-items: center;
 }
 
-.tableHead { color: var(--text3); border-bottom: 1px solid var(--border); font-weight: 600; }
-.tableRow { color: var(--text); border-bottom: 1px solid var(--border); }
-.tableRow:last-child { border-bottom: none; }
+.tableHead {
+  font-size: 10.5px; letter-spacing: 1px; text-transform: uppercase;
+  color: var(--slate); font-weight: 600;
+  border-bottom: 1px solid var(--paper-line);
+}
+.tableRow { color: var(--ink); border-top: 1px solid var(--paper-line); }
+.tableRow:nth-child(even) { background: #FCFAF4; }
 
 .deleteBtn {
   background: none;
   border: none;
-  color: var(--red);
+  color: var(--rust);
   font-size: 12px;
   cursor: pointer;
   justify-self: end;
+  font-family: var(--body);
 }
 .deleteBtn:hover { text-decoration: underline; }
 
-.empty { padding: 24px 16px; color: var(--text2); font-size: 14px; }
+.empty { padding: 24px 16px; color: var(--slate); font-size: 13.5px; }
