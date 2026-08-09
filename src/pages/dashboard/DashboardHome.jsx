@@ -134,9 +134,6 @@ export default function DashboardHome() {
       <div className={styles.pageHead}>
         <div className={styles.eyebrow}>{greeting}, {greetName} · {today}</div>
         <h1>{headline}</h1>
-        <div className={styles.subgreet}>
-          {stats ? `${stats.invoiceCount} invoice${stats.invoiceCount === 1 ? '' : 's'} total · ${stats.customerCount} client${stats.customerCount === 1 ? '' : 's'}` : 'Data load ho raha hai…'}
-        </div>
       </div>
 
       {error && <p className={styles.error}>{error}</p>}
@@ -157,8 +154,15 @@ export default function DashboardHome() {
         )}
       </div>
 
-      <p className={styles.sectionLabel}>Recent Invoices</p>
-      <p className={styles.sectionSub}>Latest {RECENT_COUNT} invoices across all clients</p>
+      <div className={styles.sectionHead}>
+        <div>
+          <p className={styles.sectionLabel}>Recent Invoices</p>
+          <p className={styles.sectionSub}>Latest {RECENT_COUNT} invoices across all clients</p>
+        </div>
+        <a className={styles.viewAllLink} href="/app/invoices" onClick={(e) => { e.preventDefault(); navigate('/app/invoices') }}>
+          View all →
+        </a>
+      </div>
 
       <div className={styles.ledgerPanel}>
         <div className={styles.tableHead}>
