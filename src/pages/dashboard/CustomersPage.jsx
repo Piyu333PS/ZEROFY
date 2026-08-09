@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import styles from './CustomersPage.module.css'
 
@@ -13,6 +13,10 @@ export default function CustomersPage() {
   const [form, setForm] = useState(emptyForm)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
+  const [downloadingTemplate, setDownloadingTemplate] = useState(false)
+  const [importing, setImporting] = useState(false)
+  const [importResult, setImportResult] = useState(null)
+  const fileInputRef = useRef(null)
 
   const load = async () => {
     setLoading(true)
@@ -56,14 +60,95 @@ export default function CustomersPage() {
     load()
   }
 
+  const handleDownloadTemplate = async () => {
+    setDownloadingTemplate(true)
+    setError(null)
+    try {
+      const res = await fetch(`${API}/api/customers/template`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      if (!res.ok) throw new Error('Template download nahi ho paya')
+      const blob = await res.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = 'zerofy-customers-template.xlsx'
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      window.URL.revokeObjectURL(url)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setDownloadingTemplate(false)
+    }
+  }
+
+  const handleImportClick = () => fileInputRef.current?.click()
+
+  const handleImportFile = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setImporting(true)
+    setError(null)
+    setImportResult(null)
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      const res = await fetch(`${API}/api/customers/import`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData
+      }).then(r => r.json())
+      if (!res.success) throw new Error(res.error || 'Import nahi ho paya')
+      setImportResult(res)
+      load()
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setImporting(false)
+      e.target.value = '' // taaki same file dobara select ho sake
+    }
+  }
+
   return (
     <div className={styles.wrap}>
       <div className={styles.header}>
         <h1 className={styles.title}>Customers</h1>
-        <button className={styles.primaryBtn} onClick={() => setShowForm(s => !s)}>
-          {showForm ? 'Cancel' : '+ Add customer'}
-        </button>
+        <div className={styles.btnGroup}>
+          <button className={styles.secondaryBtn} onClick={handleDownloadTemplate} disabled={downloadingTemplate}>
+            {downloadingTemplate ? 'Downloading...' : 'Download template'}
+          </button>
+          <button className={styles.secondaryBtn} onClick={handleImportClick} disabled={importing}>
+            {importing ? 'Importing...' : 'Import Excel'}
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".xlsx,.xls,.csv"
+            onChange={handleImportFile}
+            className={styles.hiddenInput}
+          />
+          <button className={styles.primaryBtn} onClick={() => setShowForm(s => !s)}>
+            {showForm ? 'Cancel' : '+ Add customer'}
+          </button>
+        </div>
       </div>
+
+      {importResult && (
+        <div className={styles.importSummary}>
+          <p>
+            ✅ {importResult.createdCount} customer{importResult.createdCount === 1 ? '' : 's'} import ho gaye
+            {importResult.skippedCount > 0 && `, ${importResult.skippedCount} skip ho gaye (Naam missing tha)`}.
+          </p>
+          {importResult.errors?.length > 0 && (
+            <p className={styles.importErrors}>
+              Skipped rows: {importResult.errors.map(e => `Row ${e.row}`).join(', ')}
+            </p>
+          )}
+          <button className={styles.closeSummary} onClick={() => setImportResult(null)}>Close</button>
+        </div>
+      )}
 
       {showForm && (
         <form className={styles.form} onSubmit={handleAdd}>

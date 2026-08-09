@@ -1,7 +1,49 @@
 .wrap { padding: 26px 34px 60px; font-family: var(--body); color: var(--ink); }
 
-.header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; }
+.header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; gap: 12px; flex-wrap: wrap; }
 .title { font-family: var(--display); font-size: 26px; font-weight: 600; letter-spacing: -0.3px; color: var(--ink); }
+
+.btnGroup { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+.secondaryBtn {
+  background: #fff;
+  color: var(--ink);
+  border: 1px solid var(--paper-line);
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 13.5px;
+  cursor: pointer;
+  font-family: var(--body);
+}
+.secondaryBtn:hover { border-color: var(--saffron); color: var(--saffron); }
+.secondaryBtn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.hiddenInput { display: none; }
+
+.importSummary {
+  background: #F3F8F1;
+  border: 1px solid var(--ledger-green, #6B8F71);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 22px;
+  font-size: 13.5px;
+  color: var(--ink);
+  position: relative;
+}
+.importErrors { color: var(--slate); font-size: 12.5px; margin-top: 6px; }
+.closeSummary {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  background: none;
+  border: none;
+  color: var(--slate);
+  font-size: 12px;
+  cursor: pointer;
+  font-family: var(--body);
+}
+.closeSummary:hover { color: var(--ink); }
 
 .primaryBtn {
   background: var(--saffron);
