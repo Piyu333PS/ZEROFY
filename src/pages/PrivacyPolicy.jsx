@@ -23,7 +23,7 @@ const PrivacyPolicy = () => {
       </p>
 
       <Section title="1. Introduction">
-        <p>Welcome to Zerofy ("we", "our", or "us"), a product owned and operated by <strong>Piyush Sharma</strong>, based in Jaipur, Rajasthan, India. This Privacy Policy explains how we collect, use, disclose, and protect your information when you use our platform at <a href="https://www.zerofy.co.in" style={{ color: '#7b6ef6' }}>www.zerofy.co.in</a>.</p>
+        <p>Welcome to Zerofy ("we", "our", or "us"), a product owned and operated by <strong>KumKum Sharma</strong>, based in Jaipur, Rajasthan, India. This Privacy Policy explains how we collect, use, disclose, and protect your information when you use our platform at <a href="https://www.zerofy.co.in" style={{ color: '#7b6ef6' }}>www.zerofy.co.in</a>.</p>
         <p>By using Zerofy, you agree to the collection and use of information in accordance with this policy.</p>
       </Section>
 
@@ -91,7 +91,7 @@ const PrivacyPolicy = () => {
 
       <Section title="11. Contact Us">
         <p>
-          <strong>Piyush Sharma</strong><br />
+          <strong>KumKum Sharma</strong><br />
           Zerofy, Jaipur, Rajasthan, India<br />
           Email: <a href="mailto:support@zerofy.co.in" style={{ color: '#7b6ef6' }}>support@zerofy.co.in</a><br />
           Website: <a href="https://www.zerofy.co.in" style={{ color: '#7b6ef6' }}>www.zerofy.co.in</a>

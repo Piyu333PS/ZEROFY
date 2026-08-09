@@ -23,7 +23,7 @@ const TermsConditions = () => {
       </p>
 
       <Section title="1. Acceptance of Terms">
-        <p>By accessing or using Zerofy ("the Platform"), you agree to be bound by these Terms and Conditions. If you do not agree, please do not use our services. Zerofy is owned and operated by <strong>Piyush Sharma</strong>, Jaipur, Rajasthan, India.</p>
+        <p>By accessing or using Zerofy ("the Platform"), you agree to be bound by these Terms and Conditions. If you do not agree, please do not use our services. Zerofy is owned and operated by <strong>KumKum Sharma</strong>, Jaipur, Rajasthan, India.</p>
       </Section>
 
       <Section title="2. Description of Service">
@@ -34,9 +34,9 @@ const TermsConditions = () => {
         <p>We offer the following paid plans (in Indian Rupees, inclusive of taxes):</p>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 14, margin: '20px 0 24px' }}>
           {[
-            { name: 'Monthly', price: '₹19', desc: 'per month · cancel anytime' },
-            { name: 'Quarterly', price: '₹49', desc: 'every 3 months · most popular' },
-            { name: 'Yearly', price: '₹199', desc: 'per year · best value' },
+            { name: 'Monthly', price: '₹49', desc: 'per month · cancel anytime' },
+            { name: 'Quarterly', price: '₹129', desc: 'every 3 months · most popular' },
+            { name: 'Yearly', price: '₹399', desc: 'per year · best value' },
           ].map(plan => (
             <div key={plan.name} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '16px 18px' }}>
               <div style={{ fontFamily: 'var(--font-display)', fontSize: 14, fontWeight: 600, color: '#7b6ef6', marginBottom: 4 }}>{plan.name}</div>
@@ -88,7 +88,7 @@ const TermsConditions = () => {
       </Section>
 
       <Section title="9. Intellectual Property">
-        <p>All content, branding, and tools on Zerofy are the intellectual property of Piyush Sharma / Zerofy. You may not copy, reproduce, or redistribute any part of the platform without explicit written consent.</p>
+        <p>All content, branding, and tools on Zerofy are the intellectual property of KumKum Sharma / Zerofy. You may not copy, reproduce, or redistribute any part of the platform without explicit written consent.</p>
         <p>Files you upload and generate on Zerofy remain your property. We claim no ownership over your content.</p>
       </Section>
 
@@ -110,7 +110,7 @@ const TermsConditions = () => {
 
       <Section title="14. Contact">
         <p>
-          <strong>Piyush Sharma</strong><br />
+          <strong>KumKum Sharma</strong><br />
           Zerofy, Jaipur, Rajasthan, India<br />
           Email: <a href="mailto:support@zerofy.co.in" style={{ color: '#7b6ef6' }}>support@zerofy.co.in</a><br />
           Website: <a href="https://www.zerofy.co.in" style={{ color: '#7b6ef6' }}>www.zerofy.co.in</a>

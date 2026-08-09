@@ -72,17 +72,17 @@ export default function RefundPage() {
           <div className={styles.planGrid}>
             <div className={styles.planCard}>
               <div className={styles.planName}>Monthly</div>
-              <div className={styles.planPrice}>₹19<span>/month</span></div>
+              <div className={styles.planPrice}>₹49<span>/month</span></div>
               <div className={styles.planNote}>Cancel anytime</div>
             </div>
             <div className={styles.planCard}>
               <div className={styles.planName}>Quarterly</div>
-              <div className={styles.planPrice}>₹49<span>/3 months</span></div>
+              <div className={styles.planPrice}>₹129<span>/3 months</span></div>
               <div className={styles.planNote}>Most popular</div>
             </div>
             <div className={styles.planCard}>
               <div className={styles.planName}>Yearly</div>
-              <div className={styles.planPrice}>₹199<span>/year</span></div>
+              <div className={styles.planPrice}>₹399<span>/year</span></div>
               <div className={styles.planNote}>Best value</div>
             </div>
           </div>

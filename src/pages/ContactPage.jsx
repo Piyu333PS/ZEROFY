@@ -45,7 +45,7 @@ export default function ContactPage() {
             <div className={styles.infoCard}>
               <div className={styles.infoIcon}>👤</div>
               <div className={styles.infoTitle}>Founder</div>
-              <div className={styles.infoValue}>Piyush Sharma</div>
+              <div className={styles.infoValue}>KumKum Sharma</div>
               <div className={styles.infoNote}>Zerofy</div>
             </div>
 
