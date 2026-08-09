@@ -45,13 +45,20 @@ export const CSS = `
    rest of the page instead of sitting on top of it as a flat, differently
    colored strip. */
 .ig-top {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 10px 24px;
   background: rgba(10,10,18,0.82);
   backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid rgba(99,179,237,0.14);
-  gap: 12px; flex-wrap: wrap;
   flex-shrink: 0;
+}
+/* Same max-width + centering as .ig-layout below, so the back button lines
+   up with the left panel's edge and the actions line up with the right
+   panel's edge — the header and body read as one aligned column, not two
+   independently-centered strips. */
+.ig-top-inner {
+  display: flex; align-items: center; justify-content: space-between;
+  max-width: 1600px; width: 100%; margin: 0 auto;
+  padding: 10px 24px;
+  gap: 12px; flex-wrap: wrap;
 }
 .ig-top-left { display: flex; align-items: center; gap: 12px; min-width: 0; flex-wrap: wrap; }
 .ig-back {
