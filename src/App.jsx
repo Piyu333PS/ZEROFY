@@ -46,8 +46,10 @@ import RingtoneMaker from './pages/tools/RingtoneMaker'
 import InvoiceMaker from './pages/tools/InvoiceMaker'
 import DashboardLayout from './components/dashboard/DashboardLayout'
 import DashboardHome from './pages/dashboard/DashboardHome'
+import InvoicesPage from './pages/dashboard/InvoicesPage'
 import CustomersPage from './pages/dashboard/CustomersPage'
 import PaymentsPage from './pages/dashboard/PaymentsPage'
+import ReportsPage from './pages/dashboard/ReportsPage'
 import ResumeBuilder from './pages/tools/ResumeBuilder'
 import SettingsPage from './pages/SettingsPage'
 import BillingPage from './pages/BillingPage'
@@ -206,8 +208,10 @@ function AppInner() {
           {/* Billing dashboard */}
           <Route path="/app" element={<DashboardLayout />}>
             <Route index element={<DashboardHome />} />
+            <Route path="invoices" element={<InvoicesPage />} />
             <Route path="customers" element={<CustomersPage />} />
             <Route path="payments" element={<PaymentsPage />} />
+            <Route path="reports" element={<ReportsPage />} />
           </Route>
 
           {/* Document */}
