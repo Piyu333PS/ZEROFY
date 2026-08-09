@@ -19,6 +19,8 @@ const icons = {
   profile: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 20c0-4.14 3.36-7 7.5-7s7.5 2.86 7.5 7"/></svg>,
   card: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="M2.5 10h19"/></svg>,
   logout: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>,
+  eye: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M1.5 12S5 5 12 5s10.5 7 10.5 7-3.5 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3"/></svg>,
+  share: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.8l7.6-4.2M8.2 13.2l7.6 4.2"/></svg>,
 }
 
 export default function DashboardHome() {
@@ -29,8 +31,8 @@ export default function DashboardHome() {
   const [invoices, setInvoices] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [query, setQuery] = useState('')
   const [menuOpen, setMenuOpen] = useState(false)
+  const [shareMenuId, setShareMenuId] = useState(null)
 
   useEffect(() => {
     if (!token) return
@@ -59,16 +61,7 @@ export default function DashboardHome() {
 
   const RECENT_COUNT = 10
 
-  const filteredInvoices = useMemo(() => {
-    const list = invoices.slice(0, RECENT_COUNT)
-    if (!query.trim()) return list
-    const q = query.trim().toLowerCase()
-    return invoices.filter(inv =>
-      inv.no?.toLowerCase().includes(q) ||
-      inv.clientName?.toLowerCase().includes(q) ||
-      inv.bizName?.toLowerCase().includes(q)
-    ).slice(0, 10)
-  }, [invoices, query])
+  const recentInvoices = useMemo(() => invoices.slice(0, RECENT_COUNT), [invoices])
 
   const greetName = user?.email ? user.email.split('@')[0] : 'there'
   const today = new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'short' })
@@ -95,14 +88,7 @@ export default function DashboardHome() {
   return (
     <div className={styles.wrap}>
       <div className={styles.topbar}>
-        <div className={styles.search}>
-          {icons.search}
-          <input
-            placeholder="Search invoice ya client…"
-            value={query}
-            onChange={e => setQuery(e.target.value)}
-          />
-        </div>
+        <div />
         <div className={styles.topActions}>
           <button className={styles.primaryBtn} onClick={() => navigate('/tools/invoice-maker')}>
             {icons.plus} New Invoice
@@ -180,12 +166,12 @@ export default function DashboardHome() {
         </div>
         {loading ? (
           <p className={styles.empty}>Loading...</p>
-        ) : filteredInvoices.length === 0 ? (
+        ) : recentInvoices.length === 0 ? (
           <p className={styles.empty}>
-            {query ? 'Koi match nahi mila.' : <>Abhi tak koi invoice nahi bana. <a href="/tools/invoice-maker">Pehla invoice banao →</a></>}
+            Abhi tak koi invoice nahi bana. <a href="/tools/invoice-maker">Pehla invoice banao →</a>
           </p>
         ) : (
-          filteredInvoices.map(inv => {
+          recentInvoices.map(inv => {
             const sub = (inv.items || []).reduce((s, it) => s + (Number(it.qty) || 0) * (Number(it.rate) || 0), 0)
             const afterDisc = sub - (sub * (Number(inv.discPct) || 0) / 100)
             const total = afterDisc + (afterDisc * (Number(inv.taxPct) || 0) / 100)
@@ -201,10 +187,44 @@ export default function DashboardHome() {
                 </div>
                 <span className={styles.amount}>{fmt(total)}</span>
                 <span className={`${styles.stamp} ${styles[inv.status] || ''}`}>{inv.status}</span>
-                <div className={styles.rowActions}>
-                  <button className={styles.actionBtn} title="Preview" onClick={() => openPrintWindow(inv)}>👁</button>
-                  <button className={styles.actionBtn} title="WhatsApp" onClick={() => shareViaWhatsApp(inv)}>💬</button>
-                  <button className={styles.actionBtn} title="Email" onClick={() => shareViaEmail(inv)}>✉️</button>
+                <div className={styles.rowActions} style={{ position: 'relative' }}>
+                  <button className={styles.actionBtn} title="View" onClick={() => openPrintWindow(inv)}>{icons.eye}</button>
+                  <button
+                    className={styles.actionBtn}
+                    title="Share"
+                    onClick={() => setShareMenuId(id => id === inv._id ? null : inv._id)}
+                  >
+                    {icons.share}
+                  </button>
+
+                  {shareMenuId === inv._id && (
+                    <>
+                      <div
+                        style={{ position: 'fixed', inset: 0, zIndex: 10 }}
+                        onClick={() => setShareMenuId(null)}
+                      />
+                      <div
+                        style={{
+                          position: 'absolute', top: '100%', right: 0, marginTop: 4, zIndex: 11,
+                          background: '#fff', border: '1px solid var(--border, #e5e5e5)', borderRadius: 8,
+                          boxShadow: '0 6px 20px rgba(0,0,0,0.12)', overflow: 'hidden', minWidth: 140,
+                        }}
+                      >
+                        <button
+                          style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px 12px', border: 'none', background: 'none', cursor: 'pointer', fontSize: 13 }}
+                          onClick={() => { setShareMenuId(null); shareViaWhatsApp(inv) }}
+                        >
+                          💬 WhatsApp
+                        </button>
+                        <button
+                          style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px 12px', border: 'none', background: 'none', cursor: 'pointer', fontSize: 13 }}
+                          onClick={() => { setShareMenuId(null); shareViaEmail(inv) }}
+                        >
+                          ✉️ Email
+                        </button>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             )
