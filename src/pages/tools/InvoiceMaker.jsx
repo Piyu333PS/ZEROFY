@@ -769,41 +769,22 @@ export default function InvoiceMaker() {
 
   return (
     <div className="ig-root">
-      {/* BACK / BREADCRUMB BAR */}
-      <div style={{
-        display: 'flex', alignItems: 'center', gap: 10,
-        padding: '12px 20px',
-        background: '#0F0F1A',
-        borderBottom: '1px solid rgba(255,255,255,0.07)',
-      }}>
-        <button
-          onClick={() => window.history.back()}
-          style={{
-            display: 'inline-flex', alignItems: 'center', gap: 6,
-            padding: '6px 14px', borderRadius: 8,
-            border: '1px solid rgba(255,255,255,0.15)',
-            background: 'rgba(255,255,255,0.06)',
-            color: '#B8B4E0', fontSize: 13, fontWeight: 600,
-            cursor: 'pointer', fontFamily: 'inherit',
-            transition: 'all 0.15s',
-          }}
-          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.12)'; e.currentTarget.style.color = '#F0EEFF'; }}
-          onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = '#B8B4E0'; }}
-        >
-          ‹ Back
-        </button>
-        <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 13 }}>Home</span>
-        <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 13 }}>›</span>
-        <span style={{ color: '#B8B4E0', fontSize: 13 }}>Invoice Generator</span>
-      </div>
-
-      {/* TOP BAR */}
+      {/* TOP BAR — back, breadcrumb, brand and actions combined into one compact row
+          (was two stacked bars) so the tool starts higher and the theme reads as
+          one continuous surface instead of a flat strip on top of the gradient. */}
       <div className="ig-top">
-        <div className="ig-brand">
-          <div className="ig-icon">🧾</div>
-          <div>
-            <div className="ig-name">Invoice Generator</div>
-            <div className="ig-sub">GST-ready · Instant PDF · Multi-business</div>
+        <div className="ig-top-left">
+          <button className="ig-back" onClick={() => window.history.back()}>‹ Back</button>
+          <div className="ig-crumb">
+            <span>Home</span><span className="ig-crumb-sep">›</span><span className="ig-crumb-cur">Invoice Generator</span>
+          </div>
+          <div className="ig-vsep" />
+          <div className="ig-brand">
+            <div className="ig-icon">🧾</div>
+            <div>
+              <div className="ig-name">Invoice Generator</div>
+              <div className="ig-sub">GST-ready · Instant PDF · Multi-business</div>
+            </div>
           </div>
         </div>
         <div className="ig-actions">
@@ -819,7 +800,9 @@ export default function InvoiceMaker() {
         </div>
       </div>
 
-      {/* MAIN LAYOUT */}
+      {/* MAIN LAYOUT — left form panel and right preview panel each scroll
+          independently within the fixed viewport, so the page itself never
+          needs to scroll and the live preview stays visible while you work. */}
       <div className="ig-layout">
 
         {/* LEFT — FORM */}
