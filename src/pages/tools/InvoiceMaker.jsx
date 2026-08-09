@@ -773,30 +773,32 @@ export default function InvoiceMaker() {
           (was two stacked bars) so the tool starts higher and the theme reads as
           one continuous surface instead of a flat strip on top of the gradient. */}
       <div className="ig-top">
-        <div className="ig-top-left">
-          <button className="ig-back" onClick={() => window.history.back()}>‹ Back</button>
-          <div className="ig-crumb">
-            <span>Home</span><span className="ig-crumb-sep">›</span><span className="ig-crumb-cur">Invoice Generator</span>
-          </div>
-          <div className="ig-vsep" />
-          <div className="ig-brand">
-            <div className="ig-icon">🧾</div>
-            <div>
-              <div className="ig-name">Invoice Generator</div>
-              <div className="ig-sub">GST-ready · Instant PDF · Multi-business</div>
+        <div className="ig-top-inner">
+          <div className="ig-top-left">
+            <button className="ig-back" onClick={() => window.history.back()}>‹ Back</button>
+            <div className="ig-crumb">
+              <span>Home</span><span className="ig-crumb-sep">›</span><span className="ig-crumb-cur">Invoice Generator</span>
+            </div>
+            <div className="ig-vsep" />
+            <div className="ig-brand">
+              <div className="ig-icon">🧾</div>
+              <div>
+                <div className="ig-name">Invoice Generator</div>
+                <div className="ig-sub">GST-ready · Instant PDF · Multi-business</div>
+              </div>
             </div>
           </div>
-        </div>
-        <div className="ig-actions">
-          <button className="btn" onClick={() => setShowBizModal(true)}>
-            🏢 Businesses {businesses.length > 0 && <span style={{ background: 'var(--accent)', color: '#fff', borderRadius: 10, padding: '1px 7px', fontSize: 10 }}>{businesses.length}</span>}
-          </button>
-          <button className="btn" onClick={() => navigate('/app/invoices')}>
-            📄 All Invoices
-          </button>
-          <select className="inp" value={currency} onChange={e => setCurrency(e.target.value)} style={{ width: 'auto', padding: '8px 12px' }}>
-            {CURRENCIES.map(c => <option key={c.sym} value={c.sym}>{c.sym} {c.code}</option>)}
-          </select>
+          <div className="ig-actions">
+            <button className="btn" onClick={() => setShowBizModal(true)}>
+              🏢 Businesses {businesses.length > 0 && <span style={{ background: 'var(--accent)', color: '#fff', borderRadius: 10, padding: '1px 7px', fontSize: 10 }}>{businesses.length}</span>}
+            </button>
+            <button className="btn" onClick={() => navigate('/app/invoices')}>
+              📄 All Invoices
+            </button>
+            <select className="inp" value={currency} onChange={e => setCurrency(e.target.value)} style={{ width: 'auto', padding: '8px 12px' }}>
+              {CURRENCIES.map(c => <option key={c.sym} value={c.sym}>{c.sym} {c.code}</option>)}
+            </select>
+          </div>
         </div>
       </div>
 
