@@ -25,35 +25,63 @@ export const CSS = `
   --r-sm: 9px;
   font-family: 'Plus Jakarta Sans', sans-serif;
   color: var(--text);
-  min-height: 100vh;
   background:
     radial-gradient(circle at 15% 0%, rgba(99,179,237,0.10) 0%, transparent 45%),
     radial-gradient(circle at 90% 10%, rgba(159,122,234,0.08) 0%, transparent 45%),
     var(--bg);
-  padding-bottom: 60px;
+  /* Fills exactly the space below the site navbar (60px) so the tool itself
+     never causes the whole page to scroll — the form and preview panels
+     below scroll independently instead. On small screens this collapses
+     back to normal document flow (see media query at the bottom). */
+  height: calc(100vh - 60px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 .ig-root * { box-sizing: border-box; }
 
-/* Header — sticky glass bar, same treatment as the main site nav */
+/* Header — one compact row: back + breadcrumb + brand + actions.
+   Translucent + blurred so the gradient behind shows through, matching the
+   rest of the page instead of sitting on top of it as a flat, differently
+   colored strip. */
 .ig-top {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 16px 28px;
+  padding: 10px 24px;
   background: rgba(10,10,18,0.82);
   backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid rgba(99,179,237,0.14);
   gap: 12px; flex-wrap: wrap;
-  position: sticky; top: 0; z-index: 40;
+  flex-shrink: 0;
 }
-.ig-brand { display: flex; align-items: center; gap: 12px; }
+.ig-top-left { display: flex; align-items: center; gap: 12px; min-width: 0; flex-wrap: wrap; }
+.ig-back {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-family: inherit; font-size: 12.5px; font-weight: 600;
+  padding: 6px 12px 6px 9px; border-radius: 100px;
+  border: 1px solid var(--border2); background: rgba(255,255,255,0.04);
+  color: var(--text2); cursor: pointer; white-space: nowrap; transition: all 0.15s;
+}
+.ig-back:hover { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+.ig-crumb { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--text3); white-space: nowrap; }
+.ig-crumb-sep { color: rgba(255,255,255,0.25); }
+.ig-crumb-cur { color: var(--text2); }
+.ig-vsep { width: 1px; height: 22px; background: rgba(255,255,255,0.12); flex-shrink: 0; }
+.ig-brand { display: flex; align-items: center; gap: 10px; }
 .ig-icon {
-  width: 40px; height: 40px; border-radius: 11px;
+  width: 34px; height: 34px; border-radius: 9px;
   background: var(--grad);
   display: flex; align-items: center; justify-content: center;
-  font-size: 18px; box-shadow: 0 0 20px var(--accent-glow);
+  font-size: 15px; box-shadow: 0 0 16px var(--accent-glow); flex-shrink: 0;
 }
-.ig-name { font-size: 17px; font-weight: 700; color: var(--text); letter-spacing: -0.02em; }
-.ig-sub { font-size: 11px; color: var(--text3); margin-top: 1px; }
+.ig-name { font-size: 14.5px; font-weight: 700; color: var(--text); letter-spacing: -0.02em; line-height: 1.2; }
+.ig-sub { font-size: 10px; color: var(--text3); margin-top: 1px; }
 .ig-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+@media (max-width: 1050px) {
+  .ig-root { height: auto; min-height: calc(100vh - 60px); overflow: visible; }
+}
+@media (max-width: 640px) {
+  .ig-vsep, .ig-sub { display: none; }
+}
 
 /* Centered container — matches the ~1280px max-width used across the rest of Zerofy */
 .ig-container { max-width: 1360px; margin: 0 auto; padding: 0 24px; }
@@ -79,16 +107,33 @@ export const CSS = `
 .btn-ghost { background: transparent; border-color: transparent; color: var(--text3); }
 .btn-ghost:hover { background: #181A26; color: var(--text); border-color: rgba(255,255,255,0.14); }
 
-/* Main layout — centered, generous columns so the preview isn't squeezed */
+/* Main layout — fills the remaining viewport height below the header.
+   Left (form) and right (preview) panels each get their own scrollbar via
+   min-height:0, so the page itself is fixed and only the panel you're
+   working in scrolls — the live preview stays on screen the whole time. */
 .ig-layout {
-  display: grid; grid-template-columns: minmax(0,1fr) minmax(400px, 560px);
-  gap: 28px; max-width: 1360px; margin: 0 auto; padding: 24px 24px 0;
-  align-items: start;
+  flex: 1; min-height: 0;
+  display: grid; grid-template-columns: minmax(0,1fr) minmax(360px, 480px);
+  grid-template-rows: minmax(0, 1fr);
+  gap: 24px; max-width: 1600px; width: 100%; margin: 0 auto;
+  padding: 18px 24px; align-items: stretch;
+  overflow: hidden;
 }
-@media (max-width: 1050px) { .ig-layout { grid-template-columns: 1fr; gap: 20px; } }
+@media (max-width: 1050px) {
+  .ig-layout { grid-template-columns: 1fr; grid-template-rows: none; gap: 20px; overflow: visible; height: auto; padding: 18px 16px 32px; }
+}
 
-.ig-left { padding: 0; }
-.ig-right { padding: 0; }
+.ig-left {
+  padding: 0 8px 4px 0; margin-right: -8px;
+  overflow-y: auto; min-height: 0;
+}
+.ig-right {
+  padding: 0 4px 4px 0; margin-right: -4px;
+  overflow-y: auto; min-height: 0;
+}
+@media (max-width: 1050px) {
+  .ig-left, .ig-right { overflow: visible; height: auto; padding: 0; margin: 0; }
+}
 
 /* Section heading */
 .sec-label {
@@ -158,15 +203,20 @@ select.inp option { background: #181A26; color: #F0EEFF; }
   width: 140px; letter-spacing: 0.04em;
 }
 
-/* Items table */
+/* Items table — proportional (fr-based) columns instead of fixed pixel
+   widths, so the row compresses smoothly as the left panel narrows (e.g.
+   at higher browser zoom) instead of overflowing and getting clipped. The
+   card below still has overflow-x:auto as a last-resort fallback. */
 .items-head {
-  display: grid; grid-template-columns: 88px minmax(140px,1fr) 110px 88px 80px 64px 88px 90px 32px;
-  gap: 6px; padding: 0 4px 8px; border-bottom: 2px solid rgba(99,179,237,0.3);
+  display: grid;
+  grid-template-columns: minmax(58px,0.65fr) minmax(120px,1.8fr) minmax(78px,1fr) minmax(60px,0.7fr) minmax(54px,0.65fr) minmax(42px,0.5fr) minmax(58px,0.75fr) minmax(62px,0.8fr) 24px;
+  gap: 5px; padding: 0 4px 8px; border-bottom: 2px solid rgba(99,179,237,0.3);
   font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #A0A8B8;
 }
 .item-row {
-  display: grid; grid-template-columns: 88px minmax(140px,1fr) 110px 88px 80px 64px 88px 90px 32px;
-  gap: 6px; align-items: start; margin-top: 8px; animation: fadeIn 0.2s ease;
+  display: grid;
+  grid-template-columns: minmax(58px,0.65fr) minmax(120px,1.8fr) minmax(78px,1fr) minmax(60px,0.7fr) minmax(54px,0.65fr) minmax(42px,0.5fr) minmax(58px,0.75fr) minmax(62px,0.8fr) 24px;
+  gap: 5px; align-items: start; margin-top: 8px; animation: fadeIn 0.2s ease;
   padding: 6px 4px; border-bottom: 1px solid rgba(255,255,255,0.06); border-radius: 6px;
   transition: background 0.12s;
 }
@@ -210,8 +260,9 @@ select.inp option { background: #181A26; color: #F0EEFF; }
 }
 .pct-inp:focus { border-color: var(--accent); }
 
-/* Right panel */
-.preview-panel { position: sticky; top: 88px; }
+/* Right panel — lives inside .ig-right which already scrolls on its own,
+   so this no longer needs to be sticky against the page. */
+.preview-panel { position: static; }
 
 /* Framed card that holds the white invoice preview — gives it real presence
    instead of a cramped strip pinned to the sidebar edge. */
@@ -230,8 +281,6 @@ select.inp option { background: #181A26; color: #F0EEFF; }
   width: 100%;
   transform-origin: top left;
 }
-@media (max-width: 1050px) { .preview-panel { position: static; } }
-
 /* Template thumbs */
 .tmpl-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
 .tmpl-opt {
