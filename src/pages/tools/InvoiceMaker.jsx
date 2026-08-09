@@ -45,6 +45,22 @@ const deleteInvoice = (id, token) =>
   apiFetch(`/api/invoices/${id}`, token, { method: 'DELETE' }).catch(() => {})
 const fmt = (n, sym = '₹') => `${sym}${Number(n || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 
+/* ─── Validation ─────────────────────────────────────────────── */
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
+// Standard 15-char GSTIN: 2-digit state code, 10-char PAN, 1 entity code, 'Z', 1 checksum
+const GSTIN_RE = /^\d{2}[A-Z]{5}\d{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/i
+
+const validateEmail = (v) => !v || EMAIL_RE.test(v.trim())
+const validateGstin = (v) => !v || GSTIN_RE.test(v.trim())
+
+// Small helper: red border on the input + a short message underneath,
+// but only once the user has actually left the field (so it doesn't
+// nag while they're still typing).
+function FieldError({ show, message }) {
+  if (!show) return null
+  return <div className="field-err">{message}</div>
+}
+
 /* ─── GST Data ───────────────────────────────────────────────── */
 const GST_RATES = [0, 0.1, 0.25, 1.5, 3, 5, 7.5, 12, 18, 28]
 
@@ -133,7 +149,14 @@ function BizModal({ businesses, onSave, onClose }) {
   const empty = { name: '', email: '', phone: '', altPhone: '', altEmail: '', gst: '', addr: '', prefix: 'INV' }
   const [editing, setEditing] = useState(null)
   const [form, setForm] = useState(empty)
+  const [touched, setTouched] = useState({})
   const set = (k) => (e) => setForm(f => ({ ...f, [k]: e.target.value }))
+  const markTouched = k => () => setTouched(p => ({ ...p, [k]: true }))
+  const setDigits = (k, max = 10) => (e) => setForm(f => ({ ...f, [k]: e.target.value.replace(/\D/g, '').slice(0, max) }))
+  const setGst = (k) => (e) => setForm(f => ({ ...f, [k]: e.target.value.toUpperCase().replace(/[^0-9A-Z]/g, '').slice(0, 15) }))
+  const formHasErrors =
+    !validateEmail(form.email) || !validateEmail(form.altEmail) || !validateGstin(form.gst) ||
+    (form.phone && form.phone.length !== 10)
 
   return (
     <div className="modal-bg" onClick={e => e.target === e.currentTarget && onClose()}>
@@ -151,14 +174,14 @@ function BizModal({ businesses, onSave, onClose }) {
                   <div style={{ fontSize: 11, color: 'var(--text3)', marginTop: 2 }}>{b.email}{b.gst ? ` · GSTIN: ${b.gst}` : ''}</div>
                 </div>
                 <div style={{ display: 'flex', gap: 6 }}>
-                  <button className="btn btn-sm" onClick={() => { setEditing(b.id); setForm({ ...b }) }}>Edit</button>
+                  <button className="btn btn-sm" onClick={() => { setEditing(b.id); setForm({ ...b }); setTouched({}) }}>Edit</button>
                   <button className="btn btn-sm" style={{ color: 'var(--red)', borderColor: 'rgba(248,113,113,0.25)', background: 'rgba(248,113,113,0.08)' }}
                     onClick={() => { if (window.confirm('Delete?')) onSave(null, b.id) }}>Del</button>
                 </div>
               </div>
             ))}
             <button className="btn btn-accent" style={{ width: '100%', justifyContent: 'center', marginTop: 8 }}
-              onClick={() => { setEditing('new'); setForm(empty) }}>+ Add New Business</button>
+              onClick={() => { setEditing('new'); setForm(empty); setTouched({}) }}>+ Add New Business</button>
           </>
         )}
         {editing && (
@@ -166,17 +189,36 @@ function BizModal({ businesses, onSave, onClose }) {
             <div className="sec-label"><span className="sec-dot" />{editing === 'new' ? 'New Business' : 'Edit Business'}</div>
             <div className="grid-2">
               <div className="field"><label className="lbl">Business Name *</label><input className="inp" value={form.name} onChange={set('name')} placeholder="My Company Pvt Ltd" /></div>
-              <div className="field"><label className="lbl">Email</label><input className="inp" value={form.email} onChange={set('email')} placeholder="hello@company.com" /></div>
-              <div className="field"><label className="lbl">Phone</label><input className="inp" value={form.phone} onChange={set('phone')} placeholder="+91 98000 00000" /></div>
-              <div className="field"><label className="lbl">GSTIN / PAN</label><input className="inp" value={form.gst} onChange={set('gst')} placeholder="22AAAAA0000A1Z5" /></div>
+              <div className="field">
+                <label className="lbl">Email</label>
+                <input className={`inp ${touched.email && !validateEmail(form.email) ? 'inp-err' : ''}`}
+                  type="email" value={form.email} onChange={set('email')} onBlur={markTouched('email')} placeholder="hello@company.com" />
+                <FieldError show={touched.email && !validateEmail(form.email)} message="Valid email daalein, jaise hello@company.com" />
+              </div>
+              <div className="field"><label className="lbl">Phone</label><input className="inp" value={form.phone} onChange={setDigits('phone')} placeholder="10-digit number" maxLength={10} inputMode="numeric" pattern="[0-9]*" /></div>
+              <div className="field">
+                <label className="lbl">GSTIN / PAN</label>
+                <input className={`inp ${touched.gst && !validateGstin(form.gst) ? 'inp-err' : ''}`}
+                  value={form.gst} onChange={setGst('gst')} onBlur={markTouched('gst')} placeholder="22AAAAA0000A1Z5" maxLength={15} />
+                <FieldError show={touched.gst && !validateGstin(form.gst)} message="GSTIN 15 characters ka hona chahiye, jaise 22AAAAA0000A1Z5" />
+              </div>
               <div className="field"><label className="lbl">Invoice Prefix</label><input className="inp" value={form.prefix} onChange={set('prefix')} placeholder="INV" /></div>
-              <div className="field"><label className="lbl">Alt. Phone <span style={{ fontSize: 9, color: 'var(--text3)' }}>(optional)</span></label><input className="inp" value={form.altPhone || ''} onChange={set('altPhone')} placeholder="+91 98000 00001" /></div>
-              <div className="field"><label className="lbl">Alt. Email <span style={{ fontSize: 9, color: 'var(--text3)' }}>(optional)</span></label><input className="inp" value={form.altEmail || ''} onChange={set('altEmail')} placeholder="alt@company.com" /></div>
+              <div className="field"><label className="lbl">Alt. Phone <span style={{ fontSize: 9, color: 'var(--text3)' }}>(optional)</span></label><input className="inp" value={form.altPhone || ''} onChange={setDigits('altPhone')} placeholder="10-digit number" maxLength={10} inputMode="numeric" pattern="[0-9]*" /></div>
+              <div className="field">
+                <label className="lbl">Alt. Email <span style={{ fontSize: 9, color: 'var(--text3)' }}>(optional)</span></label>
+                <input className={`inp ${touched.altEmail && !validateEmail(form.altEmail) ? 'inp-err' : ''}`}
+                  type="email" value={form.altEmail || ''} onChange={set('altEmail')} onBlur={markTouched('altEmail')} placeholder="alt@company.com" />
+                <FieldError show={touched.altEmail && !validateEmail(form.altEmail)} message="Valid email daalein, jaise alt@company.com" />
+              </div>
             </div>
             <div className="field"><label className="lbl">Address</label><textarea className="inp" value={form.addr} onChange={set('addr')} placeholder="Street, City, State, PIN" /></div>
             <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-              <button className="btn btn-accent" onClick={() => {
+              <button className="btn btn-accent" disabled={formHasErrors} style={{ opacity: formHasErrors ? 0.6 : 1, cursor: formHasErrors ? 'not-allowed' : 'pointer' }} onClick={() => {
                 if (!form.name.trim()) return alert('Business name required')
+                if (!validateEmail(form.email)) return alert('Email format sahi nahi hai.')
+                if (!validateEmail(form.altEmail)) return alert('Alt. email format sahi nahi hai.')
+                if (!validateGstin(form.gst)) return alert('GSTIN sahi format mein nahi hai (15 characters, e.g. 22AAAAA0000A1Z5).')
+                if (form.phone && form.phone.length !== 10) return alert('Phone 10 digits ka hona chahiye.')
                 onSave({ ...form, id: editing === 'new' ? uid() : editing })
                 setEditing(null)
               }}>Save</button>
@@ -468,6 +510,23 @@ export default function InvoiceMaker() {
   })
   const sf = k => e => setF(p => ({ ...p, [k]: e.target.value }))
 
+  // Track which fields the user has left at least once, so validation
+  // errors only appear after they're done typing — not while mid-entry.
+  const [touched, setTouched] = useState({})
+  const markTouched = k => () => setTouched(p => ({ ...p, [k]: true }))
+
+  // GSTIN: force uppercase, strip anything that isn't alphanumeric, cap at 15 chars
+  const setGst = k => e => {
+    const v = e.target.value.toUpperCase().replace(/[^0-9A-Z]/g, '').slice(0, 15)
+    setF(p => ({ ...p, [k]: v }))
+  }
+
+  // Alt phone: digits only, same as the main phone field (max 10)
+  const setAltPhone = k => e => {
+    const v = e.target.value.replace(/\D/g, '').slice(0, 10)
+    setF(p => ({ ...p, [k]: v }))
+  }
+
   // ── Cloud Load on login ────────────────────────────────────
   useEffect(() => {
     if (!token) return
@@ -592,6 +651,15 @@ export default function InvoiceMaker() {
     if (!f.clientName.trim()) { alert('Please enter Client Name.'); return }
     if (items.every(i => !i.desc && !i.rate)) { alert('Please add at least one item.'); return }
 
+    // Format validation — email / GSTIN fields, if filled in, must be valid
+    if (!validateEmail(f.bizEmail)) { alert('Business email format sahi nahi hai.'); return }
+    if (!validateEmail(f.bizAltEmail)) { alert('Business alt. email format sahi nahi hai.'); return }
+    if (!validateEmail(f.clientEmail)) { alert('Client email format sahi nahi hai.'); return }
+    if (!validateGstin(f.bizGst)) { alert('Business GSTIN sahi format mein nahi hai (15 characters, e.g. 22AAAAA0000A1Z5).'); return }
+    if (!validateGstin(f.clientGst)) { alert('Client GSTIN sahi format mein nahi hai (15 characters, e.g. 22AAAAA0000A1Z5).'); return }
+    if (f.bizPhone && f.bizPhone.length !== 10) { alert('Business phone 10 digits ka hona chahiye.'); return }
+    if (f.clientPhone && f.clientPhone.length !== 10) { alert('Client phone 10 digits ka hona chahiye.'); return }
+
     // Login required
     if (!token) {
       pendingGenerate.current = true
@@ -672,6 +740,12 @@ export default function InvoiceMaker() {
   const statusMeta = { draft: '#818CF8', sent: '#38BDF8', paid: '#34D399', overdue: '#F87171', cancelled: '#9CA3AF' }
   const invData = { ...f, no: invNo }
   const t = TEMPLATES.find(t => t.key === template) || TEMPLATES[0]
+
+  // Any bad-format field currently blocks Generate — used to grey out the button
+  const hasFormErrors =
+    !validateEmail(f.bizEmail) || !validateEmail(f.bizAltEmail) || !validateEmail(f.clientEmail) ||
+    !validateGstin(f.bizGst) || !validateGstin(f.clientGst) ||
+    (f.bizPhone && f.bizPhone.length !== 10) || (f.clientPhone && f.clientPhone.length !== 10)
 
   return (
     <div className="ig-root">
@@ -767,19 +841,59 @@ export default function InvoiceMaker() {
             <div className="ig-card">
               <div className="sec-label"><span className="sec-dot" />From (Your Business)</div>
               <div className="field"><label className="lbl">Business Name *</label><input className="inp" value={f.bizName} onChange={sf('bizName')} placeholder="Your Company Pvt Ltd" /></div>
-              <div className="field"><label className="lbl">Email</label><input className="inp" value={f.bizEmail} onChange={sf('bizEmail')} placeholder="hello@company.com" /></div>
+              <div className="field">
+                <label className="lbl">Email</label>
+                <input
+                  className={`inp ${touched.bizEmail && !validateEmail(f.bizEmail) ? 'inp-err' : ''}`}
+                  type="email" value={f.bizEmail} onChange={sf('bizEmail')} onBlur={markTouched('bizEmail')}
+                  placeholder="hello@company.com"
+                />
+                <FieldError show={touched.bizEmail && !validateEmail(f.bizEmail)} message="Valid email daalein, jaise hello@company.com" />
+              </div>
               <div className="field"><label className="lbl">Phone</label><input className="inp" value={f.bizPhone} onChange={e => { const v = e.target.value.replace(/\D/g, '').slice(0, 10); setF(p => ({ ...p, bizPhone: v })) }} placeholder="10-digit number" maxLength={10} inputMode="numeric" pattern="[0-9]*" /></div>
-              <div className="field"><label className="lbl">GSTIN / PAN</label><input className="inp" value={f.bizGst} onChange={sf('bizGst')} placeholder="22AAAAA0000A1Z5" /></div>
-              <div className="field"><label className="lbl">Alt. Phone <span style={{ fontSize: 9, color: 'var(--text3)' }}>(optional)</span></label><input className="inp" value={f.bizAltPhone} onChange={sf('bizAltPhone')} placeholder="+91 98000 00001" /></div>
-              <div className="field"><label className="lbl">Alt. Email <span style={{ fontSize: 9, color: 'var(--text3)' }}>(optional)</span></label><input className="inp" value={f.bizAltEmail} onChange={sf('bizAltEmail')} placeholder="alt@company.com" /></div>
+              <div className="field">
+                <label className="lbl">GSTIN / PAN</label>
+                <input
+                  className={`inp ${touched.bizGst && !validateGstin(f.bizGst) ? 'inp-err' : ''}`}
+                  value={f.bizGst} onChange={setGst('bizGst')} onBlur={markTouched('bizGst')}
+                  placeholder="22AAAAA0000A1Z5" maxLength={15}
+                />
+                <FieldError show={touched.bizGst && !validateGstin(f.bizGst)} message="GSTIN 15 characters ka hona chahiye, jaise 22AAAAA0000A1Z5" />
+              </div>
+              <div className="field"><label className="lbl">Alt. Phone <span style={{ fontSize: 9, color: 'var(--text3)' }}>(optional)</span></label><input className="inp" value={f.bizAltPhone} onChange={setAltPhone('bizAltPhone')} placeholder="10-digit number" maxLength={10} inputMode="numeric" pattern="[0-9]*" /></div>
+              <div className="field">
+                <label className="lbl">Alt. Email <span style={{ fontSize: 9, color: 'var(--text3)' }}>(optional)</span></label>
+                <input
+                  className={`inp ${touched.bizAltEmail && !validateEmail(f.bizAltEmail) ? 'inp-err' : ''}`}
+                  type="email" value={f.bizAltEmail} onChange={sf('bizAltEmail')} onBlur={markTouched('bizAltEmail')}
+                  placeholder="alt@company.com"
+                />
+                <FieldError show={touched.bizAltEmail && !validateEmail(f.bizAltEmail)} message="Valid email daalein, jaise alt@company.com" />
+              </div>
               <div className="field"><label className="lbl">Address</label><textarea className="inp" rows={2} value={f.bizAddr} onChange={sf('bizAddr')} placeholder="Street, City, State, PIN" /></div>
             </div>
             <div className="ig-card">
               <div className="sec-label"><span className="sec-dot" style={{ background: 'var(--blue)' }} />Bill To (Client)</div>
               <div className="field"><label className="lbl">Client Name *</label><input className="inp" value={f.clientName} onChange={sf('clientName')} placeholder="Client Company" /></div>
-              <div className="field"><label className="lbl">Email</label><input className="inp" value={f.clientEmail} onChange={sf('clientEmail')} placeholder="client@email.com" /></div>
+              <div className="field">
+                <label className="lbl">Email</label>
+                <input
+                  className={`inp ${touched.clientEmail && !validateEmail(f.clientEmail) ? 'inp-err' : ''}`}
+                  type="email" value={f.clientEmail} onChange={sf('clientEmail')} onBlur={markTouched('clientEmail')}
+                  placeholder="client@email.com"
+                />
+                <FieldError show={touched.clientEmail && !validateEmail(f.clientEmail)} message="Valid email daalein, jaise client@email.com" />
+              </div>
               <div className="field"><label className="lbl">Phone</label><input className="inp" value={f.clientPhone} onChange={e => { const v = e.target.value.replace(/\D/g, '').slice(0, 10); setF(p => ({ ...p, clientPhone: v })) }} placeholder="10-digit number" maxLength={10} inputMode="numeric" pattern="[0-9]*" /></div>
-              <div className="field"><label className="lbl">GSTIN / PAN</label><input className="inp" value={f.clientGst} onChange={sf('clientGst')} placeholder="Client GSTIN" /></div>
+              <div className="field">
+                <label className="lbl">GSTIN / PAN</label>
+                <input
+                  className={`inp ${touched.clientGst && !validateGstin(f.clientGst) ? 'inp-err' : ''}`}
+                  value={f.clientGst} onChange={setGst('clientGst')} onBlur={markTouched('clientGst')}
+                  placeholder="Client GSTIN" maxLength={15}
+                />
+                <FieldError show={touched.clientGst && !validateGstin(f.clientGst)} message="GSTIN 15 characters ka hona chahiye, jaise 22AAAAA0000A1Z5" />
+              </div>
               <div className="field"><label className="lbl">Address</label><textarea className="inp" rows={2} value={f.clientAddr} onChange={sf('clientAddr')} placeholder="Client address" /></div>
             </div>
           </div>
@@ -1043,11 +1157,17 @@ export default function InvoiceMaker() {
               {(!token || isPro || invoiceCount < FREE_LIMIT) && (
                 <>
                   <div style={{ marginTop: 16, display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
-                    <button className="btn btn-accent" onClick={generateInvoice} disabled={generating}
-                      style={{ fontSize: 14, padding: '10px 24px', opacity: generating ? 0.7 : 1 }}>
+                    <button className="btn btn-accent" onClick={generateInvoice} disabled={generating || hasFormErrors}
+                      title={hasFormErrors ? 'Kuch fields ka format sahi nahi hai — upar red-marked fields check karein' : ''}
+                      style={{ fontSize: 14, padding: '10px 24px', opacity: (generating || hasFormErrors) ? 0.6 : 1, cursor: (generating || hasFormErrors) ? 'not-allowed' : 'pointer' }}>
                       {generating ? '⏳ Generating…' : '⚡ Generate & Print'}
                     </button>
                   </div>
+                  {hasFormErrors && (
+                    <div style={{ fontSize: 11, color: '#F87171', marginTop: 8, textAlign: 'center' }}>
+                      Kuch fields ka format sahi nahi hai — upar check karein
+                    </div>
+                  )}
                   <div style={{ fontSize: 11, color: 'var(--text3)', marginTop: 10 }}>
                   Saves to Sent → opens print / PDF dialog
                   </div>
