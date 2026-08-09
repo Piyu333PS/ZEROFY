@@ -5,7 +5,6 @@ import LoginPage from './pages/LoginPage'
 import { useAuth } from './context/AuthContext'
 import AllToolsPage from './pages/AllToolsPage'
 import PricingPage from './pages/PricingPage'
-import SplashScreen from './components/SplashScreen'
 import { useBackButton } from './hooks/useBackButton'
 import { AuthProvider } from './context/AuthContext'
 import Footer from './components/Footer'
@@ -261,8 +260,6 @@ function AppInner() {
 }
 
 export default function App() {
-  const [showSplash, setShowSplash] = useState(true)
-
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', 'dark')
     localStorage.setItem('zerofy-theme', 'dark')
@@ -271,7 +268,6 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        {showSplash && <SplashScreen onDone={() => setShowSplash(false)} />}
         <AppInner />
       </AuthProvider>
     </BrowserRouter>
