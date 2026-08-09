@@ -1,72 +1,9 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { PRO_FEATURES, PLAN_THEME, PLANS, savingsVsMonthly } from '../data/proPlans'
 
-const plans = [
-  {
-    id: 'monthly',
-    name: 'Monthly',
-    emoji: '⚡',
-    price: 49,
-    period: '/month',
-    desc: 'Billed every month. Cancel anytime.',
-    color: 'rgba(96,165,250,0.08)',
-    border: 'rgba(96,165,250,0.25)',
-    badge: null,
-    features: [
-      'Unlimited invoice generation',
-      'All tools unlocked',
-      'Unlimited file processing',
-      'Max 100MB file size',
-      'No watermarks',
-      'Priority support',
-    ],
-    cta: 'Get Started',
-    ctaStyle: 'blue',
-  },
-  {
-    id: 'quarterly',
-    name: 'Quarterly',
-    emoji: '🔥',
-    price: 129,
-    period: '/3 months',
-    desc: 'Save vs monthly. Billed every 3 months.',
-    color: 'linear-gradient(135deg, rgba(96,165,250,0.12) 0%, rgba(167,139,250,0.14) 100%)',
-    border: 'rgba(167,139,250,0.5)',
-    badge: '🔥 Most Popular',
-    features: [
-      'Unlimited invoice generation',
-      'All tools unlocked',
-      'Unlimited file processing',
-      'Max 100MB file size',
-      'No watermarks',
-      'Priority support',
-    ],
-    cta: 'Get Started',
-    ctaStyle: 'gradient',
-  },
-  {
-    id: 'yearly',
-    name: 'Yearly',
-    emoji: '💰',
-    price: 399,
-    period: '/year',
-    desc: 'Best value. Save over 30% vs monthly.',
-    color: 'rgba(251,191,36,0.07)',
-    border: 'rgba(251,191,36,0.3)',
-    badge: '💰 Best Value',
-    features: [
-      'Unlimited invoice generation',
-      'All tools unlocked',
-      'Unlimited file processing',
-      'Max 100MB file size',
-      'No watermarks',
-      'Priority support',
-    ],
-    cta: 'Get Started',
-    ctaStyle: 'gold',
-  },
-]
+const plans = PLANS.map(p => ({ ...p, ...PLAN_THEME[p.id] }))
 
 const faqs = [
   {
@@ -382,7 +319,7 @@ export default function PricingPage() {
           <div
             key={plan.id}
             style={{
-              background: plan.color,
+              background: plan.soft,
               border: `1px solid ${plan.border}`,
               borderRadius: 20,
               padding: '36px 28px',
@@ -449,6 +386,16 @@ export default function PricingPage() {
                   {plan.period}
                 </span>
               </div>
+              {savingsVsMonthly(plan.id) > 0 && (
+                <div style={{
+                  display: 'inline-block', marginTop: 10,
+                  fontSize: 12, fontWeight: 700, padding: '3px 10px',
+                  borderRadius: 100, color: plan.accent,
+                  background: `${plan.accent}22`, border: `1px solid ${plan.accent}44`,
+                }}>
+                  Save {savingsVsMonthly(plan.id)}% vs monthly
+                </div>
+              )}
             </div>
 
             <button
@@ -464,11 +411,7 @@ export default function PricingPage() {
                 fontSize: 15,
                 marginBottom: 26,
                 transition: 'opacity 0.2s, transform 0.15s',
-                background: plan.ctaStyle === 'gradient'
-                  ? 'linear-gradient(135deg, #60A5FA, #A78BFA)'
-                  : plan.ctaStyle === 'gold'
-                    ? 'linear-gradient(135deg, #f59e0b, #fbbf24)'
-                    : 'rgba(96,165,250,0.15)',
+                background: plan.ctaStyle === 'blue' ? 'rgba(96,165,250,0.15)' : plan.gradient,
                 color: plan.ctaStyle === 'blue' ? '#60A5FA' : '#fff',
                 boxShadow: plan.ctaStyle === 'gradient'
                   ? '0 4px 18px rgba(139,127,255,0.35)'
@@ -482,33 +425,43 @@ export default function PricingPage() {
                 : autoPayEnabled ? `🔄 Start Auto Pay` : plan.cta}
             </button>
 
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 11 }}>
-              {plan.features.map((f, i) => (
-                <li key={i} style={{
-                  fontSize: 14,
-                  color: 'var(--text2, #94a3b8)',
-                  lineHeight: 1.4,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 9,
-                }}>
-                  <span style={{
-                    width: 18, height: 18, borderRadius: '50%', flexShrink: 0,
-                    background: plan.id === 'quarterly'
-                      ? 'rgba(167,139,250,0.2)'
-                      : plan.id === 'yearly'
-                        ? 'rgba(251,191,36,0.15)'
-                        : 'rgba(96,165,250,0.15)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 11, color: plan.id === 'quarterly' ? '#A78BFA' : plan.id === 'yearly' ? '#fbbf24' : '#60A5FA',
-                    fontWeight: 700,
-                  }}>✓</span>
-                  {f}
-                </li>
-              ))}
-            </ul>
+            <div style={{
+              fontSize: 13, color: plan.accent, fontWeight: 600,
+              display: 'flex', alignItems: 'center', gap: 6,
+            }}>
+              <span>✓</span> Full Zerofy Pro access — see below
+            </div>
           </div>
         ))}
+      </div>
+
+      {/* Shared Pro feature list — one place, no repeats across plans */}
+      <div style={{
+        maxWidth: 980, margin: '28px auto 0', padding: '0 24px',
+      }}>
+        <div style={{
+          background: 'rgba(52,211,153,0.05)',
+          border: '1px solid rgba(52,211,153,0.2)',
+          borderRadius: 20, padding: '28px 32px',
+        }}>
+          <h3 style={{
+            fontSize: 15, fontWeight: 700, color: '#34D399',
+            margin: '0 0 18px', display: 'flex', alignItems: 'center', gap: 8,
+          }}>
+            ✅ Every plan unlocks the same full Pro access
+          </h3>
+          <div style={{
+            display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+            gap: '12px 24px',
+          }}>
+            {PRO_FEATURES.map((f, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 14, color: 'var(--text2, #94a3b8)' }}>
+                <span style={{ fontSize: 15 }}>{f.icon}</span>
+                {f.label}
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* Trust strip */}
@@ -664,7 +617,7 @@ export default function PricingPage() {
           onMouseEnter={e => e.currentTarget.style.background = 'rgba(167,139,250,0.08)'}
           onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
         >
-          ← Back to Tools
+          ← Back to Home
         </Link>
       </div>
     </div>

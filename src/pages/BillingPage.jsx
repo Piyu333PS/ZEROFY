@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { PRO_FEATURES, PLAN_THEME } from '../data/proPlans'
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 
 const PLAN_LABELS = {
-  monthly: { name: 'Pro Monthly', period: '1 Month', color: '#60A5FA' },
-  quarterly: { name: 'Pro Quarterly', period: '3 Months', color: '#A78BFA' },
-  yearly: { name: 'Pro Yearly', period: '1 Year', color: '#fbbf24' },
+  monthly: { name: `Pro ${PLAN_THEME.monthly.name}`, period: '1 Month', color: PLAN_THEME.monthly.accent },
+  quarterly: { name: `Pro ${PLAN_THEME.quarterly.name}`, period: '3 Months', color: PLAN_THEME.quarterly.accent },
+  yearly: { name: `Pro ${PLAN_THEME.yearly.name}`, period: '1 Year', color: PLAN_THEME.yearly.accent },
 }
 
 export default function BillingPage() {
@@ -221,17 +222,10 @@ export default function BillingPage() {
             {info?.isPro ? (
               <div style={{ ...cardStyle, borderColor: 'rgba(52,211,153,0.2)' }}>
                 <h2 style={{ fontSize: 16, fontWeight: 700, color: '#34D399', marginBottom: 14, marginTop: 0 }}>✅ Pro Benefits Active</h2>
-                {[
-                  'Unlimited invoice generation',
-                  'All tools unlocked',
-                  'Unlimited file processing',
-                  'Max 100MB file size',
-                  'No watermarks',
-                  'Priority support',
-                ].map((f, i) => (
+                {PRO_FEATURES.map((f, i) => (
                   <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 10 }}>
-                    <span style={{ color: '#34D399', fontSize: 14 }}>✓</span>
-                    <span style={{ fontSize: 14, color: 'var(--text2)' }}>{f}</span>
+                    <span style={{ fontSize: 14 }}>{f.icon}</span>
+                    <span style={{ fontSize: 14, color: 'var(--text2)' }}>{f.label}</span>
                   </div>
                 ))}
                 <div style={{ marginTop: 20, padding: '12px 16px', background: 'rgba(52,211,153,0.06)', borderRadius: 10, fontSize: 13, color: 'var(--text3)' }}>
@@ -248,7 +242,7 @@ export default function BillingPage() {
               <div style={{ ...cardStyle, borderColor: 'rgba(167,139,250,0.25)', background: 'linear-gradient(135deg, rgba(96,165,250,0.04), rgba(167,139,250,0.06))' }}>
                 <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 8, marginTop: 0 }}>⚡ Upgrade to Pro</h2>
                 <p style={{ fontSize: 13, color: 'var(--text2)', marginBottom: 20, lineHeight: 1.6 }}>
-                  Unlimited invoices, all tools unlocked, no limits — starting at just ₹49/month.
+                  Unlimited invoices, every tool unlocked, no limits — starting at just ₹49/month.
                 </p>
                 <Link to="/pricing" style={{
                   display: 'inline-block', padding: '11px 28px', borderRadius: 12,
