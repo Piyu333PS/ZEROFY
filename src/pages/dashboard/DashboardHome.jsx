@@ -24,14 +24,13 @@ const icons = {
 }
 
 export default function DashboardHome() {
-  const { token, user, logout } = useAuth()
+  const { token, user } = useAuth()
   const navigate = useNavigate()
 
   const [stats, setStats] = useState(null)
   const [invoices, setInvoices] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [menuOpen, setMenuOpen] = useState(false)
   const [shareMenuId, setShareMenuId] = useState(null)
 
   useEffect(() => {
@@ -93,41 +92,6 @@ export default function DashboardHome() {
           <button className={styles.primaryBtn} onClick={() => navigate('/tools/invoice-maker')}>
             {icons.plus} New Invoice
           </button>
-
-          <div className={styles.userMenuWrap}>
-            <button
-              className={styles.avatar}
-              onClick={() => setMenuOpen(o => !o)}
-              aria-label="Account menu"
-            >
-              {initials(greetName)}
-            </button>
-
-            {menuOpen && (
-              <>
-                <div className={styles.menuOverlay} onClick={() => setMenuOpen(false)} />
-                <div className={styles.userMenu}>
-                  <div className={styles.userMenuHead}>
-                    <div className={styles.userMenuEmail}>{user?.email}</div>
-                    <div className={styles.userMenuPlan}>{user?.isPro ? '✦ Pro plan' : 'Free plan'}</div>
-                  </div>
-
-                  <button className={styles.userMenuItem} onClick={() => { setMenuOpen(false); navigate('/settings') }}>
-                    <span className={styles.userMenuIcon}>{icons.profile}</span> Profile
-                  </button>
-                  <button className={styles.userMenuItem} onClick={() => { setMenuOpen(false); navigate('/billing') }}>
-                    <span className={styles.userMenuIcon}>{icons.card}</span> Billing
-                  </button>
-
-                  <div className={styles.userMenuDivider} />
-
-                  <button className={`${styles.userMenuItem} ${styles.userMenuDanger}`} onClick={() => { setMenuOpen(false); logout() }}>
-                    <span className={styles.userMenuIcon}>{icons.logout}</span> Logout
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
         </div>
       </div>
 
