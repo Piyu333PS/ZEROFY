@@ -114,6 +114,11 @@ textarea.inp { resize: vertical; min-height: 60px; line-height: 1.5; }
 select.inp { cursor: pointer; color-scheme: dark; }
 select.inp option { background: #252338; color: #F0EEFF; }
 
+/* Field-level validation */
+.inp-err { border-color: rgba(248,113,113,0.6) !important; background: rgba(248,113,113,0.06); }
+.inp-err:focus { box-shadow: 0 0 0 3px rgba(248,113,113,0.15) !important; }
+.field-err { font-size: 10.5px; color: #F87171; margin-top: 4px; line-height: 1.4; }
+
 /* Biz pills */
 .biz-pills { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
 .biz-pill {
