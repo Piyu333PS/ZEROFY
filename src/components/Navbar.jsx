@@ -68,6 +68,91 @@ function UserDropdown({ user, logout, onClose, navigate }) {
   )
 }
 
+function ProfileMenu({ user, logout, navigate }) {
+  const [open, setOpen] = useState(false)
+  const initial = user.email[0].toUpperCase()
+
+  return (
+    <div style={{ position: 'relative' }}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        aria-label="Profile menu"
+        style={{
+          width: 34, height: 34, borderRadius: '50%',
+          background: 'var(--surface)', border: '1px solid var(--border2)',
+          color: 'var(--text)', fontWeight: 700, fontSize: 14,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          cursor: 'pointer', transition: 'transform 0.2s'
+        }}
+        onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.06)'}
+        onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+      >
+        {initial}
+      </button>
+      {open && (
+        <>
+          <div onClick={() => setOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 200 }} />
+          <div style={{
+            position: 'absolute', right: 0, top: 44,
+            background: 'var(--bg2)', border: '1px solid var(--border2)',
+            borderRadius: 14, padding: '8px', minWidth: 190,
+            boxShadow: '0 8px 32px rgba(0,0,0,0.3)', zIndex: 201
+          }}>
+            <div style={{ padding: '8px 12px 12px', borderBottom: '1px solid var(--border2)', marginBottom: 6 }}>
+              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {user.email}
+              </div>
+            </div>
+
+            <button
+              onClick={() => { navigate('/settings'); setOpen(false) }}
+              style={{
+                width: '100%', padding: '9px 12px', borderRadius: 9,
+                border: 'none', background: 'none', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', gap: 10,
+                color: 'var(--text2)', fontSize: 14, textAlign: 'left'
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = 'var(--surface)'}
+              onMouseLeave={e => e.currentTarget.style.background = 'none'}
+            >
+              👤 Profile
+            </button>
+            <button
+              onClick={() => { navigate('/billing'); setOpen(false) }}
+              style={{
+                width: '100%', padding: '9px 12px', borderRadius: 9,
+                border: 'none', background: 'none', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', gap: 10,
+                color: 'var(--text2)', fontSize: 14, textAlign: 'left'
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = 'var(--surface)'}
+              onMouseLeave={e => e.currentTarget.style.background = 'none'}
+            >
+              💳 Billing
+            </button>
+
+            <div style={{ borderTop: '1px solid var(--border2)', marginTop: 6, paddingTop: 6 }}>
+              <button
+                onClick={() => { logout(); setOpen(false) }}
+                style={{
+                  width: '100%', padding: '9px 12px', borderRadius: 9,
+                  border: 'none', background: 'none', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', gap: 10,
+                  color: '#f87171', fontSize: 14, textAlign: 'left'
+                }}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(239,68,68,0.1)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'none'}
+              >
+                🚪 Logout
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
 export default function Navbar() {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState([])
@@ -164,20 +249,15 @@ export default function Navbar() {
 
             {/* LOGGED IN PRO USER */}
             {user && user.isPro && (
-              <div style={{ position: 'relative' }}>
-                <button
-                  onClick={() => setShowDropdown(s => !s)}
-                  className={styles.proAvatarBtn}
-                >
+              <>
+                <div className={styles.proAvatarBtn} style={{ cursor: 'default' }}>
                   <div className={styles.avatarCircle}>
                     {user.email[0].toUpperCase()}
                   </div>
                   <span style={{ fontSize: 13, fontWeight: 600 }}>✦ Pro</span>
-                </button>
-                {showDropdown && (
-                  <UserDropdown user={user} logout={logout} onClose={() => setShowDropdown(false)} navigate={navigate} />
-                )}
-              </div>
+                </div>
+                <ProfileMenu user={user} logout={logout} navigate={navigate} />
+              </>
             )}
 
           </div>
