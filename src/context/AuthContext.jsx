@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react'
+import { clearBilling } from '../utils/billingStore'
 
 const AuthContext = createContext(null)
 
@@ -97,6 +98,7 @@ export function AuthProvider({ children }) {
   }
 
   const logout = () => {
+    clearBilling()
     setUser(null)
     setToken(null)
     setError(null)

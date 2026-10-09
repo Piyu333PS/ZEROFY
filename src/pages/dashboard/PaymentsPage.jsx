@@ -1,7 +1,8 @@
-import { useState, useEffect, useMemo, useCallback } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { api } from '../../utils/api'
+import { useBilling } from '../../utils/billingStore'
 import { invoiceTotal, displayStatus, formatDate, fmtMoney, localToday, r2 } from '../../utils/invoiceCalc'
 import ConfirmDialog from '../../components/ConfirmDialog'
 import styles from './PaymentsPage.module.css'
@@ -21,44 +22,30 @@ const balanceOf = (inv) => inv.balance !== undefined ? Number(inv.balance) : inv
 export default function PaymentsPage() {
   const { token } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
-  const [invoices, setInvoices] = useState([])
-  const [payments, setPayments] = useState([])
-  const [loading, setLoading] = useState(true)
+  const { data, loading, error: loadError, refresh } = useBilling(token)
+  const invoices = data?.invoices || []
+  const payments = data?.payments || []
+  const load = refresh
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState(blankForm)
   const [saving, setSaving] = useState(false)
-  const [error, setError] = useState(null)
+  const [actionError, setError] = useState(null)
+  const error = actionError || loadError
   const [notice, setNotice] = useState(null)
   const [toDelete, setToDelete] = useState(null)
   const [deleting, setDeleting] = useState(false)
 
-  const load = useCallback(async (silent = false) => {
-    if (!silent) setLoading(true)
-    const [invRes, payRes] = await Promise.all([
-      api('/api/invoices', token),
-      api('/api/payments', token),
-    ])
-    if (invRes.ok && invRes.data.success) setInvoices(invRes.data.invoices || [])
-    if (payRes.ok && payRes.data.success) setPayments(payRes.data.payments || [])
-    if (!invRes.ok || !payRes.ok) setError('Data load nahi ho paya. Page refresh karke dobara try karein.')
-    setLoading(false)
-    return invRes.ok ? (invRes.data.invoices || []) : []
-  }, [token])
-
   // Invoices page se "Record payment" → /app/payments?invoice=<id> : form khula aur balance bhara hua mile
+  const wanted = searchParams.get('invoice')
   useEffect(() => {
-    if (!token) return
-    load().then(list => {
-      const wanted = searchParams.get('invoice')
-      if (!wanted) return
-      const inv = list.find(i => i._id === wanted)
-      if (inv && ['sent', 'partial', 'overdue'].includes(displayStatus(inv))) {
-        setForm({ ...blankForm(), invoiceId: inv._id, amount: String(balanceOf(inv)) })
-        setShowForm(true)
-      }
-      setSearchParams({}, { replace: true })
-    })
-  }, [token]) // eslint-disable-line
+    if (!wanted || !data) return
+    const inv = data.invoices.find(i => i._id === wanted)
+    if (inv && ['sent', 'partial', 'overdue'].includes(displayStatus(inv))) {
+      setForm({ ...blankForm(), invoiceId: inv._id, amount: String(balanceOf(inv)) })
+      setShowForm(true)
+    }
+    setSearchParams({}, { replace: true })
+  }, [wanted, data]) // eslint-disable-line
 
   const invoiceMap = useMemo(() => Object.fromEntries(invoices.map(inv => [inv._id, inv])), [invoices])
   // Payment sirf un invoices par jinka paisa baaki hai

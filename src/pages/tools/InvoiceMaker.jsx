@@ -6,7 +6,9 @@ import { GOODS_HSN, UQC_CODES, SERVICES_SAC, CURRENCIES, TEMPLATES } from '../..
 import { CSS } from '../../data/invoiceMakerStyles'
 import { InvoicePreview } from '../../components/invoice/InvoicePreview'
 import { printInvoice } from '../../utils/invoiceShare'
-import { api, clearProCache } from '../../utils/api'
+import { api } from '../../utils/api'
+import { loadBilling, patchBilling } from '../../utils/billingStore'
+import { isValidUpiId } from '../../utils/qr'
 import {
   calcInvoice, fmtMoney, localToday, addDays, formatDate, GST_STATES, stateCodeOf, stateName, itemGstRate,
 } from '../../utils/invoiceCalc'
@@ -533,6 +535,7 @@ export default function InvoiceMaker() {
   const [businesses, setBusinesses] = useState([])
   const [savedInvoices, setSavedInvoices] = useState([])
   const [customers, setCustomers] = useState([])
+  const [catalog, setCatalog] = useState([]) // saved items
   const [cloudLoaded, setCloudLoaded] = useState(false)
   const [activeBizId, setActiveBizId] = useState(null)
   const [editing, setEditing] = useState(null) // jo saved invoice edit ho raha hai
@@ -558,13 +561,12 @@ export default function InvoiceMaker() {
 
   const refreshStatus = useCallback(() => {
     if (!token) return
-    api('/api/invoices/status', token).then(r => {
-      if (!r.ok) return
-      setInvoiceCount(r.data.invoiceCount || 0)
-      setIsPro(Boolean(r.data.isPro))
+    loadBilling(token, { force: true }).then(d => {
+      if (!d) return
+      setInvoiceCount(d.status.invoiceCount || 0)
+      setIsPro(Boolean(d.status.isPro))
     })
   }, [token])
-  useEffect(() => { refreshStatus() }, [refreshStatus])
 
   const [f, setF] = useState(blankForm)
   const sf = k => e => setF(p => ({ ...p, [k]: e.target.value }))
@@ -590,6 +592,7 @@ export default function InvoiceMaker() {
   const cloudLoadedRef = useRef(false)
   const persistBusinesses = useCallback((list) => {
     if (!token || !cloudLoadedRef.current) return
+    patchBilling({ businesses: list })
     api('/api/invoices/businesses', token, { method: 'PUT', body: { businesses: list } }).then(r => {
       if (!r.ok) setFormError('Business profile save nahi ho paya. Internet check karke dobara try karein.')
     })
@@ -669,15 +672,21 @@ export default function InvoiceMaker() {
     if (!token) return
     let cancelled = false
     ;(async () => {
-      const [bizRes, invRes, custRes] = await Promise.all([
-        api('/api/invoices/businesses', token),
-        api('/api/invoices', token),
-        api('/api/customers', token),
-      ])
+      // Poora data ek hi request mein (aur dashboard se aaye ho to turant, cache se)
+      const data = await loadBilling(token)
       if (cancelled) return
-      const invoices = invRes.ok ? (invRes.data.invoices || []) : []
-      let bizList = bizRes.ok ? (bizRes.data.businesses || []) : []
-      const custList = custRes.ok ? (custRes.data.customers || []) : []
+      if (!data) {
+        setCloudLoaded(true)
+        setFormError('Aapka saved data load nahi ho paya. Page refresh karke dobara try karein.')
+        return
+      }
+      const bizRes = { ok: true }, invRes = { ok: true }
+      const invoices = data.invoices
+      let bizList = [...data.businesses]
+      const custList = data.customers
+      setCatalog(data.items)
+      setInvoiceCount(data.status.invoiceCount || 0)
+      setIsPro(Boolean(data.status.isPro))
 
       // Recovery: ek purane bug ki wajah se business profiles save nahi ho rahe the.
       // Agar list khaali hai par invoices hain, to invoices se profiles dobara bana lo.
@@ -793,6 +802,24 @@ export default function InvoiceMaker() {
     })
   }
 
+  // Saved items: description mein saved item ka naam aate hi rate / GST / HSN / unit bhar do
+  const onItemDesc = (id, value) => {
+    const match = catalog.find(c => (c.name || '').trim().toLowerCase() === value.trim().toLowerCase())
+    setItems(p => p.map(it => {
+      if (it.id !== id) return it
+      if (!match || (it.desc || '').trim().toLowerCase() === value.trim().toLowerCase()) return { ...it, desc: value }
+      return {
+        ...it, desc: match.name,
+        type: match.type === 'service' ? 'service' : 'goods',
+        hsnSac: match.hsnSac || it.hsnSac,
+        uqc: match.uqc || it.uqc,
+        gstRate: match.gstRate ?? it.gstRate,
+        rate: it.rate === '' || it.rate === undefined ? String(match.rate ?? '') : it.rate,
+        qty: it.qty === '' || it.qty === undefined ? 1 : it.qty,
+      }
+    }))
+  }
+
   // Poora invoice object — preview, totals aur save teeno isi se bante hain
   const draftInv = useMemo(() => ({
     ...f, no: invNo.trim(), template, currency, discPct, taxPct: 18,
@@ -820,6 +847,7 @@ export default function InvoiceMaker() {
     if (f.bizPhone && f.bizPhone.length !== 10) p.push('Business phone 10 digits ka hona chahiye')
     if (f.clientPhone && f.clientPhone.length !== 10) p.push('Client phone 10 digits ka hona chahiye')
     if (f.dueDate && f.date && f.dueDate < f.date) p.push('Due date invoice date se pehle nahi ho sakti')
+    if (f.upiId.trim() && !isValidUpiId(f.upiId)) p.push('UPI ID sahi format mein nahi hai (jaise yourname@upi)')
     return p
   }, [invNo, f, totals])
 
@@ -843,7 +871,7 @@ export default function InvoiceMaker() {
       : (wasDraft ? 'sent' : editing.status)
 
     const body = {
-      ...f, no: invNo.trim(), bizId, status, template, currency,
+      ...f, bizLogo: '', no: invNo.trim(), bizId, status, template, currency,
       discPct: Number(discPct) || 0, taxPct: 18,
       shipping: Number(shipping) || 0, roundOff,
       items: items
@@ -854,8 +882,8 @@ export default function InvoiceMaker() {
     const res = editing
       ? await api(`/api/invoices/${editing._id}`, token, { method: 'PUT', body })
       : await api('/api/invoices', token, { method: 'POST', body: { ...body, countUsage: true } })
-    setSaving('')
 
+    if (!res.ok || !res.data.success) setSaving('')
     if (res.status === 403 && res.data.error === 'free_limit_reached') {
       setInvoiceCount(res.data.invoiceCount || FREE_LIMIT)
       setShowUpgradeModal(true)
@@ -866,8 +894,10 @@ export default function InvoiceMaker() {
       return
     }
 
-    const saved = res.data.invoice
+    const saved = { ...res.data.invoice, bizLogo: f.bizLogo || '' }
     if (res.data.invoiceCount !== undefined) setInvoiceCount(res.data.invoiceCount)
+    // List ko naye invoice ke saath taaza karo, phir wahan le jao
+    await loadBilling(token, { force: true })
     navigate('/app/invoices')
     if (mode === 'final') printInvoice(saved, { hideBranding: isPro })
   }
@@ -924,6 +954,10 @@ export default function InvoiceMaker() {
 
         {/* LEFT — FORM */}
         <div className="ig-left">
+
+          {token && !cloudLoaded && (
+            <div className="ig-banner" role="status">⏳ Aapka saved business, clients aur items load ho rahe hain…</div>
+          )}
 
           {editing && (
             <div className="ig-banner">
@@ -1097,7 +1131,9 @@ export default function InvoiceMaker() {
                 </div>
                 {/* Description */}
                 <div>
-                  <input className="inp" aria-label="Item description" value={it.desc} onChange={e => updateItem(it.id, 'desc', e.target.value)} placeholder="Item description…" />
+                  <input className="inp" aria-label="Item description" list="zerofy-item-list" autoComplete="off"
+                    value={it.desc} onChange={e => onItemDesc(it.id, e.target.value)}
+                    placeholder={catalog.length ? 'Naam likhein ya saved item chunein' : 'Item description…'} />
                   {it.hsnSac && (
                     <div style={{ marginTop: 3, fontSize: 10, color: 'var(--text3)' }}>
                       {it.type === 'goods' ? 'HSN' : 'SAC'}: <span style={{ color: 'var(--accent-deep)', fontWeight: 700 }}>{it.hsnSac}</span>
@@ -1106,7 +1142,7 @@ export default function InvoiceMaker() {
                 </div>
                 {/* HSN/SAC */}
                 <div>
-                  <CodePicker key={it.type} type={it.type} value={it.hsnSac}
+                  <CodePicker key={`${it.type}:${it.hsnSac}`} type={it.type} value={it.hsnSac}
                     onSelect={sel => {
                       const key = it.type === 'goods' ? 'hsn' : 'sac'
                       updateItem(it.id, 'hsnSac', sel[key])
@@ -1185,6 +1221,13 @@ export default function InvoiceMaker() {
               </div>
             ))}
 
+            <datalist id="zerofy-item-list">
+              {catalog.map(c => <option key={c._id} value={c.name}>{`${fmt(c.rate, currency)} · GST ${c.gstRate}%`}</option>)}
+            </datalist>
+            <div style={{ fontSize: 10.5, color: 'var(--text3)', marginTop: 8 }}>
+              Jo items aap invoice mein daalte hain wo apne aap save ho jate hain — agli baar sirf naam chunna hoga.
+            </div>
+
             {/* Totals */}
             <div className="totals">
               <div className="t-row"><span>Subtotal (excl. GST)</span><span style={mono}>{fmt(totals.sub, currency)}</span></div>
@@ -1226,7 +1269,11 @@ export default function InvoiceMaker() {
             <div className="grid-2">
               <div className="field"><label className="lbl">Bank details</label><textarea className="inp" rows={3} value={f.bankDetails} onChange={sf('bankDetails')} placeholder={'Account name\nAccount no.\nIFSC · Bank & branch'} /></div>
               <div>
-                <div className="field"><label className="lbl">UPI ID</label><input className="inp" value={f.upiId} onChange={sf('upiId')} placeholder="yourname@upi" /></div>
+                <div className="field">
+                  <label className="lbl">UPI ID</label>
+                  <input className={`inp ${f.upiId.trim() && !isValidUpiId(f.upiId) ? 'inp-err' : ''}`} value={f.upiId} onChange={e => setF(p => ({ ...p, upiId: e.target.value.trim() }))} placeholder="yourname@upi" />
+                  <div style={{ fontSize: 10.5, color: 'var(--text3)', marginTop: 4 }}>UPI ID daalne par invoice par "Scan to pay" QR code apne aap aa jata hai.</div>
+                </div>
                 <div className="field"><label className="lbl">Signatory name</label><input className="inp" value={f.signatory} onChange={sf('signatory')} placeholder="Authorised Signatory" /></div>
               </div>
             </div>
@@ -1361,7 +1408,6 @@ export default function InvoiceMaker() {
                       API={API}
                       onSuccess={() => {
                         setShowUpgradeModal(false)
-                        clearProCache()
                         refreshStatus()
                       }}
                       onClose={() => setShowUpgradeModal(false)}

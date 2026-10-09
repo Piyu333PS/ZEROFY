@@ -47,6 +47,7 @@ import DashboardLayout from './components/dashboard/DashboardLayout'
 import DashboardHome from './pages/dashboard/DashboardHome'
 import InvoicesPage from './pages/dashboard/InvoicesPage'
 import CustomersPage from './pages/dashboard/CustomersPage'
+import ItemsPage from './pages/dashboard/ItemsPage'
 import PaymentsPage from './pages/dashboard/PaymentsPage'
 import ReportsPage from './pages/dashboard/ReportsPage'
 import ResumeBuilder from './pages/tools/ResumeBuilder'
@@ -209,6 +210,7 @@ function AppInner() {
             <Route index element={<DashboardHome />} />
             <Route path="invoices" element={<InvoicesPage />} />
             <Route path="customers" element={<CustomersPage />} />
+            <Route path="items" element={<ItemsPage />} />
             <Route path="payments" element={<PaymentsPage />} />
             <Route path="reports" element={<ReportsPage />} />
             <Route path="settings" element={<SettingsPage embedded />} />

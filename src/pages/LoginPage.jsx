@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import ForgotPassword from '../components/ForgotPassword'
 import styles from './LoginPage.module.css'
 
 export default function LoginPage() {
@@ -8,6 +9,8 @@ export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPass, setShowPass] = useState(false)
+  const [forgot, setForgot] = useState(() => new URLSearchParams(window.location.search).has('forgot'))
+  const [notice, setNotice] = useState('')
   const { login, register, googleLogin, loading, error, setError, user } = useAuth()
   const googleButtonRef = useRef(null)
   const navigate = useNavigate()
@@ -81,6 +84,17 @@ export default function LoginPage() {
             >Create account</button>
           </div>
 
+          {forgot && (
+            <ForgotPassword
+              styles={styles}
+              initialEmail={email}
+              onBack={() => setForgot(false)}
+              onDone={(doneEmail, message) => { setEmail(doneEmail); setPassword(''); setTab('login'); setNotice(message); setError(null); setForgot(false) }}
+            />
+          )}
+
+          {/* Google button ek hi baar render hota hai, isliye is hisse ko unmount nahi karte — bas chhupa dete hain */}
+          <div style={{ display: forgot ? 'none' : 'block' }}>
           <h1 className={styles.heading}>
             {tab === 'login' ? 'Welcome back' : 'Set up your business'}
           </h1>
@@ -130,6 +144,15 @@ export default function LoginPage() {
               </div>
             </label>
 
+            {tab === 'login' && (
+              <div style={{ textAlign: 'right', marginTop: -6 }}>
+                <button type="button" className={styles.switchBtn} onClick={() => { setNotice(''); setError(null); setForgot(true) }}>Forgot password?</button>
+              </div>
+            )}
+
+            {notice && !error && (
+              <div style={{ background: '#E4F0EA', border: '1px solid #BFDCCD', borderRadius: 9, padding: '10px 13px', fontSize: 12.5, color: '#154F3C' }}>{notice}</div>
+            )}
             {error && <div className={styles.errorBox}>{error}</div>}
 
             <button type="submit" className={styles.submitBtn} disabled={loading}>
@@ -143,6 +166,7 @@ export default function LoginPage() {
               {tab === 'login' ? 'Create one' : 'Log in'}
             </button>
           </p>
+          </div>
         </div>
       </div>
 

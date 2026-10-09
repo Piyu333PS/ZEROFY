@@ -1,7 +1,7 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
-import { api, fetchIsPro } from '../../utils/api'
+import { useBilling } from '../../utils/billingStore'
 import { invoiceTotal, displayStatus, STATUS_LABELS, fmtMoney } from '../../utils/invoiceCalc'
 import InvoiceViewModal from '../../components/invoice/InvoiceViewModal'
 import styles from './DashboardHome.module.css'
@@ -27,34 +27,11 @@ export default function DashboardHome() {
   const { token, user } = useAuth()
   const navigate = useNavigate()
 
-  const [stats, setStats] = useState(null)
-  const [invoices, setInvoices] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const { data, loading, error } = useBilling(token)
+  const stats = data?.stats || null
+  const invoices = data?.invoices || []
+  const isPro = Boolean(data?.status?.isPro)
   const [viewing, setViewing] = useState(null)
-  const [isPro, setIsPro] = useState(false)
-
-  useEffect(() => {
-    if (!token) return
-    let cancelled = false
-
-    async function load() {
-      setLoading(true)
-      setError(null)
-      const [statsRes, invRes] = await Promise.all([
-        api('/api/dashboard/stats', token),
-        api('/api/invoices', token),
-      ])
-      if (cancelled) return
-      if (statsRes.ok && statsRes.data.success) setStats(statsRes.data.stats)
-      if (invRes.ok && invRes.data.success) setInvoices(invRes.data.invoices || [])
-      if (!statsRes.ok || !invRes.ok) setError('Data load nahi ho paya. Page refresh karke dobara try karein.')
-      setLoading(false)
-    }
-    fetchIsPro(token).then(v => { if (!cancelled) setIsPro(v) })
-    load()
-    return () => { cancelled = true }
-  }, [token])
 
   const RECENT_COUNT = 10
 

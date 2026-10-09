@@ -1,7 +1,8 @@
-import { useState, useEffect, useMemo, useCallback } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
-import { api, fetchIsPro } from '../../utils/api'
+import { api } from '../../utils/api'
+import { useBilling } from '../../utils/billingStore'
 import { downloadInvoicePdf } from '../../utils/invoiceShare'
 import { invoiceTotal, displayStatus, STATUS_LABELS, formatDate, fmtMoney } from '../../utils/invoiceCalc'
 import InvoiceViewModal from '../../components/invoice/InvoiceViewModal'
@@ -37,11 +38,12 @@ export default function InvoicesPage() {
   const { token } = useAuth()
   const navigate = useNavigate()
 
-  const [invoices, setInvoices] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const { data, loading, error: loadError, refresh } = useBilling(token)
+  const invoices = data?.invoices || []
+  const isPro = Boolean(data?.status?.isPro)
+  const [actionError, setError] = useState(null)
+  const error = actionError || loadError
   const [notice, setNotice] = useState(null)
-  const [isPro, setIsPro] = useState(false)
 
   const [menuId, setMenuId] = useState(null)
   const [viewing, setViewing] = useState(null)
@@ -51,21 +53,6 @@ export default function InvoicesPage() {
   const [query, setQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [page, setPage] = useState(1)
-
-  const load = useCallback(async (silent = false) => {
-    if (!silent) setLoading(true)
-    setError(null)
-    const res = await api('/api/invoices', token)
-    if (res.ok && res.data.success) setInvoices(res.data.invoices || [])
-    else setError(res.data.error || 'Invoices load nahi ho paye. Dobara try karein.')
-    setLoading(false)
-  }, [token])
-
-  useEffect(() => {
-    if (!token) return
-    load()
-    fetchIsPro(token).then(setIsPro)
-  }, [token, load])
 
   // Filter + search reset page to 1
   useEffect(() => { setPage(1) }, [query, statusFilter])
@@ -116,12 +103,13 @@ export default function InvoicesPage() {
 
   const setStatus = async (inv, status, msg) => {
     setWorking(true)
+    setError(null)
     const res = await api(`/api/invoices/${inv._id}`, token, { method: 'PUT', body: { status } })
     setWorking(false)
     setConfirm(null)
     if (!res.ok) { setError(res.data.message || res.data.error || 'Update nahi ho paya.'); return }
     flash(msg)
-    load(true)
+    refresh()
   }
 
   const doDelete = async (inv) => {
@@ -131,7 +119,7 @@ export default function InvoicesPage() {
     setConfirm(null)
     if (!res.ok) { setError(res.data.error || 'Delete nahi ho paya.'); return }
     flash(`Invoice ${inv.no} delete ho gaya.`)
-    load(true)
+    refresh()
   }
 
   const act = (fn) => () => { setMenuId(null); fn() }

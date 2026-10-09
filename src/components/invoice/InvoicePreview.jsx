@@ -2,6 +2,7 @@ import { TEMPLATES, UQC_CODES } from '../../data/invoiceCodes'
 import {
   calcInvoice, fmtMoney, formatDate, localToday, amountInWords, placeOfSupplyOf, stateName, r2,
 } from '../../utils/invoiceCalc'
+import { qrSvg, upiPayUri } from '../../utils/qr'
 
 export const today = localToday
 export const fmt = fmtMoney
@@ -39,6 +40,13 @@ export function InvoicePreview({ inv = {}, items, currency, discPct, taxPct, tem
   const paid = r2(full.paidAmount)
   const balance = r2(Math.max(0, c.total - paid))
   const pos = placeOfSupplyOf(full)
+  // UPI "Scan to pay" QR — sirf ₹ invoices par, aur jab tak paisa baaki ho
+  const payable = paid > 0 ? balance : c.total
+  const upiUri = (cur === '₹' && !isCancelled && st !== 'paid' && payable > 0)
+    ? upiPayUri({ upiId: full.upiId, name: full.bizName, amount: payable, note: full.no ? `Invoice ${full.no}` : '' })
+    : ''
+  const qr = upiUri ? qrSvg(upiUri) : null
+
   const uqcLabel = (code) => (UQC_CODES.find(u => u.code === code) || {}).code || code || ''
 
   const metaRows = [
@@ -222,10 +230,22 @@ export function InvoicePreview({ inv = {}, items, currency, discPct, taxPct, tem
             </div>
 
             {(full.bankDetails || full.upiId) && (
-              <div style={{ border: `1px solid ${accMid}`, borderRadius: 8, padding: '10px 14px' }}>
-                <div style={{ fontSize: 9, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', color: acc, marginBottom: 4 }}>Payment Details</div>
-                {full.bankDetails && <div style={{ fontSize: 10.5, color: '#5A578A', lineHeight: 1.6, whiteSpace: 'pre-line' }}>{full.bankDetails}</div>}
-                {full.upiId && <div style={{ fontSize: 10.5, color: '#3d3b63', fontWeight: 700, marginTop: full.bankDetails ? 4 : 0 }}>UPI: {full.upiId}</div>}
+              <div style={{ border: `1px solid ${accMid}`, borderRadius: 8, padding: '10px 14px', display: 'flex', gap: 14, alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontSize: 9, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', color: acc, marginBottom: 4 }}>Payment Details</div>
+                  {full.bankDetails && <div style={{ fontSize: 10.5, color: '#5A578A', lineHeight: 1.6, whiteSpace: 'pre-line' }}>{full.bankDetails}</div>}
+                  {full.upiId && <div style={{ fontSize: 10.5, color: '#3d3b63', fontWeight: 700, marginTop: full.bankDetails ? 4 : 0, wordBreak: 'break-all' }}>UPI: {full.upiId}</div>}
+                </div>
+                {qr && (
+                  <div style={{ textAlign: 'center', flexShrink: 0 }}>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox={`0 0 ${qr.size} ${qr.size}`} width="104" height="104" shapeRendering="crispEdges" role="img" aria-label="UPI payment QR code" style={{ display: 'block', background: '#fff' }}>
+                      <rect width={qr.size} height={qr.size} fill="#ffffff" />
+                      <path d={qr.path} fill="#000000" />
+                    </svg>
+                    <div style={{ fontSize: 8.5, fontWeight: 700, color: '#3d3b63', marginTop: 3 }}>Scan to pay {money(payable)}</div>
+                    <div style={{ fontSize: 7.5, color: '#9492C0' }}>Any UPI app</div>
+                  </div>
+                )}
               </div>
             )}
 

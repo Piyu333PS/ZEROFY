@@ -1,7 +1,8 @@
-import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
+import { useState, useRef, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { api, API } from '../../utils/api'
+import { useBilling } from '../../utils/billingStore'
 import { fmtMoney } from '../../utils/invoiceCalc'
 import ConfirmDialog from '../../components/ConfirmDialog'
 import styles from './CustomersPage.module.css'
@@ -13,13 +14,15 @@ const GSTIN_RE = /^\d{2}[A-Z]{5}\d{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/i
 export default function CustomersPage() {
   const { token } = useAuth()
   const navigate = useNavigate()
-  const [customers, setCustomers] = useState([])
-  const [loading, setLoading] = useState(true)
+  const { data, loading, error: loadError, refresh } = useBilling(token)
+  const customers = data?.customers || []
+  const load = refresh
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState(null)
   const [form, setForm] = useState(emptyForm)
   const [saving, setSaving] = useState(false)
-  const [error, setError] = useState(null)
+  const [actionError, setError] = useState(null)
+  const error = actionError || loadError
   const [notice, setNotice] = useState(null)
   const [query, setQuery] = useState('')
   const [toDelete, setToDelete] = useState(null)
@@ -28,16 +31,6 @@ export default function CustomersPage() {
   const [importing, setImporting] = useState(false)
   const [importResult, setImportResult] = useState(null)
   const fileInputRef = useRef(null)
-
-  const load = useCallback(async (silent = false) => {
-    if (!silent) setLoading(true)
-    const res = await api('/api/customers', token)
-    if (res.ok && res.data.success) setCustomers(res.data.customers || [])
-    else setError(res.data.error || 'Clients load nahi ho paye.')
-    setLoading(false)
-  }, [token])
-
-  useEffect(() => { if (token) load() }, [token, load])
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()

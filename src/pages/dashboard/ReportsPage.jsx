@@ -1,10 +1,10 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
   PieChart, Pie, Cell,
 } from 'recharts'
 import { useAuth } from '../../context/AuthContext'
-import { api } from '../../utils/api'
+import { useBilling } from '../../utils/billingStore'
 import { calcInvoice, displayStatus, STATUS_LABELS } from '../../utils/invoiceCalc'
 import { downloadText } from '../../utils/download'
 import styles from './ReportsPage.module.css'
@@ -67,34 +67,11 @@ function buildBuckets(period, count) {
 
 export default function ReportsPage() {
   const { token } = useAuth()
-  const [invoices, setInvoices] = useState([])
-  const [payments, setPayments] = useState([])
-  const [customers, setCustomers] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const { data, loading, error } = useBilling(token)
+  const invoices = data?.invoices || []
+  const payments = data?.payments || []
+  const customers = data?.customers || []
   const [period, setPeriod] = useState('monthly')
-
-  useEffect(() => {
-    if (!token) return
-    let cancelled = false
-    async function load() {
-      setLoading(true)
-      setError(null)
-      const [invRes, payRes, custRes] = await Promise.all([
-        api('/api/invoices', token),
-        api('/api/payments', token),
-        api('/api/customers', token),
-      ])
-      if (cancelled) return
-      if (invRes.ok && invRes.data.success) setInvoices(invRes.data.invoices || [])
-      if (payRes.ok && payRes.data.success) setPayments(payRes.data.payments || [])
-      if (custRes.ok && custRes.data.success) setCustomers(custRes.data.customers || [])
-      if (!invRes.ok || !payRes.ok) setError('Report data load nahi ho paya. Page refresh karke dobara try karein.')
-      setLoading(false)
-    }
-    load()
-    return () => { cancelled = true }
-  }, [token])
 
   const invoiceMap = useMemo(() => Object.fromEntries(invoices.map(inv => [inv._id, inv])), [invoices])
 
