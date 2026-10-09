@@ -1,6 +1,6 @@
 import { TEMPLATES, UQC_CODES } from '../../data/invoiceCodes'
 import {
-  calcInvoice, fmtMoney, formatDate, localToday, amountInWords, placeOfSupplyOf, stateName, r2,
+  calcInvoice, fmtMoney, localToday, amountInWords, docView,
 } from '../../utils/invoiceCalc'
 import { qrSvg, upiPayUri } from '../../utils/qr'
 
@@ -37,26 +37,18 @@ export function InvoicePreview({ inv = {}, items, currency, discPct, taxPct, tem
   const st = full.status || 'draft'
   const isDraft = st === 'draft'
   const isCancelled = st === 'cancelled'
-  const paid = r2(full.paidAmount)
-  const balance = r2(Math.max(0, c.total - paid))
-  const pos = placeOfSupplyOf(full)
-  // UPI "Scan to pay" QR — sirf ₹ invoices par, aur jab tak paisa baaki ho
-  const payable = paid > 0 ? balance : c.total
-  const upiUri = (cur === '₹' && !isCancelled && st !== 'paid' && payable > 0)
+  const view = docView(full, c)
+  const { paid, credited, balance } = view
+  // UPI "Scan to pay" QR — only on ₹ invoices, while money is still due
+  const payable = balance
+  const upiUri = (cur === '₹' && view.allowQr)
     ? upiPayUri({ upiId: full.upiId, name: full.bizName, amount: payable, note: full.no ? `Invoice ${full.no}` : '' })
     : ''
   const qr = upiUri ? qrSvg(upiUri) : null
 
   const uqcLabel = (code) => (UQC_CODES.find(u => u.code === code) || {}).code || code || ''
 
-  const metaRows = [
-    ['Invoice No.', full.no || '—', true],
-    ['Invoice Date', formatDate(full.date || localToday())],
-    full.dueDate ? ['Due Date', formatDate(full.dueDate)] : null,
-    full.poNumber ? ['PO / Ref No.', full.poNumber] : null,
-    pos ? ['Place of Supply', `${stateName(pos) || pos} (${pos})`] : null,
-    cur !== '₹' ? ['Currency', cur] : null,
-  ].filter(Boolean)
+  const metaRows = view.meta.map((row, i) => (i === 0 ? [...row, true] : row))
 
   const sumRow = (label, value, color) => (
     <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: 11, color: color || '#4B5B6E' }}>
@@ -120,18 +112,18 @@ export function InvoicePreview({ inv = {}, items, currency, discPct, taxPct, tem
           {/* Right — Invoice meta */}
           <div style={{ textAlign: 'right', flexShrink: 0 }}>
             <div style={{ fontSize: 28, fontWeight: 900, color: acc, letterSpacing: '-0.02em', lineHeight: 1, marginBottom: 8, textTransform: 'uppercase' }}>
-              {full.bizGst ? 'Tax Invoice' : 'Invoice'}
+              {view.title}
             </div>
             <div style={{ fontFamily: 'monospace', fontSize: 13, fontWeight: 700, color: '#14202E', letterSpacing: '0.04em' }}>
               {full.no || '—'}
             </div>
-            {st === 'paid' && (
+            {view.badge && (
               <div style={{ marginTop: 8 }}>
                 <span style={{
                   background: '#34D39922', color: '#1F9C5A', fontSize: 9, fontWeight: 800,
                   padding: '4px 10px', borderRadius: 20, textTransform: 'uppercase',
                   letterSpacing: '0.1em', border: '1px solid #34D39966',
-                }}>Paid</span>
+                }}>{view.badge}</span>
               </div>
             )}
           </div>
@@ -160,14 +152,14 @@ export function InvoicePreview({ inv = {}, items, currency, discPct, taxPct, tem
 
           <div style={{ padding: '16px 32px', background: accLight }}>
             <div style={{ fontSize: 9, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.14em', color: acc, marginBottom: 8 }}>
-              Invoice Details
+              {view.detailsLabel}
             </div>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
               <tbody>
                 {metaRows.map(([label, value, mono]) => (
                   <tr key={label}>
-                    <td style={{ padding: '3px 0', color: '#4B5B6E' }}>{label}</td>
-                    <td style={{ padding: '3px 0', textAlign: 'right', fontWeight: 700, fontFamily: mono ? 'monospace' : 'inherit', color: '#14202E' }}>{value}</td>
+                    <td style={{ padding: '3px 0', color: '#4B5B6E', whiteSpace: 'nowrap', verticalAlign: 'top' }}>{label}</td>
+                    <td style={{ padding: '3px 0 3px 10px', textAlign: 'right', fontWeight: 700, wordBreak: 'break-word', fontFamily: mono ? 'monospace' : 'inherit', color: '#14202E' }}>{value}</td>
                   </tr>
                 ))}
               </tbody>
@@ -229,7 +221,7 @@ export function InvoicePreview({ inv = {}, items, currency, discPct, taxPct, tem
               </div>
             </div>
 
-            {(full.bankDetails || full.upiId) && (
+            {view.showPayment && (full.bankDetails || full.upiId) && (
               <div style={{ border: `1px solid ${accMid}`, borderRadius: 8, padding: '10px 14px', display: 'flex', gap: 14, alignItems: 'center', justifyContent: 'space-between' }}>
                 <div style={{ minWidth: 0 }}>
                   <div style={{ fontSize: 9, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', color: acc, marginBottom: 4 }}>Payment Details</div>
@@ -282,12 +274,13 @@ export function InvoicePreview({ inv = {}, items, currency, discPct, taxPct, tem
                   background: acc, borderRadius: 6, marginTop: 8,
                   fontSize: 13, fontWeight: 900, color: '#fff',
                 }}>
-                  <span>Total</span>
+                  <span>{view.totalLabel}</span>
                   <span style={{ fontFamily: 'monospace' }}>{money(c.total)}</span>
                 </div>
-                {paid > 0 && (
+                {(paid > 0 || credited > 0) && (
                   <div style={{ marginTop: 6 }}>
-                    {sumRow('Amount paid', `−${money(paid)}`, '#1F9C5A')}
+                    {credited > 0 && sumRow('Credit notes', `−${money(credited)}`, '#1F9C5A')}
+                    {paid > 0 && sumRow('Amount paid', `−${money(paid)}`, '#1F9C5A')}
                     <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: 11.5, fontWeight: 800, color: '#14202E' }}>
                       <span>Balance due</span>
                       <span style={{ fontFamily: 'monospace' }}>{money(balance)}</span>
@@ -314,7 +307,7 @@ export function InvoicePreview({ inv = {}, items, currency, discPct, taxPct, tem
           padding: '12px 32px',
           display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12,
         }}>
-          <div style={{ fontSize: 9, color: '#8A97A6' }}>This is a computer-generated invoice</div>
+          <div style={{ fontSize: 9, color: '#8A97A6' }}>{view.footer}</div>
           <div style={{ fontSize: 9, color: '#8A97A6', textAlign: 'right' }}>
             {full.bizName && <span style={{ fontWeight: 700, color: acc }}>{full.bizName}</span>}
             {full.bizGst && <span> · GSTIN: {full.bizGst}</span>}

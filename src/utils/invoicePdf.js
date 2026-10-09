@@ -1,7 +1,7 @@
 import { PDFDocument, StandardFonts, rgb, degrees, LineCapStyle } from 'pdf-lib'
 import { TEMPLATES } from '../data/invoiceCodes'
 import {
-  calcInvoice, formatDate, localToday, amountInWords, placeOfSupplyOf, stateName, r2,
+  calcInvoice, amountInWords, docView,
 } from './invoiceCalc'
 import { qrMatrix, upiPayUri } from './qr'
 
@@ -47,7 +47,8 @@ const encodable = (s) => {
 }
 
 const TEXT_FIELDS = ['no', 'poNumber', 'bizName', 'bizAddr', 'bizPhone', 'bizAltPhone', 'bizEmail', 'bizAltEmail', 'bizGst',
-  'clientName', 'clientAddr', 'clientPhone', 'clientEmail', 'clientGst', 'notes', 'terms', 'bankDetails', 'upiId', 'signatory']
+  'clientName', 'clientAddr', 'clientPhone', 'clientEmail', 'clientGst', 'notes', 'terms', 'bankDetails', 'upiId', 'signatory',
+  'reason', 'refInvoiceNo']
 
 export function canBuildTextPdf(inv) {
   if (!TEXT_FIELDS.every(k => encodable(inv[k]))) return false
@@ -68,13 +69,14 @@ export async function buildInvoicePdf(inv, { hideBranding = false } = {}) {
   const t = TEMPLATES.find(x => x.key === inv.template) || TEMPLATES[0]
   const ACC = col(t.accent), ACC_L = tint(t.accent, 0.08), ACC_M = tint(t.accent, 0.18)
   const st = inv.status || 'draft'
-  const paid = r2(inv.paidAmount)
-  const balance = r2(Math.max(0, c.total - paid))
+  const view = docView(inv, c)
+  const { paid, credited, balance } = view
+  const settled = paid > 0 || credited > 0
   const [W, H] = A4
 
-  doc.setTitle(`Invoice ${clean(inv.no)}`)
+  doc.setTitle(clean(view.noteLabel))
   doc.setAuthor(clean(inv.bizName) || 'Zerofy')
-  doc.setSubject(`Invoice for ${clean(inv.clientName)}`)
+  doc.setSubject(`${view.title} for ${clean(inv.clientName)}`)
   doc.setCreator('Zerofy — www.zerofy.co.in')
 
   let page, y // y = top se neeche ki taraf (points)
@@ -184,31 +186,27 @@ export async function buildInvoicePdf(inv, { hideBranding = false } = {}) {
   contact.forEach((ln) => { text(ln, lx, ty, { size: 8.2, color: MUTED }); ty += 11.5 })
   if (inv.bizGst) text(`GSTIN: ${inv.bizGst}`, lx, ty, { font: B, size: 8.2, color: col('#263A52') })
 
-  text(inv.bizGst ? 'TAX INVOICE' : 'INVOICE', W - M, headTop + 38, { font: B, size: 21, color: ACC, align: 'right' })
+  text(view.title.toUpperCase(), W - M, headTop + 38, { font: B, size: 21, color: ACC, align: 'right' })
   text(inv.no || '-', W - M, headTop + 54, { font: B, size: 10, color: INK, align: 'right' })
-  if (st === 'paid') {
-    const pw = B.widthOfTextAtSize('PAID', 7.5) + 16
+  if (view.badge) {
+    const badge = view.badge.toUpperCase()
+    const pw = B.widthOfTextAtSize(badge, 7.5) + 16
     page.drawRectangle({ x: W - M - pw, y: Y(headTop + 74), width: pw, height: 14, color: tint('#1F9C5A', 0.14), borderColor: GREEN, borderWidth: 0.6 })
-    text('PAID', W - M - pw / 2, headTop + 70, { font: B, size: 7.5, color: GREEN, align: 'center' })
+    text(badge, W - M - pw / 2, headTop + 70, { font: B, size: 7.5, color: GREEN, align: 'center' })
   }
   y = headTop + headH
 
   /* ───────── BILL TO / DETAILS ───────── */
   const half = W / 2
-  const pos = placeOfSupplyOf(inv)
-  const meta = [
-    ['Invoice No.', inv.no || '-'],
-    ['Invoice Date', formatDate(inv.date || localToday())],
-    inv.dueDate && ['Due Date', formatDate(inv.dueDate)],
-    inv.poNumber && ['PO / Ref No.', inv.poNumber],
-    pos && ['Place of Supply', `${stateName(pos) || pos} (${pos})`],
-    cur !== '₹' && ['Currency', cur],
-  ].filter(Boolean)
+  // Long values (a credit note reason) wrap inside the right half
+  const metaValW = half - 20 - M - 78
+  const meta = view.meta.map(([k, v]) => [k, wrap(String(v).replace(/—/g, '-'), B, 8.6, metaValW)])
+  const metaH = meta.reduce((s, [, lines]) => s + lines.length * 13, 0)
   const cAddr = inv.clientAddr ? wrap(inv.clientAddr, F, 8.2, half - M - 20) : []
   const cName = wrap(inv.clientName || '-', B, 10.5, half - M - 20)
   const cExtra = [inv.clientPhone && `Ph: ${inv.clientPhone}`, inv.clientEmail && `Email: ${inv.clientEmail}`].filter(Boolean)
   const billH = 30 + cName.length * 13 + cAddr.length * 11.5 + cExtra.length * 11.5 + (inv.clientGst ? 12 : 0) + 10
-  const blockH = Math.max(billH, 30 + meta.length * 13 + 10)
+  const blockH = Math.max(billH, 30 + metaH + 10)
   page.drawRectangle({ x: half, y: Y(y + blockH), width: half, height: blockH, color: ACC_L })
   page.drawLine({ start: { x: half, y: Y(y) }, end: { x: half, y: Y(y + blockH) }, thickness: 0.7, color: ACC_M })
   page.drawLine({ start: { x: 0, y: Y(y + blockH) }, end: { x: W, y: Y(y + blockH) }, thickness: 0.7, color: ACC_M })
@@ -220,10 +218,12 @@ export async function buildInvoicePdf(inv, { hideBranding = false } = {}) {
   cExtra.forEach((ln) => { text(ln, M, by, { size: 8.2, color: MUTED }); by += 11.5 })
   if (inv.clientGst) text(`GSTIN: ${inv.clientGst}`, M, by, { font: B, size: 8.2, color: col('#263A52') })
 
-  label('Invoice Details', half + 20, y + 18)
-  meta.forEach(([k, v], i) => {
-    text(k, half + 20, y + 34 + i * 13, { size: 8.6, color: MUTED })
-    text(v, W - M, y + 34 + i * 13, { font: B, size: 8.6, align: 'right' })
+  label(view.detailsLabel, half + 20, y + 18)
+  let my = y + 34
+  meta.forEach(([k, lines]) => {
+    text(k, half + 20, my, { size: 8.6, color: MUTED })
+    lines.forEach((ln, i) => text(ln, W - M, my + i * 13, { font: B, size: 8.6, align: 'right' }))
+    my += lines.length * 13
   })
   y += blockH + 16
 
@@ -280,8 +280,8 @@ export async function buildInvoicePdf(inv, { hideBranding = false } = {}) {
   const RX = M + LW + GAP
   const padX = 10
 
-  const payable = paid > 0 ? balance : c.total
-  const upiUri = (cur === '₹' && st !== 'cancelled' && st !== 'paid' && payable > 0)
+  const payable = balance
+  const upiUri = (cur === '₹' && view.allowQr)
     ? upiPayUri({ upiId: inv.upiId, name: inv.bizName, amount: payable, note: inv.no ? `Invoice ${inv.no}` : '' }) : ''
   const qr = upiUri ? qrMatrix(upiUri) : null
   const QR = 78
@@ -290,7 +290,7 @@ export async function buildInvoicePdf(inv, { hideBranding = false } = {}) {
   const wordsH = 22 + paraHeight(words, I, 8.8, LW - padX * 2) + 6
   const payTextW = LW - padX * 2 - (qr ? QR + 14 : 0)
   const payTextH = paraHeight(inv.bankDetails, F, 8.4, payTextW) + (inv.upiId ? 12 : 0)
-  const hasPay = Boolean(inv.bankDetails || inv.upiId)
+  const hasPay = view.showPayment && Boolean(inv.bankDetails || inv.upiId)
   const payH = hasPay ? Math.max(22 + payTextH + 6, qr ? QR + 34 : 0) : 0
   const notesH = inv.notes ? 22 + paraHeight(inv.notes, F, 8.4, LW - padX * 2) + 6 : 0
   const termsH = inv.terms ? 14 + paraHeight(inv.terms, F, 7.8, LW) + 4 : 0
@@ -304,7 +304,8 @@ export async function buildInvoicePdf(inv, { hideBranding = false } = {}) {
     c.shipping > 0 && ['Shipping / other charges', c.shipping],
     c.roundAdj !== 0 && ['Round off', c.roundAdj],
   ].filter(Boolean)
-  const totalsH = 10 + sumRows.length * 14 + 30 + (paid > 0 ? 34 : 0) + 6
+  const settledRows = (paid > 0 ? 1 : 0) + (credited > 0 ? 1 : 0)
+  const totalsH = 10 + sumRows.length * 14 + 30 + (settled ? 20 + settledRows * 14 : 0) + 6
   const rightTotalH = totalsH + 74
 
   ensure(Math.max(leftTotalH, rightTotalH) + 10)
@@ -367,14 +368,17 @@ export async function buildInvoicePdf(inv, { hideBranding = false } = {}) {
     ry += 14
   })
   page.drawRectangle({ x: RX + 6, y: Y(ry + 20), width: RW - 12, height: 24, color: ACC })
-  text('Total', RX + 16, ry + 12, { font: B, size: 10.5, color: WHITE })
+  text(view.totalLabel, RX + 16, ry + 12, { font: B, size: 10.5, color: WHITE })
   money(c.total, RX + RW - 16, ry + 12, { font: B, size: 10.5, color: WHITE })
   ry += 30
-  if (paid > 0) {
+  if (settled) {
     ry += 6
-    text('Amount paid', RX + padX, ry, { size: 8.6, color: GREEN })
-    money(paid, RX + RW - padX, ry, { size: 8.6, color: GREEN, sign: '-' })
-    ry += 14
+    for (const [k, v] of [['Credit notes', credited], ['Amount paid', paid]]) {
+      if (!(v > 0)) continue
+      text(k, RX + padX, ry, { size: 8.6, color: GREEN })
+      money(v, RX + RW - padX, ry, { size: 8.6, color: GREEN, sign: '-' })
+      ry += 14
+    }
     text('Balance due', RX + padX, ry, { font: B, size: 9.2 })
     money(balance, RX + RW - padX, ry, { font: B, size: 9.2 })
   }
@@ -391,7 +395,7 @@ export async function buildInvoicePdf(inv, { hideBranding = false } = {}) {
   pages.forEach((p, i) => {
     page = p
     page.drawLine({ start: { x: M, y: 40 }, end: { x: W - M, y: 40 }, thickness: 0.8, color: ACC_M })
-    text('This is a computer-generated invoice', M, H - 28, { size: 7, color: SOFT })
+    text(view.footer, M, H - 28, { size: 7, color: SOFT })
     const tail = [inv.bizName, inv.bizGst && `GSTIN: ${inv.bizGst}`].filter(Boolean).join('  |  ')
     text(pages.length > 1 ? `${tail}${tail ? '  |  ' : ''}Page ${i + 1} of ${pages.length}` : tail, W - M, H - 28, { size: 7, color: SOFT, align: 'right' })
     if (!hideBranding) text('Created with Zerofy Invoice Generator - www.zerofy.co.in', W / 2, H - 15, { size: 6.4, color: SOFT, align: 'center' })

@@ -12,6 +12,7 @@ import { isValidUpiId } from '../../utils/qr'
 import { toast } from '../../components/ui/Toast'
 import {
   calcInvoice, fmtMoney, localToday, addDays, formatDate, GST_STATES, stateCodeOf, stateName, itemGstRate,
+  docTypeOf, docInfo, invoiceTotal,
 } from '../../utils/invoiceCalc'
 
 /* ─── Utilities ──────────────────────────────────────────────── */
@@ -506,8 +507,10 @@ const blankForm = () => ({
   bizName: '', bizEmail: '', bizPhone: '', bizAltPhone: '', bizAltEmail: '', bizGst: '', bizAddr: '', bizLogo: '',
   clientName: '', clientEmail: '', clientPhone: '', clientGst: '', clientAddr: '', placeOfSupply: '',
   notes: '', terms: '', bankDetails: '', upiId: '', signatory: '',
-  date: today(), dueDate: '', poNumber: '',
+  date: today(), dueDate: '', poNumber: '', validTill: '', reason: '',
 })
+
+const CREDIT_REASONS = ['Goods returned', 'Rate or amount corrected', 'Discount given after the invoice', 'Order cancelled', 'Damaged or missing goods']
 
 // Saved invoice ke items ko form ke shape mein lao (purane invoices mein gstRate/hsnSac nahi the)
 const itemsFromInvoice = (inv) => {
@@ -531,6 +534,10 @@ export default function InvoiceMaker() {
   const editParam = searchParams.get('edit')
   const copyParam = searchParams.get('copy')
   const clientParam = searchParams.get('client')
+  const typeParam = searchParams.get('type')            // 'quotation' | 'credit_note' for a new document
+  const refParam = searchParams.get('invoice')          // credit note: the invoice it is for
+  const fromQuoteParam = searchParams.get('fromQuote')  // new invoice made from this quotation
+  const plainNew = !editParam && !copyParam && !clientParam && !typeParam && !refParam && !fromQuoteParam
 
   const [businesses, setBusinesses] = useState([])
   const [savedInvoices, setSavedInvoices] = useState([])
@@ -539,6 +546,15 @@ export default function InvoiceMaker() {
   const [cloudLoaded, setCloudLoaded] = useState(false)
   const [activeBizId, setActiveBizId] = useState(null)
   const [editing, setEditing] = useState(null) // jo saved invoice edit ho raha hai
+  const [docType, setDocTypeState] = useState(typeParam === 'quotation' || typeParam === 'credit_note' ? typeParam : 'invoice')
+  const docTypeRef = useRef(docType)
+  const setDocType = (t) => { docTypeRef.current = t; setDocTypeState(t) }
+  const info = docInfo(docType)
+  const isQuote = docType === 'quotation', isCredit = docType === 'credit_note'
+  const [allInvoices, setAllInvoices] = useState([])   // real invoices — a credit note picks one of these
+  const [creditNotes, setCreditNotes] = useState([])
+  const [refInvoice, setRefInvoice] = useState(null)   // credit note: the invoice being reduced
+  const [fromQuote, setFromQuote] = useState(null)     // invoice being made from this quotation
   const [showBizModal, setShowBizModal] = useState(false)
   const [template, setTemplate] = useState('modern')
   const [currency, setCurrency] = useState('₹')
@@ -546,7 +562,8 @@ export default function InvoiceMaker() {
   const [shipping, setShipping] = useState('')
   const [roundOff, setRoundOff] = useState(false)
   const [items, setItems] = useState([defaultItem()])
-  const [invNo, setInvNo] = useState('')
+  // A new quotation or credit note starts with a number; the first invoice number is left for the owner to choose
+  const [invNo, setInvNo] = useState(() => (typeParam === 'quotation' || typeParam === 'credit_note') && !editParam ? `${docInfo(typeParam).prefix}-${new Date().getFullYear()}-001` : '')
   const [saving, setSaving] = useState('') // '' | 'draft' | 'final'
   const [formError, setFormError] = useState('')
   const [showProblems, setShowProblems] = useState(false)
@@ -604,7 +621,9 @@ export default function InvoiceMaker() {
   // business and increment it — the field always stays editable.
   const genInvNo = useCallback((bizId, invoices = savedInvoices) => {
     const existing = invoices.filter(i => (i.bizId || null) === (bizId || null))
-    if (existing.length === 0) return ''
+    const type = docTypeRef.current
+    // Quotations and credit notes get a starting number on their own; the first invoice number is the owner's choice
+    if (existing.length === 0) return type === 'invoice' ? '' : `${docInfo(type).prefix}-${new Date().getFullYear()}-001`
     const last = [...existing].sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')))[0]
     const taken = new Set(existing.map(i => i.no))
     let candidate = last.no || ''
@@ -612,7 +631,7 @@ export default function InvoiceMaker() {
     for (let i = 0; i < 500; i++) {
       const m = candidate.match(/^(.*?)(\d+)(\D*)$/)
       if (!m) {
-        candidate = `INV-${new Date().getFullYear()}-001`
+        candidate = `${docInfo(type).prefix}-${new Date().getFullYear()}-001`
         if (!taken.has(candidate)) return candidate
         continue
       }
@@ -655,6 +674,8 @@ export default function InvoiceMaker() {
       date: asCopy ? today() : (inv.date || today()),
       dueDate: asCopy ? '' : (inv.dueDate || ''),
       poNumber: asCopy ? '' : (inv.poNumber || ''),
+      validTill: asCopy ? '' : (inv.validTill || ''),
+      reason: asCopy ? '' : (inv.reason || ''),
     })
     setItems(itemsFromInvoice(inv))
     setTemplate(inv.template || 'modern')
@@ -681,7 +702,14 @@ export default function InvoiceMaker() {
         return
       }
       const bizRes = { ok: true }, invRes = { ok: true }
-      const invoices = data.invoices
+      const lists = { invoice: data.invoices, quotation: data.quotations, credit_note: data.creditNotes }
+      setAllInvoices(data.invoices)
+      setCreditNotes(data.creditNotes)
+      const wantedId = editParam || copyParam
+      const wantedDoc = wantedId ? [...data.invoices, ...data.quotations, ...data.creditNotes].find(i => i._id === wantedId) : null
+      const type = wantedDoc ? docTypeOf(wantedDoc) : docTypeRef.current
+      setDocType(type)
+      const invoices = lists[type]
       let bizList = [...data.businesses]
       const custList = data.customers
       setCatalog(data.items)
@@ -691,9 +719,9 @@ export default function InvoiceMaker() {
       // Recovery: ek purane bug ki wajah se business profiles save nahi ho rahe the.
       // Agar list khaali hai par invoices hain, to invoices se profiles dobara bana lo.
       if (bizRes.ok) cloudLoadedRef.current = true
-      if (bizRes.ok && bizList.length === 0 && invoices.length > 0) {
+      if (bizRes.ok && bizList.length === 0 && data.invoices.length > 0) {
         const seen = new Set()
-        for (const inv of invoices) { // newest first
+        for (const inv of data.invoices) { // newest first
           const key = inv.bizId || inv.bizName
           if (!inv.bizName || !key || seen.has(key)) continue
           seen.add(key)
@@ -718,11 +746,35 @@ export default function InvoiceMaker() {
         return
       }
 
-      const wantedId = editParam || copyParam
       if (wantedId) {
-        const inv = invoices.find(i => i._id === wantedId)
-        if (inv) { fillFromInvoice(inv, { asCopy: !editParam, invoices }); return }
-        setFormError('This invoice was not found. It may have been deleted. You can create a new one.')
+        const inv = wantedDoc
+        if (inv) {
+          fillFromInvoice(inv, { asCopy: !editParam, invoices })
+          if (type === 'credit_note') {
+            if (!editParam) setF(p => ({ ...p, reason: inv.reason || '' }))
+            setRefInvoice(data.invoices.find(i => i._id === inv.refInvoiceId) || null)
+          }
+          return
+        }
+        setFormError('This document was not found. It may have been deleted. You can create a new one.')
+      }
+
+      // New credit note for a chosen invoice: start from that invoice's business, client and items
+      if (type === 'credit_note' && refParam) {
+        const ref = data.invoices.find(i => i._id === refParam)
+        if (ref) { fillFromInvoice(ref, { asCopy: true, invoices }); setRefInvoice(ref); return }
+        setFormError('That invoice was not found. Choose an invoice below.')
+      }
+      // New invoice from an accepted quotation
+      if (type === 'invoice' && fromQuoteParam) {
+        const q = data.quotations.find(i => i._id === fromQuoteParam)
+        if (q) {
+          fillFromInvoice(q, { asCopy: true, invoices })
+          setF(p => ({ ...p, poNumber: q.poNumber || '' }))
+          setFromQuote(q)
+          return
+        }
+        setFormError('That quotation was not found. You can still create a new invoice.')
       }
 
       // Naya invoice: pichhli baar wali business apne aap select ho jaye
@@ -825,16 +877,39 @@ export default function InvoiceMaker() {
     ...f, no: invNo.trim(), template, currency, discPct, taxPct: 18,
     shipping: Number(shipping) || 0, roundOff,
     items,
-    status: editing ? editing.status : 'draft',
+    docType,
+    status: editing ? editing.status : (docType === 'credit_note' ? 'issued' : 'draft'),
     paidAmount: editing ? editing.paidAmount : 0,
-  }), [f, invNo, template, currency, discPct, shipping, roundOff, items, editing])
+    creditedAmount: editing ? editing.creditedAmount : 0,
+    refInvoiceNo: refInvoice ? refInvoice.no : (editing ? editing.refInvoiceNo : ''),
+    refInvoiceDate: refInvoice ? refInvoice.date : (editing ? editing.refInvoiceDate : ''),
+  }), [f, invNo, template, currency, discPct, shipping, roundOff, items, editing, docType, refInvoice])
   const totals = useMemo(() => calcInvoice(draftInv), [draftInv])
   const total = totals.total
+
+  // Credit note: how much of the chosen invoice can still be credited
+  const creditRoom = useMemo(() => {
+    if (!refInvoice) return null
+    const others = creditNotes
+      .filter(n => n.refInvoiceId === refInvoice._id && n.status !== 'cancelled' && (!editing || n._id !== editing._id))
+      .reduce((sum, n) => sum + invoiceTotal(n), 0)
+    return Math.round((invoiceTotal(refInvoice) - others) * 100) / 100
+  }, [refInvoice, creditNotes, editing])
+
+  const pickRefInvoice = (id) => {
+    const ref = allInvoices.find(i => i._id === id)
+    if (!ref) { setRefInvoice(null); return }
+    const keep = { no: invNo, reason: f.reason, date: f.date }
+    fillFromInvoice(ref, { asCopy: true, invoices: savedInvoices })
+    setInvNo(keep.no || genInvNo(ref.bizId || null, savedInvoices))
+    setF(p => ({ ...p, reason: keep.reason, date: keep.date }))
+    setRefInvoice(ref)
+  }
 
   // Jo cheezein save hone se rokti hain — saaf-saaf list (pehle sirf "format sahi nahi" dikhta tha)
   const problems = useMemo(() => {
     const p = []
-    if (!invNo.trim()) p.push('Enter an invoice number')
+    if (!invNo.trim()) p.push(`Enter ${isQuote ? 'a quotation' : isCredit ? 'a credit note' : 'an invoice'} number`)
     if (!f.bizName.trim()) p.push('Enter your business name')
     if (!f.clientName.trim()) p.push('Enter the client name')
     if (totals.lines.length === 0) p.push('Add at least one item (with a description or rate)')
@@ -846,10 +921,18 @@ export default function InvoiceMaker() {
     if (!validateGstin(f.clientGst)) p.push('Client GSTIN must be 15 characters')
     if (f.bizPhone && f.bizPhone.length !== 10) p.push('Business phone must be 10 digits')
     if (f.clientPhone && f.clientPhone.length !== 10) p.push('Client phone must be 10 digits')
-    if (f.dueDate && f.date && f.dueDate < f.date) p.push('Due date cannot be before the invoice date')
+    if (!isQuote && !isCredit && f.dueDate && f.date && f.dueDate < f.date) p.push('Due date cannot be before the invoice date')
+    if (isQuote && f.validTill && f.date && f.validTill < f.date) p.push('"Valid till" cannot be before the quotation date')
+    if (isCredit && !refInvoice) p.push('Choose the invoice this credit note is for')
+    if (isCredit && refInvoice && totals.lines.length > 0 && !(totals.total > 0)) p.push('The credit note amount must be more than 0')
+    if (isCredit && creditRoom !== null && totals.total > creditRoom + 0.01) {
+      p.push(creditRoom > 0
+        ? `The credit note is more than the invoice. Up to ${fmtMoney(creditRoom, currency)} can still be credited on ${refInvoice.no}`
+        : `Invoice ${refInvoice.no} has already been credited in full`)
+    }
     if (f.upiId.trim() && !isValidUpiId(f.upiId)) p.push('UPI ID is not valid (for example yourname@upi)')
     return p
-  }, [invNo, f, totals])
+  }, [invNo, f, totals, isQuote, isCredit, refInvoice, creditRoom, currency])
 
   /* ── Auto-save: a new invoice you are still typing is kept in this browser, so closing the tab
         or losing the connection does not lose your work. It is cleared once the invoice is saved. ── */
@@ -859,7 +942,7 @@ export default function InvoiceMaker() {
   const hasContent = Boolean(f.clientName.trim() || items.some(it => (it.desc || '').trim() || Number(it.rate)))
 
   useEffect(() => {
-    if (editing || recovered || skipAutosave.current) return
+    if (editing || recovered || skipAutosave.current || !plainNew) return
     if (token && !cloudLoaded) return
     const timer = setTimeout(() => {
       try {
@@ -875,7 +958,7 @@ export default function InvoiceMaker() {
 
   // On opening a blank new invoice, offer to bring back unsaved work (kept for 7 days)
   useEffect(() => {
-    if (editParam || copyParam || clientParam) return
+    if (!plainNew) return
     try {
       const raw = localStorage.getItem(draftKey)
       if (!raw) return
@@ -929,12 +1012,16 @@ export default function InvoiceMaker() {
     setSaving(mode)
     const bizId = upsertBusinessFromForm()
     const wasDraft = !editing || editing.status === 'draft'
-    const status = mode === 'draft'
-      ? (editing && editing.status !== 'draft' ? editing.status : 'draft')
-      : (wasDraft ? 'sent' : editing.status)
+    const status = isCredit
+      ? (editing ? editing.status : 'issued')
+      : mode === 'draft'
+        ? (editing && editing.status !== 'draft' ? editing.status : 'draft')
+        : (wasDraft ? 'sent' : editing.status)
 
     const body = {
-      ...f, bizLogo: '', no: invNo.trim(), bizId, status, template, currency,
+      ...f, bizLogo: '', no: invNo.trim(), bizId, status, template, currency, docType,
+      ...(isCredit && refInvoice ? { refInvoiceId: refInvoice._id } : {}),
+      ...(fromQuote ? { fromQuotationId: fromQuote._id } : {}),
       discPct: Number(discPct) || 0, taxPct: 18,
       shipping: Number(shipping) || 0, roundOff,
       items: items
@@ -953,20 +1040,20 @@ export default function InvoiceMaker() {
       return
     }
     if (!res.ok || !res.data.success) {
-      setFormError(res.data.message || res.data.error || 'Could not save the invoice. Please try again.')
+      setFormError(res.data.message || res.data.error || `Could not save the ${info.lower}. Please try again.`)
       return
     }
 
     // Saved on the server — the browser copy is no longer needed
     skipAutosave.current = true
     try { localStorage.removeItem(draftKey) } catch { /* ignore */ }
-    toast(mode === 'draft' && status === 'draft' ? `Draft ${invNo.trim()} saved` : `Invoice ${invNo.trim()} saved`)
+    toast(mode === 'draft' && status === 'draft' ? `Draft ${invNo.trim()} saved` : `${info.label} ${invNo.trim()} saved`)
 
     const saved = { ...res.data.invoice, bizLogo: f.bizLogo || '' }
     if (res.data.invoiceCount !== undefined) setInvoiceCount(res.data.invoiceCount)
     // List ko naye invoice ke saath taaza karo, phir wahan le jao
     await loadBilling(token, { force: true })
-    navigate('/app/invoices')
+    navigate(info.path)
     if (mode === 'final') printInvoice(saved, { hideBranding: isPro })
   }
 
@@ -979,7 +1066,8 @@ export default function InvoiceMaker() {
     }
   }, [token, cloudLoaded]) // eslint-disable-line
 
-  const limitReached = Boolean(token) && !isPro && !editing && invoiceCount >= FREE_LIMIT
+  const countsToLimit = docType === 'invoice' && !editing
+  const limitReached = Boolean(token) && !isPro && countsToLimit && invoiceCount >= FREE_LIMIT
   const sellerState = stateCodeOf(f.bizGst)
   const busy = Boolean(saving)
   const mono = { fontFamily: "'IBM Plex Mono', monospace" }
@@ -990,10 +1078,10 @@ export default function InvoiceMaker() {
       <div className="ig-top">
         <div className="ig-top-inner">
           <div className="ig-top-left">
-            <button className="ig-back" onClick={() => navigate(token ? '/app/invoices' : '/')}>‹ Invoices</button>
+            <button className="ig-back" onClick={() => navigate(token ? info.path : '/')}>‹ {info.plural}</button>
             <div className="ig-vsep" />
             <div className="ig-brand">
-              <div className="ig-name">{editing ? `Edit invoice ${editing.no}` : 'New invoice'}</div>
+              <div className="ig-name">{editing ? `Edit ${info.lower} ${editing.no}` : `New ${info.lower}`}</div>
             </div>
           </div>
           <div className="ig-actions">
@@ -1030,7 +1118,50 @@ export default function InvoiceMaker() {
 
           {editing && (
             <div className="ig-banner">
-              You are editing saved invoice <strong>{editing.no}</strong>. Saving updates the same invoice and does not use up a free invoice.
+              You are editing saved {info.lower} <strong>{editing.no}</strong>. {docType === 'invoice'
+                ? 'Saving updates the same invoice and does not use up a free invoice.'
+                : `Saving updates the same ${info.lower}.`}
+            </div>
+          )}
+
+          {!editing && isQuote && (
+            <div className="ig-banner">
+              A quotation is a price offer. It is not counted in your billing or GST, and does not use up a free invoice. When the client agrees, turn it into an invoice in one click.
+            </div>
+          )}
+          {fromQuote && !editing && (
+            <div className="ig-banner">
+              This invoice is being made from quotation <strong>{fromQuote.no}</strong>. Change anything the client asked for, then save.
+            </div>
+          )}
+          {isCredit && (
+            <div className="ig-card" style={{ paddingBottom: 14 }}>
+              <div className="sec-label"><span className="sec-dot" />Credit note for</div>
+              <div className="g2">
+                <div className="field">
+                  <label className="lbl" htmlFor="cn-invoice">Invoice *</label>
+                  {editing ? (
+                    <input id="cn-invoice" className="inp" style={mono} value={editing.refInvoiceNo || ''} disabled />
+                  ) : (
+                    <select id="cn-invoice" className={`inp ${showProblems && !refInvoice ? 'inp-err' : ''}`} value={refInvoice?._id || ''} onChange={e => pickRefInvoice(e.target.value)}>
+                      <option value="">Choose an invoice…</option>
+                      {allInvoices.filter(i => i.status !== 'draft' && i.status !== 'cancelled').map(i => (
+                        <option key={i._id} value={i._id}>{i.no} · {i.clientName} · {fmtMoney(i.grandTotal, i.currency || '₹')}</option>
+                      ))}
+                    </select>
+                  )}
+                </div>
+                <div className="field">
+                  <label className="lbl" htmlFor="cn-reason">Reason</label>
+                  <input id="cn-reason" className="inp" list="cn-reasons" value={f.reason} onChange={sf('reason')} maxLength={120} placeholder="e.g. Goods returned" />
+                  <datalist id="cn-reasons">{CREDIT_REASONS.map(r => <option key={r} value={r} />)}</datalist>
+                </div>
+              </div>
+              <div style={{ fontSize: 11.5, color: 'var(--text3)', marginTop: 8, lineHeight: 1.55 }}>
+                {refInvoice
+                  ? <>Invoice <strong>{refInvoice.no}</strong> is for {fmtMoney(invoiceTotal(refInvoice), refInvoice.currency || '₹')}{creditRoom !== null && creditRoom < invoiceTotal(refInvoice) - 0.01 ? <>, of which {fmtMoney(creditRoom, refInvoice.currency || '₹')} can still be credited</> : ''}. Keep only the items and quantities you are taking back or reducing — remove the rest.</>
+                  : 'A credit note reduces an invoice you have already sent — for returned goods, a wrong rate, or a discount given later. The original invoice stays as it is.'}
+              </div>
             </div>
           )}
 
@@ -1038,36 +1169,61 @@ export default function InvoiceMaker() {
           <div className="ig-card" style={{ paddingBottom: 14 }}>
             <div className="meta-grid">
               <div className="field">
-                <label className="lbl">Invoice No. *</label>
+                <label className="lbl">{info.label} No. *</label>
                 <input className={`inp ${showProblems && !invNo.trim() ? 'inp-err' : ''}`} style={mono}
                   value={invNo} onChange={e => setInvNo(e.target.value)} maxLength={30}
-                  placeholder="e.g. INV-2026-001" />
+                  placeholder={`e.g. ${info.prefix}-${new Date().getFullYear()}-001`} />
               </div>
               <div className="field">
-                <label className="lbl">Invoice Date</label>
+                <label className="lbl">{docType === 'invoice' ? 'Invoice Date' : 'Date'}</label>
                 <input type="date" className="inp" value={f.date} onChange={sf('date')} />
               </div>
-              <div className="field">
-                <label className="lbl">Due Date</label>
-                <input type="date" className="inp" value={f.dueDate} min={f.date || undefined} onChange={sf('dueDate')} />
-              </div>
-              <div className="field">
-                <label className="lbl">PO / Ref No.</label>
-                <input className="inp" value={f.poNumber} onChange={sf('poNumber')} maxLength={40} placeholder="Optional" />
-              </div>
+              {docType === 'invoice' && (
+                <div className="field">
+                  <label className="lbl">Due Date</label>
+                  <input type="date" className="inp" value={f.dueDate} min={f.date || undefined} onChange={sf('dueDate')} />
+                </div>
+              )}
+              {isQuote && (
+                <div className="field">
+                  <label className="lbl">Valid Till</label>
+                  <input type="date" className="inp" value={f.validTill} min={f.date || undefined} onChange={sf('validTill')} />
+                </div>
+              )}
+              {!isCredit && (
+                <div className="field">
+                  <label className="lbl">{isQuote ? 'Ref No.' : 'PO / Ref No.'}</label>
+                  <input className="inp" value={f.poNumber} onChange={sf('poNumber')} maxLength={40} placeholder="Optional" />
+                </div>
+              )}
             </div>
-            <div className="due-chips">
-              <span>Due in:</span>
-              {[0, 7, 15, 30, 45].map(d => (
-                <button key={d} type="button"
-                  className={`biz-pill ${f.dueDate && f.dueDate === addDays(f.date, d) ? 'on' : ''}`}
-                  onClick={() => setF(p => ({ ...p, dueDate: addDays(p.date, d) }))}>
-                  {d === 0 ? 'On receipt' : `${d} days`}
-                </button>
-              ))}
-              {f.dueDate && <button type="button" className="biz-pill" onClick={() => setF(p => ({ ...p, dueDate: '' }))}>Clear</button>}
-            </div>
-            {!invNo.trim() && !editing && (
+            {docType === 'invoice' && (
+              <div className="due-chips">
+                <span>Due in:</span>
+                {[0, 7, 15, 30, 45].map(d => (
+                  <button key={d} type="button"
+                    className={`biz-pill ${f.dueDate && f.dueDate === addDays(f.date, d) ? 'on' : ''}`}
+                    onClick={() => setF(p => ({ ...p, dueDate: addDays(p.date, d) }))}>
+                    {d === 0 ? 'On receipt' : `${d} days`}
+                  </button>
+                ))}
+                {f.dueDate && <button type="button" className="biz-pill" onClick={() => setF(p => ({ ...p, dueDate: '' }))}>Clear</button>}
+              </div>
+            )}
+            {isQuote && (
+              <div className="due-chips">
+                <span>Valid for:</span>
+                {[7, 15, 30].map(d => (
+                  <button key={d} type="button"
+                    className={`biz-pill ${f.validTill && f.validTill === addDays(f.date, d) ? 'on' : ''}`}
+                    onClick={() => setF(p => ({ ...p, validTill: addDays(p.date, d) }))}>
+                    {d} days
+                  </button>
+                ))}
+                {f.validTill && <button type="button" className="biz-pill" onClick={() => setF(p => ({ ...p, validTill: '' }))}>Clear</button>}
+              </div>
+            )}
+            {docType === 'invoice' && !invNo.trim() && !editing && (
               <div style={{ fontSize: 11.5, color: 'var(--text3)', marginTop: 8 }}>
                 This is the first invoice for this business, so enter your starting invoice number. After this, each new invoice is numbered automatically (you can still change it).
               </div>
@@ -1375,12 +1531,13 @@ export default function InvoiceMaker() {
 
             {/* Save area */}
             <div className="gen-area">
-              <div className="gen-label">Invoice total</div>
+              <div className="gen-label">{info.label} total</div>
               <div className="gen-total">{fmt(total, currency)}</div>
-              {f.dueDate && <div className="gen-note" style={{ marginTop: 4 }}>Due {formatDate(f.dueDate)}</div>}
+              {isQuote && f.validTill && <div className="gen-note" style={{ marginTop: 4 }}>Valid till {formatDate(f.validTill)}</div>}
+              {docType === 'invoice' && f.dueDate && <div className="gen-note" style={{ marginTop: 4 }}>Due {formatDate(f.dueDate)}</div>}
 
               {/* Free limit indicator */}
-              {token && !isPro && !editing && (
+              {token && !isPro && countsToLimit && (
                 limitReached ? (
                   <div style={{
                     margin: '14px 0 0', padding: '14px 16px',
@@ -1420,13 +1577,13 @@ export default function InvoiceMaker() {
                     </button>
                     <button className="btn" onClick={() => saveInvoice('draft')} disabled={busy}
                       style={{ fontSize: 13, padding: '10px 16px', opacity: busy ? 0.6 : 1, cursor: busy ? 'wait' : 'pointer' }}>
-                      {saving === 'draft' ? 'Saving…' : (editing && editing.status !== 'draft' ? 'Save changes' : 'Save as draft')}
+                      {saving === 'draft' ? 'Saving…' : (editing && editing.status !== 'draft' ? 'Save changes' : isCredit ? 'Save only' : 'Save as draft')}
                     </button>
                   </div>
                   <div className="gen-note">
-                    Save &amp; print saves the invoice and opens the print / PDF dialog
+                    Save &amp; print saves the {info.lower} and opens the print / PDF dialog
                   </div>
-                  {!editing && hasContent && <div className="gen-note" style={{ marginTop: 4 }}>Your work is auto-saved on this device as you type</div>}
+                  {!editing && hasContent && plainNew && <div className="gen-note" style={{ marginTop: 4 }}>Your work is auto-saved on this device as you type</div>}
                 </>
               )}
 

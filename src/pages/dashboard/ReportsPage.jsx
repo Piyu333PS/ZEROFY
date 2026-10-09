@@ -19,7 +19,7 @@ const invoiceTotal = (inv) => inv.grandTotal !== undefined ? Number(inv.grandTot
 // Draft (abhi bheja nahi) aur cancelled invoices billing mein nahi gine jate
 const isBillable = (inv) => inv.status !== 'cancelled' && inv.status !== 'draft'
 
-const STATUS_COLORS = { paid: '#0B6E4F', sent: '#EFA02F', partial: '#2B5D8C', overdue: '#B3261E', draft: '#5C7189', cancelled: '#B9A9A7' }
+const STATUS_COLORS = { paid: '#0B6E4F', credited: '#5E9C87', sent: '#EFA02F', partial: '#2B5D8C', overdue: '#B3261E', draft: '#5C7189', cancelled: '#B9A9A7' }
 const CHART_COLORS = ['#EFA02F', '#0B6E4F', '#2B5D8C', '#B3261E', '#7A5AA8', '#A85E08', '#5C7189']
 
 const PERIODS = [
@@ -73,6 +73,8 @@ export default function ReportsPage() {
   const navigate = useNavigate()
   const { data, loading, error } = useBilling(token)
   const invoices = data?.invoices || []
+  // Credit notes that count: not cancelled. They reduce billing and GST in the month they are dated.
+  const creditNotes = useMemo(() => (data?.creditNotes || []).filter(n => n.status !== 'cancelled'), [data])
   const payments = data?.payments || []
   const customers = data?.customers || []
   const [period, setPeriod] = useState('monthly')
@@ -83,9 +85,9 @@ export default function ReportsPage() {
   const totals = useMemo(() => {
     const billable = invoices.filter(isBillable)
     const billableIds = new Set(billable.map(i => i._id))
-    const totalInvoiced = billable.reduce((s, i) => s + invoiceTotal(i), 0)
+    const totalInvoiced = billable.reduce((s, i) => s + Math.max(0, invoiceTotal(i) - (Number(i.creditedAmount) || 0)), 0)
     const totalReceived = payments.filter(p => billableIds.has(p.invoiceId)).reduce((s, p) => s + (p.amount || 0), 0)
-    const pending = Math.max(0, totalInvoiced - totalReceived)
+    const pending = billable.reduce((s, i) => s + (i.balance !== undefined ? Number(i.balance) : invoiceTotal(i)), 0)
     const collectionRate = totalInvoiced > 0 ? (totalReceived / totalInvoiced) * 100 : 0
     const avgInvoice = billable.length > 0 ? totalInvoiced / billable.length : 0
     return { totalInvoiced, totalReceived, pending, collectionRate, avgInvoice }
@@ -104,6 +106,12 @@ export default function ReportsPage() {
       const key = periodKey(d, period)
       if (map[key]) map[key].invoiced += invoiceTotal(inv)
     })
+    creditNotes.forEach(note => {
+      const d = parseDate(note.date) || parseDate(note.createdAt)
+      if (!d) return
+      const key = periodKey(d, period)
+      if (map[key]) map[key].invoiced -= invoiceTotal(note)
+    })
 
     payments.forEach(p => {
       const d = parseDate(p.date) || parseDate(p.createdAt)
@@ -112,8 +120,8 @@ export default function ReportsPage() {
       if (map[key]) map[key].received += (p.amount || 0)
     })
 
-    return buckets.map(b => ({ ...b, invoiced: Math.round(b.invoiced), received: Math.round(b.received) }))
-  }, [invoices, payments, period])
+    return buckets.map(b => ({ ...b, invoiced: Math.max(0, Math.round(b.invoiced)), received: Math.round(b.received) }))
+  }, [invoices, creditNotes, payments, period])
 
   // ---- Top clients by payment received ----
   const topClients = useMemo(() => {
@@ -154,14 +162,29 @@ export default function ReportsPage() {
       const m = byMonth[key]
       m.count += 1; m.taxable += c.taxable; m.cgst += c.cgst; m.sgst += c.sgst; m.igst += c.igst; m.total += c.total
     })
+    // A credit note lowers the taxable value and GST of the month it is dated in
+    creditNotes.forEach(note => {
+      const d = parseDate(note.date) || parseDate(note.createdAt)
+      if (!d) return
+      const key = periodKey(d, 'monthly')
+      const c = calcInvoice(note)
+      if (!byMonth[key]) byMonth[key] = { key, count: 0, taxable: 0, cgst: 0, sgst: 0, igst: 0, total: 0 }
+      const m = byMonth[key]
+      m.taxable -= c.taxable; m.cgst -= c.cgst; m.sgst -= c.sgst; m.igst -= c.igst; m.total -= c.total
+    })
     return Object.values(byMonth).sort((a, b) => b.key.localeCompare(a.key)).slice(0, 12)
-  }, [invoices])
+  }, [invoices, creditNotes])
 
   const exportGstCsv = () => {
-    const rows = [['Invoice No', 'Date', 'Client', 'Client GSTIN', 'Taxable value', 'CGST', 'SGST', 'IGST', 'Invoice total', 'Status']]
+    const rows = [['Type', 'Number', 'Date', 'Client', 'Client GSTIN', 'Taxable value', 'CGST', 'SGST', 'IGST', 'Total', 'Status', 'Against invoice']]
     invoices.filter(isBillable).forEach(inv => {
       const c = calcInvoice(inv)
-      rows.push([inv.no, inv.date || '', inv.clientName || '', inv.clientGst || '', c.taxable, c.cgst, c.sgst, c.igst, c.total, displayStatus(inv)])
+      rows.push(['Invoice', inv.no, inv.date || '', inv.clientName || '', inv.clientGst || '', c.taxable, c.cgst, c.sgst, c.igst, c.total, displayStatus(inv), ''])
+    })
+    // Credit notes are listed as minus amounts, so the column totals are the net figures
+    creditNotes.forEach(note => {
+      const c = calcInvoice(note)
+      rows.push(['Credit note', note.no, note.date || '', note.clientName || '', note.clientGst || '', -c.taxable, -c.cgst, -c.sgst, -c.igst, -c.total, 'issued', note.refInvoiceNo || ''])
     })
     const csv = rows.map(r => r.map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',')).join('\n')
     downloadText('\uFEFF' + csv, 'zerofy-gst-report.csv', 'text/csv;charset=utf-8')
@@ -309,7 +332,7 @@ export default function ReportsPage() {
             <div className={styles.panelHeadRow}>
               <div>
                 <p className={styles.panelTitle}>GST summary</p>
-                <p className={styles.panelSub}>Taxable value and tax by month (draft and cancelled invoices are not included)</p>
+                <p className={styles.panelSub}>Taxable value and tax by month (after credit notes; draft and cancelled invoices are not included)</p>
               </div>
               <button className={styles.exportBtn} onClick={exportGstCsv}>Export CSV</button>
             </div>

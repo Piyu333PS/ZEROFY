@@ -37,6 +37,16 @@ const STEPS = [
     body: 'Search and filter by status. Open an invoice to print it, download a PDF, or share it on WhatsApp or email. Use the ⋯ menu to edit, duplicate, cancel or delete.',
   },
   {
+    route: '/app/quotations', target: 'nav-quotations',
+    title: 'Quotations, before the sale',
+    body: 'Send a client a price offer first. Quotations are free and are not counted in your billing or GST. When the client agrees, use "Convert to invoice" and the invoice is ready.',
+  },
+  {
+    route: '/app/credit-notes', target: 'nav-credit-notes',
+    title: 'Credit notes, after the sale',
+    body: 'If goods come back or you need to reduce an invoice you already sent, make a credit note for it. The invoice balance and your GST summary go down by that amount.',
+  },
+  {
     route: '/app/customers', target: 'nav-clients',
     title: 'Clients are saved for you',
     body: 'Every client you invoice is saved automatically. Next time, type the name and the details fill in. You can also see what each client has been billed and still owes.',

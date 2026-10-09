@@ -99,15 +99,39 @@ export const formatDate = (iso) => {
   return `${Number(m[3])} ${MONTHS[Number(m[2]) - 1] || ''} ${m[1]}`
 }
 
+/* ─── Document types ─────────────────────────────────────────── */
+// Invoices, quotations and credit notes are stored the same way; `docType` tells them apart.
+// Documents saved before this existed have no docType — they are invoices.
+export const docTypeOf = (d) => (d && (d.docType === 'quotation' || d.docType === 'credit_note') ? d.docType : 'invoice')
+
+export const DOC = {
+  invoice: { label: 'Invoice', lower: 'invoice', plural: 'Invoices', prefix: 'INV', path: '/app/invoices', listKey: 'invoices' },
+  quotation: { label: 'Quotation', lower: 'quotation', plural: 'Quotations', prefix: 'QT', path: '/app/quotations', listKey: 'quotations' },
+  credit_note: { label: 'Credit note', lower: 'credit note', plural: 'Credit notes', prefix: 'CN', path: '/app/credit-notes', listKey: 'creditNotes' },
+}
+export const docInfo = (d) => DOC[typeof d === 'string' ? (DOC[d] ? d : 'invoice') : docTypeOf(d)]
+
 /* ─── Status ─────────────────────────────────────────────────── */
-// Dikhane wala status: stored status + payments + due date se nikalta hai
-// → draft | sent | partial | overdue | paid | cancelled
+// The status to show. It comes from the saved status plus payments, credit notes and dates.
+//   invoice     → draft | sent | partial | overdue | paid | credited | cancelled
+//   quotation   → draft | sent | expired | accepted | declined | converted
+//   credit note → issued | cancelled
 export const displayStatus = (inv) => {
+  const type = docTypeOf(inv)
   const s = inv.status || 'draft'
-  if (s === 'draft' || s === 'cancelled' || s === 'paid') return s
+  if (type === 'credit_note') return s === 'cancelled' ? 'cancelled' : 'issued'
+  if (type === 'quotation') {
+    if (['draft', 'accepted', 'declined', 'converted'].includes(s)) return s
+    if (inv.validTill && inv.validTill < localToday()) return 'expired'
+    return 'sent'
+  }
+  if (s === 'draft' || s === 'cancelled') return s
   const total = inv.grandTotal !== undefined ? Number(inv.grandTotal) : invoiceTotal(inv)
   const paid = Number(inv.paidAmount) || 0
-  if (paid > 0 && paid >= total - 0.01) return 'paid'
+  const credited = Number(inv.creditedAmount) || 0
+  if (credited > 0 && paid <= 0 && credited >= total - 0.01) return 'credited'
+  if (s === 'paid') return 'paid'
+  if (paid + credited > 0 && paid + credited >= total - 0.01) return 'paid'
   if (inv.dueDate && inv.dueDate < localToday()) return 'overdue'
   if (paid > 0) return 'partial'
   return 'sent'
@@ -115,6 +139,56 @@ export const displayStatus = (inv) => {
 
 export const STATUS_LABELS = {
   draft: 'Draft', sent: 'Sent', partial: 'Part paid', overdue: 'Overdue', paid: 'Paid', cancelled: 'Cancelled',
+  credited: 'Credited', expired: 'Expired', accepted: 'Accepted', declined: 'Declined', converted: 'Invoiced', issued: 'Issued',
+}
+
+// Everything the preview and the PDF need to know that depends on the document type —
+// kept here so the screen, the print and the PDF always say the same thing.
+export const docView = (inv, calc) => {
+  const type = docTypeOf(inv)
+  const c = calc || calcInvoice(inv)
+  const cur = inv.currency || '₹'
+  const pos = placeOfSupplyOf(inv)
+  const common = [
+    pos ? ['Place of Supply', `${stateName(pos) || pos} (${pos})`] : null,
+    cur !== '₹' ? ['Currency', cur] : null,
+  ]
+  const date = formatDate(inv.date || localToday())
+  if (type === 'quotation') {
+    return {
+      type, title: 'Quotation', detailsLabel: 'Quotation Details', totalLabel: 'Total', noteLabel: `Quotation ${inv.no || ''}`.trim(),
+      meta: [['Quotation No.', inv.no || '—'], ['Date', date],
+        inv.validTill ? ['Valid Till', formatDate(inv.validTill)] : null,
+        inv.poNumber ? ['Ref No.', inv.poNumber] : null, ...common].filter(Boolean),
+      footer: 'This is a quotation, not a tax invoice',
+      showPayment: false, allowQr: false, paid: 0, credited: 0, balance: c.total, badge: '',
+    }
+  }
+  if (type === 'credit_note') {
+    return {
+      type, title: 'Credit Note', detailsLabel: 'Credit Note Details', totalLabel: 'Total credit', noteLabel: `Credit note ${inv.no || ''}`.trim(),
+      meta: [['Credit Note No.', inv.no || '—'], ['Date', date],
+        inv.refInvoiceNo ? ['Against Invoice', inv.refInvoiceNo] : null,
+        inv.refInvoiceDate ? ['Invoice Date', formatDate(inv.refInvoiceDate)] : null,
+        inv.reason ? ['Reason', inv.reason] : null, ...common].filter(Boolean),
+      footer: 'This is a computer-generated credit note',
+      showPayment: false, allowQr: false, paid: 0, credited: 0, balance: 0, badge: '',
+    }
+  }
+  const paid = r2(inv.paidAmount)
+  const credited = r2(inv.creditedAmount)
+  const balance = r2(Math.max(0, c.total - paid - credited))
+  const st = inv.status || 'draft'
+  return {
+    type, title: inv.bizGst ? 'Tax Invoice' : 'Invoice', detailsLabel: 'Invoice Details', totalLabel: 'Total', noteLabel: `Invoice ${inv.no || ''}`.trim(),
+    meta: [['Invoice No.', inv.no || '—'], ['Invoice Date', date],
+      inv.dueDate ? ['Due Date', formatDate(inv.dueDate)] : null,
+      inv.poNumber ? ['PO / Ref No.', inv.poNumber] : null, ...common].filter(Boolean),
+    footer: 'This is a computer-generated invoice',
+    showPayment: true, allowQr: st !== 'cancelled' && st !== 'paid' && balance > 0,
+    paid, credited, balance,
+    badge: st === 'paid' ? (paid <= 0 && credited > 0 ? 'Credited' : 'Paid') : '',
+  }
 }
 
 /* ─── Money ──────────────────────────────────────────────────── */

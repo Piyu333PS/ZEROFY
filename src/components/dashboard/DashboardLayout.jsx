@@ -9,6 +9,8 @@ const I = (d) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stro
 const icons = {
   overview: I(<><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></>),
   invoices: I(<><path d="M7 3h8l4 4v14a1 1 0 01-1 1H7a1 1 0 01-1-1V4a1 1 0 011-1z"/><path d="M9 12h6M9 16h6M9 8h3"/></>),
+  quotes: I(<><path d="M7 3h8l4 4v14a1 1 0 01-1 1H7a1 1 0 01-1-1V4a1 1 0 011-1z"/><path d="M9.5 13.5c0-1.2.8-2 1.8-2M9.5 13.5v2h2v-2zM13.5 13.5c0-1.2.8-2 1.8-2M13.5 13.5v2h2v-2z"/></>),
+  credit: I(<><path d="M7 3h8l4 4v14a1 1 0 01-1 1H7a1 1 0 01-1-1V4a1 1 0 011-1z"/><path d="M15 14H9.5M11.5 11.5L9 14l2.5 2.5"/></>),
   clients: I(<><circle cx="9" cy="8" r="3.2"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><path d="M17 4.2a3.2 3.2 0 010 6.2M21.5 20c0-3-2-5.2-5-5.8"/></>),
   items: I(<><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3z"/><path d="M4 7.5l8 4.5 8-4.5M12 12v9"/></>),
   payments: I(<><rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="M2.5 10h19M6.5 15h4"/></>),
@@ -23,6 +25,8 @@ const icons = {
 const NAV_ITEMS = [
   { to: '/app', label: 'Overview', icon: icons.overview, end: true, tour: 'nav-overview' },
   { to: '/app/invoices', label: 'Invoices', icon: icons.invoices, tour: 'nav-invoices' },
+  { to: '/app/quotations', label: 'Quotations', icon: icons.quotes, tour: 'nav-quotations' },
+  { to: '/app/credit-notes', label: 'Credit notes', icon: icons.credit, tour: 'nav-credit-notes' },
   { to: '/app/customers', label: 'Clients', icon: icons.clients, tour: 'nav-clients' },
   { to: '/app/items', label: 'Items', icon: icons.items, tour: 'nav-items' },
   { to: '/app/payments', label: 'Payments', icon: icons.payments, tour: 'nav-payments' },

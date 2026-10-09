@@ -6,8 +6,8 @@
 
 .primaryBtn {
   display: flex; align-items: center; gap: 8px;
-  background: var(--saffron); color: #fff;
-  font-weight: 600; font-size: 13.5px;
+  background: var(--saffron); color: var(--ink);
+  font-weight: 700; font-size: 13.5px;
   border: none; padding: 11px 18px; border-radius: 10px;
   cursor: pointer; 
   font-family: var(--body); white-space: nowrap;
@@ -177,3 +177,13 @@
 .primaryBtn { color: var(--ink); font-weight: 700; transition: background 0.15s ease; }
 .primaryBtn:hover:not(:disabled) { background: #F6B24E; opacity: 1; }
 .title { font-weight: 600; font-size: 28px; letter-spacing: -0.01em; }
+
+/* ---------- Quotations and credit notes ---------- */
+.primaryBtn:hover { filter: brightness(0.96); }
+.stamp.credited, .stamp.accepted { color: var(--green-deep); border: 1.5px solid var(--green-deep); background: var(--green-soft); }
+.stamp.converted { color: #2B5D8C; border: 1.5px solid #2B5D8C; background: #E3EDF6; }
+.stamp.issued { color: var(--saffron-deep); border: 1.5px solid var(--saffron-deep); background: var(--saffron-soft); }
+.stamp.declined, .stamp.expired { color: var(--slate); border: 1.5px solid var(--slate); background: var(--paper-dim); }
+.explain { font-size: 13px; color: var(--slate); line-height: 1.6; max-width: 720px; margin: -8px 0 18px; }
+.refLink { background: none; border: none; padding: 0; font: inherit; color: #2B5D8C; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+@media (max-width: 720px) { .header { flex-wrap: wrap; } }

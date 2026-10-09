@@ -20,9 +20,12 @@ function normalize(raw) {
   const businesses = raw.businesses || []
   const logoByBiz = {}
   for (const b of businesses) if (b && b.id && b.logo) logoByBiz[b.id] = b.logo
+  const withLogo = (list) => (list || []).map(inv => ({ ...inv, bizLogo: inv.bizLogo || logoByBiz[inv.bizId] || '' }))
   return {
     businesses,
-    invoices: (raw.invoices || []).map(inv => ({ ...inv, bizLogo: inv.bizLogo || logoByBiz[inv.bizId] || '' })),
+    invoices: withLogo(raw.invoices),
+    quotations: withLogo(raw.quotations),
+    creditNotes: withLogo(raw.creditNotes),
     customers: raw.customers || [],
     payments: raw.payments || [],
     items: raw.items || [],

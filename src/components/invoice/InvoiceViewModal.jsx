@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { InvoicePreview } from './InvoicePreview'
 import { printInvoice, downloadInvoicePdf, shareViaWhatsApp, shareViaEmail } from '../../utils/invoiceShare'
-import { formatDate } from '../../utils/invoiceCalc'
+import { formatDate, docInfo } from '../../utils/invoiceCalc'
 import styles from './InvoiceViewModal.module.css'
 
 /* Saved invoice ko app ke andar hi dikhata hai (pehle "View" naya tab/popup kholta tha,
@@ -32,7 +32,7 @@ export default function InvoiceViewModal({ invoice, hideBranding = false, onClos
 
   return (
     <div className={styles.overlay} onMouseDown={e => { if (e.target === e.currentTarget) onClose() }}>
-      <div className={styles.modal} role="dialog" aria-modal="true" aria-label={`Invoice ${invoice.no}`}>
+      <div className={styles.modal} role="dialog" aria-modal="true" aria-label={`${docInfo(invoice).label} ${invoice.no}`}>
         <div className={styles.head}>
           <div>
             <div className={styles.title}>{invoice.no}</div>

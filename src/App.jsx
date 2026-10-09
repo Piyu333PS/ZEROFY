@@ -219,6 +219,8 @@ function AppInner() {
           <Route path="/app" element={<DashboardLayout />}>
             <Route index element={<DashboardHome />} />
             <Route path="invoices" element={<InvoicesPage />} />
+            <Route path="quotations" element={<InvoicesPage key="quotation" docType="quotation" />} />
+            <Route path="credit-notes" element={<InvoicesPage key="credit_note" docType="credit_note" />} />
             <Route path="customers" element={<CustomersPage />} />
             <Route path="items" element={<ItemsPage />} />
             <Route path="payments" element={<PaymentsPage />} />
