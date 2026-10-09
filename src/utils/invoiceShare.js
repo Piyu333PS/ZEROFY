@@ -4,6 +4,7 @@ import jsPDF from 'jspdf'
 import html2canvas from 'html2canvas'
 import { InvoicePreview } from '../components/invoice/InvoicePreview'
 import { invoiceTotal, fmtMoney, formatDate } from './invoiceCalc'
+import { buildInvoicePdf, canBuildTextPdf } from './invoicePdf'
 
 /* ─── Build the exact invoice markup for ANY invoice object ────
    Seedha `inv` object se render hota hai — screen par jo preview khula hai us par depend nahi karta. */
@@ -80,9 +81,24 @@ export function printInvoice(inv, opts = {}) {
 // Purana naam — jo code abhi bhi ise import karta hai uske liye
 export const openPrintWindow = (inv, opts) => printInvoice(inv, opts)
 
-/* ─── Real PDF blob generation ─────────────────────────────────
-   Lamba invoice ho to A4 ke kai pages mein toot jata hai (pehle sab ek page mein dab jata tha). */
+/* ─── PDF blob generation ──────────────────────────────────── */
 export async function generateInvoicePdfBlob(inv, opts = {}) {
+  // Pehli pasand: asli text wala PDF (select / search / copy hota hai, file chhoti hoti hai).
+  // Sirf tab image wala PDF banta hai jab invoice mein Hindi jaisa non-Latin text ho
+  // (PDF ke standard fonts use nahi likh sakte) ya text PDF banane mein koi error aaye.
+  if (canBuildTextPdf(inv)) {
+    try {
+      const bytes = await buildInvoicePdf(inv, opts)
+      return new Blob([bytes], { type: 'application/pdf' })
+    } catch (e) {
+      console.error('Text PDF error, image PDF par ja rahe hain:', e)
+    }
+  }
+  return generateInvoiceImagePdfBlob(inv, opts)
+}
+
+// Purana tareeka: invoice ki tasveer ko PDF mein rakhna (fallback)
+async function generateInvoiceImagePdfBlob(inv, opts = {}) {
   const container = document.createElement('div')
   container.style.cssText = 'position:fixed;left:-99999px;top:0;width:794px;background:#fff;'
   container.innerHTML = renderInvoiceMarkup(inv, opts)
