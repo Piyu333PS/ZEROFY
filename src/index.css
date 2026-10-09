@@ -80,6 +80,9 @@
   --nav-border: rgba(0,0,0,0.08);
 }
 
+/* NOTE: neeche ki 5 lines kisi rule ke andar nahi hain, isliye browser inhe aur inke turant baad wale
+   reset rule ko ignore karta hai. Poori site isi behaviour par bani hai, isliye ise jaan-boojhkar
+   waise hi chhoda hai — sirf body ka default 8px margin alag se hataya gaya hai (dekho neeche). */
 --font-display: 'Syne', sans-serif;
 --font-body:    'DM Sans', sans-serif;
 --radius:       12px;
@@ -89,6 +92,10 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html { scroll-behavior: smooth; }
+
+/* Browser ka default 8px body margin — isse har page ke charon taraf safed patti aur
+   mobile par side-scroll aa raha tha */
+body { margin: 0; }
 
 body {
   background: var(--bg);

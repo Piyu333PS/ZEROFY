@@ -395,4 +395,23 @@ select.inp option { background: #fff; color: var(--text); }
 .ig-root ::-webkit-scrollbar-thumb { background: rgba(232,147,60,0.4); border-radius: 10px; }
 .code-drop ::-webkit-scrollbar { width: 4px; }
 .code-drop ::-webkit-scrollbar-thumb { background: rgba(232,147,60,0.35); border-radius: 10px; }
+
+/* ── v2: meta grid, banners, problems list ── */
+.meta-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 900px) { .meta-grid { grid-template-columns: 1fr 1fr; } }
+.due-chips { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-top: 10px; font-size: 11.5px; color: var(--text3); }
+.due-chips .biz-pill { padding: 4px 10px; font-size: 11px; }
+.ig-banner {
+  background: rgba(31,111,84,0.08); border: 1px solid rgba(31,111,84,0.3); color: #154F3C;
+  border-radius: 10px; padding: 10px 14px; font-size: 12.5px; margin-bottom: 14px; line-height: 1.5;
+}
+.ig-problems {
+  margin-top: 12px; text-align: left; background: rgba(193,68,60,0.07); border: 1px solid rgba(193,68,60,0.3);
+  color: #A3362F; border-radius: 10px; padding: 10px 14px; font-size: 12px; line-height: 1.6;
+}
+.ig-problems ul { margin: 4px 0 0 18px; padding: 0; }
+.ig-left, .ig-right { min-width: 0; }
+@media (max-width: 1050px) { .ig-layout { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 640px) { .meta-grid { grid-template-columns: 1fr 1fr; gap: 8px; } .ig-card { padding: 14px; } }
+@media (max-width: 700px) { .prev-frame { overflow-x: auto; } .prev-box { min-width: 640px; } }
 `

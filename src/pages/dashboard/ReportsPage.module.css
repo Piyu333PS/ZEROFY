@@ -44,3 +44,23 @@
 
 .error { color: var(--rust); margin-bottom: 16px; }
 .empty { padding: 24px 10px; color: var(--slate); font-size: 13.5px; text-align: center; }
+
+/* ---------- v2: tables ---------- */
+.panelHeadRow { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+.exportBtn {
+  background: #fff; color: var(--ink); border: 1px solid var(--paper-line); padding: 8px 14px;
+  border-radius: 10px; font-weight: 600; font-size: 12.5px; cursor: pointer; font-family: var(--body);
+}
+.exportBtn:hover { border-color: var(--saffron); color: var(--saffron-deep); }
+.tableScroll { overflow-x: auto; margin-top: 12px; }
+.dataTable { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 560px; }
+.dataTable th {
+  text-align: right; font-size: 10.5px; letter-spacing: 1px; text-transform: uppercase;
+  color: var(--slate); font-weight: 600; padding: 9px 10px; border-bottom: 1px solid var(--paper-line);
+}
+.dataTable td { text-align: right; padding: 10px; border-bottom: 1px solid var(--paper-line); font-family: var(--mono); color: var(--ink); }
+.dataTable th:first-child, .dataTable td:first-child { text-align: left; font-family: var(--body); }
+.dataTable tbody tr:last-child td { border-bottom: none; }
+.overdueCell { color: var(--rust); font-weight: 600; }
+@media (max-width: 820px) { .wrap { padding: 20px 14px 50px; } }
+.row { margin-bottom: 20px; }

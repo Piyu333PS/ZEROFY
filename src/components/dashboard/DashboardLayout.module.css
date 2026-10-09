@@ -89,6 +89,8 @@
 .navIcon { width: 17px; display: flex; align-items: center; justify-content: center; opacity: 0.9; }
 .active .navIcon { opacity: 1; }
 
+.settingsLink { margin-top: auto; }
+
 .content {
   flex: 1;
   min-width: 0;
@@ -106,8 +108,13 @@
     align-items: center;
     overflow-x: auto;
     padding: 14px;
+    box-sizing: border-box;   /* warna width:100% + padding se page side mein scroll hota tha */
   }
   .brand, .brandSub { display: none; }
   .nav { flex-direction: row; }
-  .content { border-radius: 0; }
+  .navLink { white-space: nowrap; }
+  .settingsLink { margin-top: 0; margin-left: 2px; }
+  .settingsLink { margin-top: auto; }
+
+.content { border-radius: 0; }
 }

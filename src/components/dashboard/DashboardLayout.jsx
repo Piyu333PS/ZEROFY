@@ -53,7 +53,10 @@ export default function DashboardLayout() {
           ))}
         </nav>
 
-        <NavLink to="/settings" className={styles.navLink} style={{ marginTop: 'auto' }}>
+        <NavLink
+          to="/app/settings"
+          className={({ isActive }) => `${styles.navLink} ${styles.settingsLink} ${isActive ? styles.active : ''}`}
+        >
           <span className={styles.navIcon}>{icons.settings}</span>
           Settings
         </NavLink>

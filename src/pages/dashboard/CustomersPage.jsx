@@ -1,63 +1,90 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
+import { api, API } from '../../utils/api'
+import { fmtMoney } from '../../utils/invoiceCalc'
+import ConfirmDialog from '../../components/ConfirmDialog'
 import styles from './CustomersPage.module.css'
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 const emptyForm = { name: '', email: '', phone: '', gst: '', addr: '' }
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
+const GSTIN_RE = /^\d{2}[A-Z]{5}\d{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/i
 
 export default function CustomersPage() {
   const { token } = useAuth()
+  const navigate = useNavigate()
   const [customers, setCustomers] = useState([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
+  const [editingId, setEditingId] = useState(null)
   const [form, setForm] = useState(emptyForm)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
+  const [notice, setNotice] = useState(null)
+  const [query, setQuery] = useState('')
+  const [toDelete, setToDelete] = useState(null)
+  const [deleting, setDeleting] = useState(false)
   const [downloadingTemplate, setDownloadingTemplate] = useState(false)
   const [importing, setImporting] = useState(false)
   const [importResult, setImportResult] = useState(null)
   const fileInputRef = useRef(null)
 
-  const load = async () => {
-    setLoading(true)
-    try {
-      const res = await fetch(`${API}/api/customers`, { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json())
-      if (res.success) setCustomers(res.customers || [])
-    } catch (e) {
-      setError('Customers load nahi ho paye.')
-    } finally {
-      setLoading(false)
-    }
+  const load = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true)
+    const res = await api('/api/customers', token)
+    if (res.ok && res.data.success) setCustomers(res.data.customers || [])
+    else setError(res.data.error || 'Clients load nahi ho paye.')
+    setLoading(false)
+  }, [token])
+
+  useEffect(() => { if (token) load() }, [token, load])
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase()
+    if (!q) return customers
+    return customers.filter(c =>
+      [c.name, c.phone, c.email, c.gst].some(v => String(v || '').toLowerCase().includes(q))
+    )
+  }, [customers, query])
+
+  const emailBad = Boolean(form.email.trim()) && !EMAIL_RE.test(form.email.trim())
+  const gstBad = Boolean(form.gst.trim()) && !GSTIN_RE.test(form.gst.trim())
+  const phoneBad = Boolean(form.phone) && form.phone.length !== 10
+
+  const openAdd = () => { setEditingId(null); setForm(emptyForm); setError(null); setShowForm(true) }
+  const openEdit = (c) => {
+    setEditingId(c._id)
+    setForm({ name: c.name || '', email: c.email || '', phone: c.phone || '', gst: c.gst || '', addr: c.addr || '' })
+    setError(null)
+    setShowForm(true)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
+  const closeForm = () => { setShowForm(false); setEditingId(null); setForm(emptyForm); setError(null) }
 
-  useEffect(() => { if (token) load() }, [token])
-
-  const handleAdd = async (e) => {
+  const handleSave = async (e) => {
     e.preventDefault()
     if (!form.name.trim()) return
+    if (emailBad || gstBad || phoneBad) { setError('Laal fields theek karein, phir save karein.'); return }
     setSaving(true)
     setError(null)
-    try {
-      const res = await fetch(`${API}/api/customers`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify(form)
-      }).then(r => r.json())
-      if (!res.success) throw new Error(res.error || 'Save nahi hua')
-      setForm(emptyForm)
-      setShowForm(false)
-      load()
-    } catch (err) {
-      setError(err.message)
-    } finally {
-      setSaving(false)
-    }
+    const res = editingId
+      ? await api(`/api/customers/${editingId}`, token, { method: 'PUT', body: form })
+      : await api('/api/customers', token, { method: 'POST', body: form })
+    setSaving(false)
+    if (!res.ok || !res.data.success) { setError(res.data.error || 'Save nahi hua. Dobara try karein.'); return }
+    setNotice(editingId ? 'Client update ho gaya.' : 'Client add ho gaya.')
+    setTimeout(() => setNotice(null), 4000)
+    closeForm()
+    load(true)
   }
 
-  const handleDelete = async (id) => {
-    if (!confirm('Ye customer delete karna hai? Unke invoices delete nahi honge.')) return
-    await fetch(`${API}/api/customers/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } })
-    load()
+  const handleDelete = async () => {
+    setDeleting(true)
+    const res = await api(`/api/customers/${toDelete._id}`, token, { method: 'DELETE' })
+    setDeleting(false)
+    setToDelete(null)
+    if (!res.ok) { setError(res.data.error || 'Delete nahi ho paya.'); return }
+    load(true)
   }
 
   const handleDownloadTemplate = async () => {
@@ -72,11 +99,11 @@ export default function CustomersPage() {
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = 'zerofy-customers-template.xlsx'
+      a.download = 'zerofy-clients-template.xlsx'
       document.body.appendChild(a)
       a.click()
       a.remove()
-      window.URL.revokeObjectURL(url)
+      setTimeout(() => window.URL.revokeObjectURL(url), 4000)
     } catch (err) {
       setError(err.message)
     } finally {
@@ -102,7 +129,7 @@ export default function CustomersPage() {
       }).then(r => r.json())
       if (!res.success) throw new Error(res.error || 'Import nahi ho paya')
       setImportResult(res)
-      load()
+      load(true)
     } catch (err) {
       setError(err.message)
     } finally {
@@ -114,7 +141,12 @@ export default function CustomersPage() {
   return (
     <div className={styles.wrap}>
       <div className={styles.header}>
-        <h1 className={styles.title}>Customers</h1>
+        <div>
+          <h1 className={styles.title}>Clients</h1>
+          <p className={styles.subtitle}>
+            {loading ? 'Loading…' : `${customers.length} client${customers.length === 1 ? '' : 's'} — invoice banate hi client yahan apne aap save ho jata hai`}
+          </p>
+        </div>
         <div className={styles.btnGroup}>
           <button className={styles.secondaryBtn} onClick={handleDownloadTemplate} disabled={downloadingTemplate}>
             {downloadingTemplate ? 'Downloading...' : 'Download template'}
@@ -129,8 +161,8 @@ export default function CustomersPage() {
             onChange={handleImportFile}
             className={styles.hiddenInput}
           />
-          <button className={styles.primaryBtn} onClick={() => setShowForm(s => !s)}>
-            {showForm ? 'Cancel' : '+ Add customer'}
+          <button className={styles.primaryBtn} onClick={() => (showForm ? closeForm() : openAdd())}>
+            {showForm ? 'Cancel' : '+ Add client'}
           </button>
         </div>
       </div>
@@ -138,8 +170,8 @@ export default function CustomersPage() {
       {importResult && (
         <div className={styles.importSummary}>
           <p>
-            ✅ {importResult.createdCount} customer{importResult.createdCount === 1 ? '' : 's'} import ho gaye
-            {importResult.skippedCount > 0 && `, ${importResult.skippedCount} skip ho gaye (Naam missing tha)`}.
+            ✅ {importResult.createdCount} client{importResult.createdCount === 1 ? '' : 's'} import ho gaye
+            {importResult.skippedCount > 0 && `, ${importResult.skippedCount} skip ho gaye (naam missing tha)`}.
           </p>
           {importResult.errors?.length > 0 && (
             <p className={styles.importErrors}>
@@ -150,42 +182,86 @@ export default function CustomersPage() {
         </div>
       )}
 
+      {notice && <p className={styles.notice}>{notice}</p>}
+      {error && !showForm && <p className={styles.error}>{error}</p>}
+
       {showForm && (
-        <form className={styles.form} onSubmit={handleAdd}>
+        <form className={styles.form} onSubmit={handleSave} noValidate>
+          <div className={styles.formTitle}>{editingId ? 'Edit client' : 'New client'}</div>
           <div className={styles.formGrid}>
-            <input placeholder="Naam *" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required />
-            <input placeholder="Phone" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} />
-            <input placeholder="Email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
-            <input placeholder="GSTIN" value={form.gst} onChange={e => setForm({ ...form, gst: e.target.value })} />
+            <input placeholder="Name *" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required autoFocus />
+            <input placeholder="Phone (10 digits)" inputMode="numeric" value={form.phone}
+              className={phoneBad ? styles.fieldErr : ''}
+              onChange={e => setForm({ ...form, phone: e.target.value.replace(/\D/g, '').slice(0, 10) })} />
+            <input placeholder="Email" type="email" value={form.email}
+              className={emailBad ? styles.fieldErr : ''}
+              onChange={e => setForm({ ...form, email: e.target.value })} />
+            <input placeholder="GSTIN" value={form.gst} maxLength={15}
+              className={gstBad ? styles.fieldErr : ''}
+              onChange={e => setForm({ ...form, gst: e.target.value.toUpperCase().replace(/[^0-9A-Z]/g, '').slice(0, 15) })} />
             <input placeholder="Address" value={form.addr} onChange={e => setForm({ ...form, addr: e.target.value })} className={styles.wide} />
           </div>
+          {(emailBad || gstBad || phoneBad) && (
+            <p className={styles.hint}>
+              {[phoneBad && 'Phone 10 digits ka hona chahiye', emailBad && 'Email sahi format mein nahi hai', gstBad && 'GSTIN 15 characters ka hona chahiye (jaise 22AAAAA0000A1Z5)'].filter(Boolean).join(' · ')}
+            </p>
+          )}
           {error && <p className={styles.error}>{error}</p>}
-          <button type="submit" className={styles.primaryBtn} disabled={saving}>
-            {saving ? 'Saving...' : 'Save customer'}
-          </button>
+          <div className={styles.formActions}>
+            <button type="submit" className={styles.primaryBtn} disabled={saving || !form.name.trim()}>
+              {saving ? 'Saving...' : editingId ? 'Update client' : 'Save client'}
+            </button>
+            <button type="button" className={styles.secondaryBtn} onClick={closeForm}>Cancel</button>
+          </div>
         </form>
+      )}
+
+      {customers.length > 5 && (
+        <input className={styles.searchBox} placeholder="Search by name, phone, email or GSTIN…" value={query} onChange={e => setQuery(e.target.value)} />
       )}
 
       <div className={styles.table}>
         <div className={styles.tableHead}>
-          <span>Naam</span><span>Phone</span><span>Email</span><span>GSTIN</span><span></span>
+          <span>Client</span><span>GSTIN</span><span>Invoices</span><span>Billed</span><span>Outstanding</span><span></span>
         </div>
         {loading ? (
           <p className={styles.empty}>Loading...</p>
         ) : customers.length === 0 ? (
-          <p className={styles.empty}>Abhi tak koi customer add nahi hua.</p>
+          <p className={styles.empty}>Abhi tak koi client nahi hai. "+ Add client" se jodein, ya seedha invoice banayein — client apne aap yahan aa jayega.</p>
+        ) : filtered.length === 0 ? (
+          <p className={styles.empty}>Is search se koi client nahi mila.</p>
         ) : (
-          customers.map(c => (
+          filtered.map(c => (
             <div key={c._id} className={styles.tableRow}>
-              <span>{c.name}</span>
-              <span>{c.phone || '—'}</span>
-              <span>{c.email || '—'}</span>
-              <span>{c.gst || '—'}</span>
-              <button className={styles.deleteBtn} onClick={() => handleDelete(c._id)}>Delete</button>
+              <div>
+                <div className={styles.nameMain}>{c.name}</div>
+                {(c.phone || c.email) && <div className={styles.nameSub}>{[c.phone, c.email].filter(Boolean).join(' · ')}</div>}
+              </div>
+              <span className={styles.mono}><span className={styles.cellLabel}>GSTIN</span>{c.gst || '—'}</span>
+              <span className={styles.num}><span className={styles.cellLabel}>Invoices</span>{c.invoiceCount || 0}</span>
+              <span className={styles.num}><span className={styles.cellLabel}>Billed</span>{fmtMoney(c.billed)}</span>
+              <span className={`${styles.num} ${c.outstanding > 0 ? styles.due : ''}`}><span className={styles.cellLabel}>Outstanding</span>{fmtMoney(c.outstanding)}</span>
+              <div className={styles.rowBtns}>
+                <button className={styles.linkBtn} onClick={() => navigate(`/tools/invoice-maker?client=${c._id}`)}>New invoice</button>
+                <button className={styles.linkBtn} onClick={() => openEdit(c)}>Edit</button>
+                <button className={styles.deleteBtn} onClick={() => setToDelete(c)}>Delete</button>
+              </div>
             </div>
           ))
         )}
       </div>
+
+      {toDelete && (
+        <ConfirmDialog
+          danger
+          busy={deleting}
+          title={`${toDelete.name} ko delete karein?`}
+          message="Client list se hat jayega. Unke invoices delete nahi honge."
+          confirmLabel="Delete"
+          onConfirm={handleDelete}
+          onCancel={() => setToDelete(null)}
+        />
+      )}
     </div>
   )
 }

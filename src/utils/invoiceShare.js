@@ -3,173 +3,197 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import jsPDF from 'jspdf'
 import html2canvas from 'html2canvas'
 import { InvoicePreview } from '../components/invoice/InvoicePreview'
+import { invoiceTotal, fmtMoney, formatDate } from './invoiceCalc'
 
 /* ─── Build the exact invoice markup for ANY invoice object ────
-   This is the fix for the "WhatsApp/Email/Preview sab ek jaisa
-   behave karte hain" bug — earlier code read whatever invoice
-   preview happened to already be mounted in the DOM (which was
-   often the currently-open draft, not the invoice actually
-   clicked). Rendering straight from the `inv` object removes
-   that dependency entirely.                                    */
-export function renderInvoiceMarkup(inv) {
+   Seedha `inv` object se render hota hai — screen par jo preview khula hai us par depend nahi karta. */
+export function renderInvoiceMarkup(inv, opts = {}) {
   return renderToStaticMarkup(
-    createElement(InvoicePreview, {
-      inv,
-      items: inv.items || [],
-      currency: inv.currency || '₹',
-      discPct: inv.discPct || 0,
-      taxPct: inv.taxPct || 18,
-      template: inv.template || 'modern',
-      status: inv.status || 'sent',
-    })
+    createElement(InvoicePreview, { inv, hideBranding: Boolean(opts.hideBranding) })
   )
 }
+
+const esc = (s) => String(s || '').replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]))
+const safeFileName = (inv) => (String(inv.no || 'invoice').replace(/[^\w.-]+/g, '-') || 'invoice') + '.pdf'
+const totalText = (inv) => fmtMoney(invoiceTotal(inv), inv.currency || '₹')
 
 const PRINT_DOC_HEAD = `<meta charset="UTF-8">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   html, body {
-    width: 210mm; min-height: 297mm;
+    width: 210mm;
     font-family: 'Plus Jakarta Sans', sans-serif;
     background: #fff; color: #1a1a2e;
     -webkit-print-color-adjust: exact; print-color-adjust: exact; color-adjust: exact;
   }
-  body { padding: 0; }
-  .invoice-wrap { width: 210mm; min-height: 297mm; background: #fff; display: flex; flex-direction: column; position: relative; }
-  @media print { @page { size: A4 portrait; margin: 0; } html, body { margin: 0; padding: 0; } .invoice-wrap { page-break-after: avoid; } }
+  .invoice-wrap { width: 210mm; background: #fff; }
+  @media print {
+    @page { size: A4 portrait; margin: 0; }
+    html, body { margin: 0; padding: 0; }
+    tr { page-break-inside: avoid; }
+  }
   table { border-collapse: collapse; }
 </style>`
 
-function buildPrintDocument(inv, { autoPrint = false } = {}) {
-  const inner = renderInvoiceMarkup(inv)
-  const autoPrintScript = autoPrint
-    ? `<script>window.onload=function(){window.print();setTimeout(function(){window.close();},2000);}<\/script>`
-    : ''
-  return `<!DOCTYPE html><html><head><title>${inv.no || 'Invoice'}</title>${PRINT_DOC_HEAD}${autoPrintScript}</head><body><div class="invoice-wrap">${inner}</div></body></html>`
+function buildPrintDocument(inv, opts) {
+  return `<!DOCTYPE html><html><head><title>${esc(inv.no || 'Invoice')}</title>${PRINT_DOC_HEAD}</head><body><div class="invoice-wrap">${renderInvoiceMarkup(inv, opts)}</div></body></html>`
 }
 
-/* Opens a print-ready tab for the given invoice and triggers the
-   browser print dialog (also usable as "Save as PDF").          */
-export function openPrintWindow(inv) {
-  const w = window.open('', '_blank')
-  if (!w) return null
-  w.document.write(buildPrintDocument(inv))
-  w.document.close()
-  w.focus()
-  setTimeout(() => w.print(), 700)
-  return w
+/* ─── Print / Save as PDF ──────────────────────────────────────
+   Pehle ye naya tab (popup) kholta tha — popup blocker use rok deta tha aur button
+   "kuch nahi karta" lagta tha. Ab ek hidden iframe mein print hota hai: koi popup nahi. */
+export function printInvoice(inv, opts = {}) {
+  return new Promise((resolve) => {
+    const old = document.getElementById('zerofy-print-frame')
+    if (old) old.remove()
+
+    const frame = document.createElement('iframe')
+    frame.id = 'zerofy-print-frame'
+    frame.setAttribute('aria-hidden', 'true')
+    frame.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden;'
+    document.body.appendChild(frame)
+
+    const doc = frame.contentWindow.document
+    doc.open()
+    doc.write(buildPrintDocument(inv, opts))
+    doc.close()
+
+    let done = false
+    const go = () => {
+      if (done) return
+      done = true
+      try {
+        frame.contentWindow.focus()
+        frame.contentWindow.print()
+      } catch (e) {
+        console.error('Print error:', e)
+      }
+      resolve()
+    }
+    // Font load hone do, par 1.2s se zyada wait mat karo
+    const fonts = doc.fonts && doc.fonts.ready ? doc.fonts.ready : Promise.resolve()
+    Promise.race([fonts, new Promise(r => setTimeout(r, 1200))]).then(() => setTimeout(go, 150))
+  })
 }
 
-/* ─── Real PDF blob generation (for Web Share API attachments) ── */
-export async function generateInvoicePdfBlob(inv) {
+// Purana naam — jo code abhi bhi ise import karta hai uske liye
+export const openPrintWindow = (inv, opts) => printInvoice(inv, opts)
+
+/* ─── Real PDF blob generation ─────────────────────────────────
+   Lamba invoice ho to A4 ke kai pages mein toot jata hai (pehle sab ek page mein dab jata tha). */
+export async function generateInvoicePdfBlob(inv, opts = {}) {
   const container = document.createElement('div')
-  container.style.position = 'fixed'
-  container.style.left = '-99999px'
-  container.style.top = '0'
-  container.style.width = '210mm'
-  container.style.background = '#fff'
-  container.innerHTML = renderInvoiceMarkup(inv)
+  container.style.cssText = 'position:fixed;left:-99999px;top:0;width:794px;background:#fff;'
+  container.innerHTML = renderInvoiceMarkup(inv, opts)
   document.body.appendChild(container)
 
   try {
-    // Let fonts/layout settle before rasterizing
+    if (document.fonts && document.fonts.ready) {
+      await Promise.race([document.fonts.ready, new Promise(r => setTimeout(r, 800))])
+    }
     await new Promise(r => setTimeout(r, 60))
     const canvas = await html2canvas(container, { scale: 2, useCORS: true, backgroundColor: '#ffffff' })
-    const imgData = canvas.toDataURL('image/jpeg', 0.95)
     const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' })
-    const pageWidth = pdf.internal.pageSize.getWidth()
-    const pageHeight = (canvas.height * pageWidth) / canvas.width
-    pdf.addImage(imgData, 'JPEG', 0, 0, pageWidth, pageHeight)
-    const blob = pdf.output('blob')
-    return blob
+    const pageW = pdf.internal.pageSize.getWidth()
+    const pageH = pdf.internal.pageSize.getHeight()
+    const pxPerPage = Math.floor(canvas.width * pageH / pageW)
+
+    let y = 0, page = 0
+    while (y < canvas.height) {
+      const sliceH = Math.min(pxPerPage, canvas.height - y)
+      // Aakhri page par sirf kuch pixel bache hon to naya page mat banao
+      if (page > 0 && sliceH < 8) break
+      const slice = document.createElement('canvas')
+      slice.width = canvas.width
+      slice.height = sliceH
+      const ctx = slice.getContext('2d')
+      ctx.fillStyle = '#ffffff'
+      ctx.fillRect(0, 0, slice.width, slice.height)
+      ctx.drawImage(canvas, 0, y, canvas.width, sliceH, 0, 0, canvas.width, sliceH)
+      if (page > 0) pdf.addPage()
+      pdf.addImage(slice.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, pageW, sliceH * pageW / canvas.width)
+      y += sliceH
+      page++
+    }
+    return pdf.output('blob')
   } finally {
     document.body.removeChild(container)
   }
 }
 
+function saveBlob(blob, filename) {
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+  setTimeout(() => URL.revokeObjectURL(url), 4000)
+}
+
+/* ─── Seedha PDF file download ─────────────────────────────── */
+export async function downloadInvoicePdf(inv, opts = {}) {
+  const blob = await generateInvoicePdfBlob(inv, opts)
+  saveBlob(blob, safeFileName(inv))
+}
+
 function buildWhatsAppMessage(inv, attached) {
   const attachLine = attached
     ? '📎 PDF is attached with this message.'
-    : '📎 The PDF has been opened for download — please save it and attach it here.'
-  return `Hi ${inv.clientName || 'Client'},\n\nYour invoice *${inv.no}* is ready!\n\n📋 *Invoice Details:*\nAmount: *${inv.total}*\nDate: ${inv.date}\nBusiness: ${inv.bizName || ''}\n\n${attachLine}\n\n_Generated by Zerofy Invoice Generator_\nhttps://www.zerofy.co.in`
+    : '📎 The PDF has been downloaded — please attach it here.'
+  const due = inv.dueDate ? `\nDue date: ${formatDate(inv.dueDate)}` : ''
+  return `Hi ${inv.clientName || 'Client'},\n\nYour invoice *${inv.no}* is ready!\n\n📋 *Invoice Details:*\nAmount: *${totalText(inv)}*\nDate: ${formatDate(inv.date)}${due}\nBusiness: ${inv.bizName || ''}\n\n${attachLine}\n\n_Generated by Zerofy Invoice Generator_\nhttps://www.zerofy.co.in`
 }
 
 function buildEmailBody(inv, attached) {
   const attachLine = attached
     ? '📎 The PDF is attached to this email.'
-    : '📎 The PDF has been opened in your browser — please save it and attach it before sending.'
-  return `Hi ${inv.clientName || 'Client'},\n\nPlease find your invoice details below:\n\nInvoice No: ${inv.no}\nDate: ${inv.date}\nAmount: ${inv.total}\n\nBusiness: ${inv.bizName || ''}\n\n${attachLine}\n\nThank you for your business!\n\nRegards,\n${inv.bizName || ''}`
+    : '📎 The PDF has been downloaded to your device — please attach it before sending.'
+  const due = inv.dueDate ? `\nDue date: ${formatDate(inv.dueDate)}` : ''
+  return `Hi ${inv.clientName || 'Client'},\n\nPlease find your invoice details below:\n\nInvoice No: ${inv.no}\nDate: ${formatDate(inv.date)}${due}\nAmount: ${totalText(inv)}\n\nBusiness: ${inv.bizName || ''}\n\n${attachLine}\n\nThank you for your business!\n\nRegards,\n${inv.bizName || ''}`
 }
 
-/* ─── WhatsApp share — auto-attaches the PDF via the native
-   share sheet when the browser/device supports it (Web Share
-   API level 2). Falls back to opening the PDF for download +
-   WhatsApp pre-filled with the message when it isn't supported
-   (desktop browsers mostly).                                   */
-export async function shareViaWhatsApp(inv) {
+// Native share sheet (mobile) — PDF attach ho jata hai. true = share ho gaya ya user ne cancel kiya.
+async function tryNativeShare(inv, blob, text, title) {
   try {
-    const blob = await generateInvoicePdfBlob(inv)
-    const file = new File([blob], `${inv.no || 'invoice'}.pdf`, { type: 'application/pdf' })
+    const file = new File([blob], safeFileName(inv), { type: 'application/pdf' })
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      await navigator.share({
-        files: [file],
-        title: `Invoice ${inv.no}`,
-        text: buildWhatsAppMessage(inv, true),
-      })
-      return
+      await navigator.share({ files: [file], title, text })
+      return true
     }
-    // Fallback: download PDF + open WhatsApp with message pre-filled
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `${inv.no || 'invoice'}.pdf`
-    document.body.appendChild(a)
-    a.click()
-    a.remove()
-    setTimeout(() => URL.revokeObjectURL(url), 4000)
   } catch (err) {
-    if (err?.name === 'AbortError') return // user cancelled the share sheet
-    console.error('WhatsApp share error:', err)
-    openPrintWindow(inv)
-  } finally {
-    const phone = inv.clientPhone ? `91${inv.clientPhone}` : ''
-    const waUrl = `https://wa.me/${phone}?text=${encodeURIComponent(buildWhatsAppMessage(inv, false))}`
-    setTimeout(() => window.open(waUrl, '_blank'), 600)
+    if (err?.name === 'AbortError') return true // user ne share sheet band kar di
+    console.error('Share error:', err)
   }
+  return false
 }
 
-/* ─── Email share — same auto-attach-if-possible approach. ──── */
-export async function shareViaEmail(inv) {
-  try {
-    const blob = await generateInvoicePdfBlob(inv)
-    const file = new File([blob], `${inv.no || 'invoice'}.pdf`, { type: 'application/pdf' })
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      await navigator.share({
-        files: [file],
-        title: `Invoice ${inv.no} from ${inv.bizName || 'Zerofy'}`,
-        text: buildEmailBody(inv, true),
-      })
-      return
-    }
-    // Fallback: download PDF + open default mail client with body pre-filled
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `${inv.no || 'invoice'}.pdf`
-    document.body.appendChild(a)
-    a.click()
-    a.remove()
-    setTimeout(() => URL.revokeObjectURL(url), 4000)
-  } catch (err) {
-    if (err?.name === 'AbortError') return
-    console.error('Email share error:', err)
-    openPrintWindow(inv)
-  } finally {
-    const subject = `Invoice ${inv.no} from ${inv.bizName || 'Zerofy'}`
-    const body = buildEmailBody(inv, false)
-    setTimeout(() => {
-      window.location.href = `mailto:${inv.clientEmail || ''}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
-    }, 600)
-  }
+/* ─── WhatsApp share ───────────────────────────────────────────
+   Mobile: PDF native share sheet se attach hota hai.
+   Desktop: PDF download hota hai + WhatsApp message pre-filled khulta hai.
+   (Pehle share cancel karne par bhi WhatsApp khul jata tha — wo bug fix hai.) */
+export async function shareViaWhatsApp(inv, opts = {}) {
+  const digits = String(inv.clientPhone || '').replace(/\D/g, '')
+  const phone = digits.length === 10 ? `91${digits}` : digits
+  let blob = null
+  try { blob = await generateInvoicePdfBlob(inv, opts) } catch (e) { console.error('PDF error:', e) }
+
+  if (blob && await tryNativeShare(inv, blob, buildWhatsAppMessage(inv, true), `Invoice ${inv.no}`)) return
+  if (blob) saveBlob(blob, safeFileName(inv))
+  const waUrl = `https://wa.me/${phone}?text=${encodeURIComponent(buildWhatsAppMessage(inv, false))}`
+  const w = window.open(waUrl, '_blank', 'noopener')
+  if (!w) window.location.href = waUrl
+}
+
+/* ─── Email share — same approach ──────────────────────────── */
+export async function shareViaEmail(inv, opts = {}) {
+  let blob = null
+  try { blob = await generateInvoicePdfBlob(inv, opts) } catch (e) { console.error('PDF error:', e) }
+
+  const subject = `Invoice ${inv.no} from ${inv.bizName || 'Zerofy'}`
+  if (blob && await tryNativeShare(inv, blob, buildEmailBody(inv, true), subject)) return
+  if (blob) saveBlob(blob, safeFileName(inv))
+  window.location.href = `mailto:${String(inv.clientEmail || '').trim()}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(buildEmailBody(inv, false))}`
 }

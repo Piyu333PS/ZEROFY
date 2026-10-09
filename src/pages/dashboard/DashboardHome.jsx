@@ -1,12 +1,12 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
-import { openPrintWindow, shareViaWhatsApp, shareViaEmail } from '../../utils/invoiceShare'
+import { api, fetchIsPro } from '../../utils/api'
+import { invoiceTotal, displayStatus, STATUS_LABELS, fmtMoney } from '../../utils/invoiceCalc'
+import InvoiceViewModal from '../../components/invoice/InvoiceViewModal'
 import styles from './DashboardHome.module.css'
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:5000'
-
-const fmt = (n) => `₹${Number(n || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+const fmt = (n) => fmtMoney(n)
 
 const initials = (name) => (name || '?').trim().split(/\s+/).slice(0, 2).map(w => w[0]?.toUpperCase()).join('') || '?'
 
@@ -31,7 +31,8 @@ export default function DashboardHome() {
   const [invoices, setInvoices] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [shareMenuId, setShareMenuId] = useState(null)
+  const [viewing, setViewing] = useState(null)
+  const [isPro, setIsPro] = useState(false)
 
   useEffect(() => {
     if (!token) return
@@ -40,20 +41,17 @@ export default function DashboardHome() {
     async function load() {
       setLoading(true)
       setError(null)
-      try {
-        const [statsRes, invRes] = await Promise.all([
-          fetch(`${API}/api/dashboard/stats`, { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
-          fetch(`${API}/api/invoices`, { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
-        ])
-        if (cancelled) return
-        if (statsRes.success) setStats(statsRes.stats)
-        if (invRes.success) setInvoices(invRes.invoices || [])
-      } catch (e) {
-        if (!cancelled) setError('Data load nahi ho paya. Dobara try karo.')
-      } finally {
-        if (!cancelled) setLoading(false)
-      }
+      const [statsRes, invRes] = await Promise.all([
+        api('/api/dashboard/stats', token),
+        api('/api/invoices', token),
+      ])
+      if (cancelled) return
+      if (statsRes.ok && statsRes.data.success) setStats(statsRes.data.stats)
+      if (invRes.ok && invRes.data.success) setInvoices(invRes.data.invoices || [])
+      if (!statsRes.ok || !invRes.ok) setError('Data load nahi ho paya. Page refresh karke dobara try karein.')
+      setLoading(false)
     }
+    fetchIsPro(token).then(v => { if (!cancelled) setIsPro(v) })
     load()
     return () => { cancelled = true }
   }, [token])
@@ -62,7 +60,9 @@ export default function DashboardHome() {
 
   const recentInvoices = useMemo(() => invoices.slice(0, RECENT_COUNT), [invoices])
 
-  const greetName = user?.email ? user.email.split('@')[0] : 'there'
+  // Naam: business ka naam ho to wahi, warna email ka pehla hissa
+  const bizName = invoices.find(i => i.bizName)?.bizName
+  const greetName = bizName || (user?.email ? user.email.split('@')[0] : 'there')
   const today = new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'short' })
 
   // Time-based greeting — system time ke hisaab se badalta hai
@@ -75,13 +75,13 @@ export default function DashboardHome() {
   }, [])
 
   // Business name available ho to wahi dikhao, warna generic simple heading
-  const headline = (invoices[0]?.bizName) ? invoices[0].bizName : 'Business Overview'
+  const headline = 'Business Overview'
 
   const statCards = stats ? [
     { label: 'Total invoiced', value: fmt(stats.totalInvoiced), icon: icons.revenue },
     { label: 'Received', value: fmt(stats.received), icon: icons.revenue, tone: 'green' },
     { label: 'Pending', value: fmt(stats.pending), icon: icons.pending, tone: 'orange' },
-    { label: 'Customers', value: stats.customerCount, icon: icons.customers },
+    { label: 'Clients', value: stats.customerCount, icon: icons.customers },
   ] : []
 
   return (
@@ -136,13 +136,12 @@ export default function DashboardHome() {
           <p className={styles.empty}>Loading...</p>
         ) : recentInvoices.length === 0 ? (
           <p className={styles.empty}>
-            Abhi tak koi invoice nahi bana. <a href="/tools/invoice-maker">Pehla invoice banao →</a>
+            Abhi tak koi invoice nahi bana. <a href="/tools/invoice-maker" onClick={e => { e.preventDefault(); navigate('/tools/invoice-maker') }}>Pehla invoice banao →</a>
           </p>
         ) : (
           recentInvoices.map(inv => {
-            const sub = (inv.items || []).reduce((s, it) => s + (Number(it.qty) || 0) * (Number(it.rate) || 0), 0)
-            const afterDisc = sub - (sub * (Number(inv.discPct) || 0) / 100)
-            const total = afterDisc + (afterDisc * (Number(inv.taxPct) || 0) / 100)
+            const total = inv.grandTotal !== undefined ? Number(inv.grandTotal) : invoiceTotal(inv)
+            const ds = displayStatus(inv)
             return (
               <div key={inv._id} className={styles.tableRow}>
                 <span className={styles.invId}>{inv.no}</span>
@@ -153,52 +152,25 @@ export default function DashboardHome() {
                     {inv.bizName && <div style={{ fontSize: 11, color: 'var(--slate)' }}>{inv.bizName}</div>}
                   </div>
                 </div>
-                <span className={styles.amount}>{fmt(total)}</span>
-                <span className={`${styles.stamp} ${styles[inv.status] || ''}`}>{inv.status}</span>
-                <div className={styles.rowActions} style={{ position: 'relative' }}>
-                  <button className={styles.actionBtn} title="View" onClick={() => openPrintWindow(inv)}>{icons.eye}</button>
-                  <button
-                    className={styles.actionBtn}
-                    title="Share"
-                    onClick={() => setShareMenuId(id => id === inv._id ? null : inv._id)}
-                  >
-                    {icons.share}
-                  </button>
-
-                  {shareMenuId === inv._id && (
-                    <>
-                      <div
-                        style={{ position: 'fixed', inset: 0, zIndex: 10 }}
-                        onClick={() => setShareMenuId(null)}
-                      />
-                      <div
-                        style={{
-                          position: 'absolute', top: '100%', right: 0, marginTop: 4, zIndex: 11,
-                          background: '#fff', border: '1px solid var(--border, #e5e5e5)', borderRadius: 8,
-                          boxShadow: '0 6px 20px rgba(0,0,0,0.12)', overflow: 'hidden', minWidth: 140,
-                        }}
-                      >
-                        <button
-                          style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px 12px', border: 'none', background: 'none', cursor: 'pointer', fontSize: 13 }}
-                          onClick={() => { setShareMenuId(null); shareViaWhatsApp(inv) }}
-                        >
-                          💬 WhatsApp
-                        </button>
-                        <button
-                          style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px 12px', border: 'none', background: 'none', cursor: 'pointer', fontSize: 13 }}
-                          onClick={() => { setShareMenuId(null); shareViaEmail(inv) }}
-                        >
-                          ✉️ Email
-                        </button>
-                      </div>
-                    </>
-                  )}
+                <span className={styles.amount}>{fmtMoney(total, inv.currency || '₹')}</span>
+                <span className={`${styles.stamp} ${styles[ds] || ''}`}>{STATUS_LABELS[ds] || ds}</span>
+                <div className={styles.rowActions}>
+                  <button className={styles.actionBtn} title="View" aria-label={`View ${inv.no}`} onClick={() => setViewing(inv)}>{icons.eye}</button>
                 </div>
               </div>
             )
           })
         )}
       </div>
+
+      {viewing && (
+        <InvoiceViewModal
+          invoice={viewing}
+          hideBranding={isPro}
+          onClose={() => setViewing(null)}
+          onEdit={(inv) => navigate(`/tools/invoice-maker?edit=${inv._id}`)}
+        />
+      )}
     </div>
   )
 }

@@ -121,3 +121,43 @@
 .deleteBtn:hover { text-decoration: underline; }
 
 .empty { padding: 24px 16px; color: var(--slate); font-size: 13.5px; }
+
+/* ---------- v2: search, edit, balances ---------- */
+.subtitle { font-size: 13px; color: var(--slate); margin-top: 4px; }
+.searchBox {
+  width: 100%; max-width: 380px; background: #fff; border: 1px solid var(--paper-line);
+  border-radius: 10px; padding: 10px 14px; font-size: 13.5px; color: var(--ink);
+  font-family: var(--body); margin-bottom: 16px; outline: none;
+}
+.searchBox:focus { border-color: var(--saffron); }
+.formTitle { font-family: var(--display); font-size: 15px; font-weight: 600; margin-bottom: 12px; color: var(--ink); }
+.formActions { display: flex; gap: 10px; align-items: center; }
+.fieldErr { border-color: var(--rust) !important; }
+.hint { font-size: 12px; color: var(--rust); margin: -6px 0 10px; }
+
+.tableHead, .tableRow { grid-template-columns: 1.5fr 1.1fr 70px 1fr 1fr 190px; gap: 10px; }
+.nameMain { font-weight: 600; }
+.nameSub { font-size: 11.5px; color: var(--slate); margin-top: 2px; word-break: break-word; }
+.mono { font-family: var(--mono); font-size: 12.5px; }
+.num { font-family: var(--mono); font-weight: 600; }
+.due { color: var(--saffron-deep); }
+.rowBtns { display: flex; gap: 12px; justify-content: flex-end; flex-wrap: wrap; }
+.linkBtn {
+  background: none; border: none; color: var(--saffron-deep); font-size: 12px; font-weight: 600;
+  cursor: pointer; font-family: var(--body); padding: 0;
+}
+.linkBtn:hover { text-decoration: underline; }
+.notice {
+  background: var(--green-soft); color: var(--green-deep); border: 1px solid #BFDCCD;
+  border-radius: 10px; padding: 10px 14px; font-size: 13px; margin-bottom: 14px;
+}
+
+@media (max-width: 820px) {
+  .wrap { padding: 20px 14px 50px; }
+  .tableHead { display: none; }
+  .tableRow { grid-template-columns: 1fr 1fr; row-gap: 6px; }
+  .tableRow > :first-child { grid-column: 1 / -1; }
+  .rowBtns { grid-column: 1 / -1; justify-content: flex-start; }
+  .cellLabel { display: block; font-size: 10px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--slate); }
+}
+@media (min-width: 821px) { .cellLabel { display: none; } }

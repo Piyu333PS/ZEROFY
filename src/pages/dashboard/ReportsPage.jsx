@@ -4,20 +4,19 @@ import {
   PieChart, Pie, Cell,
 } from 'recharts'
 import { useAuth } from '../../context/AuthContext'
+import { api } from '../../utils/api'
+import { calcInvoice, displayStatus, STATUS_LABELS } from '../../utils/invoiceCalc'
+import { downloadText } from '../../utils/download'
 import styles from './ReportsPage.module.css'
-
-const API = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 
 const fmt = (n) => `₹${Number(n || 0).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
 const fmt2 = (n) => `₹${Number(n || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 
-const invoiceTotal = (inv) => {
-  const sub = (inv.items || []).reduce((s, it) => s + (Number(it.qty) || 0) * (Number(it.rate) || 0), 0)
-  const afterDisc = sub - (sub * (Number(inv.discPct) || 0) / 100)
-  return afterDisc + (afterDisc * (Number(inv.taxPct) || 0) / 100)
-}
+const invoiceTotal = (inv) => inv.grandTotal !== undefined ? Number(inv.grandTotal) : calcInvoice(inv).total
+// Draft (abhi bheja nahi) aur cancelled invoices billing mein nahi gine jate
+const isBillable = (inv) => inv.status !== 'cancelled' && inv.status !== 'draft'
 
-const STATUS_COLORS = { paid: '#1F6F54', sent: '#E8933C', draft: '#69708A', cancelled: '#C1443C' }
+const STATUS_COLORS = { paid: '#1F6F54', sent: '#E8933C', partial: '#2B5D8C', overdue: '#C1443C', draft: '#69708A', cancelled: '#B9A9A7' }
 const CHART_COLORS = ['#E8933C', '#1F6F54', '#2B5D8C', '#C1443C', '#7A5AA8', '#C97423', '#69708A']
 
 const PERIODS = [
@@ -81,21 +80,17 @@ export default function ReportsPage() {
     async function load() {
       setLoading(true)
       setError(null)
-      try {
-        const [invRes, payRes, custRes] = await Promise.all([
-          fetch(`${API}/api/invoices`, { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
-          fetch(`${API}/api/payments`, { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
-          fetch(`${API}/api/customers`, { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
-        ])
-        if (cancelled) return
-        if (invRes.success) setInvoices(invRes.invoices || [])
-        if (payRes.success) setPayments(payRes.payments || [])
-        if (custRes.success) setCustomers(custRes.customers || [])
-      } catch (e) {
-        if (!cancelled) setError('Report data load nahi ho paya.')
-      } finally {
-        if (!cancelled) setLoading(false)
-      }
+      const [invRes, payRes, custRes] = await Promise.all([
+        api('/api/invoices', token),
+        api('/api/payments', token),
+        api('/api/customers', token),
+      ])
+      if (cancelled) return
+      if (invRes.ok && invRes.data.success) setInvoices(invRes.data.invoices || [])
+      if (payRes.ok && payRes.data.success) setPayments(payRes.data.payments || [])
+      if (custRes.ok && custRes.data.success) setCustomers(custRes.data.customers || [])
+      if (!invRes.ok || !payRes.ok) setError('Report data load nahi ho paya. Page refresh karke dobara try karein.')
+      setLoading(false)
     }
     load()
     return () => { cancelled = true }
@@ -105,11 +100,13 @@ export default function ReportsPage() {
 
   // ---- Summary totals ----
   const totals = useMemo(() => {
-    const totalInvoiced = invoices.filter(i => i.status !== 'cancelled').reduce((s, i) => s + invoiceTotal(i), 0)
-    const totalReceived = payments.reduce((s, p) => s + (p.amount || 0), 0)
+    const billable = invoices.filter(isBillable)
+    const billableIds = new Set(billable.map(i => i._id))
+    const totalInvoiced = billable.reduce((s, i) => s + invoiceTotal(i), 0)
+    const totalReceived = payments.filter(p => billableIds.has(p.invoiceId)).reduce((s, p) => s + (p.amount || 0), 0)
     const pending = Math.max(0, totalInvoiced - totalReceived)
     const collectionRate = totalInvoiced > 0 ? (totalReceived / totalInvoiced) * 100 : 0
-    const avgInvoice = invoices.length > 0 ? totalInvoiced / invoices.filter(i => i.status !== 'cancelled').length : 0
+    const avgInvoice = billable.length > 0 ? totalInvoiced / billable.length : 0
     return { totalInvoiced, totalReceived, pending, collectionRate, avgInvoice }
   }, [invoices, payments])
 
@@ -120,7 +117,7 @@ export default function ReportsPage() {
     const map = Object.fromEntries(buckets.map(b => [b.key, b]))
 
     invoices.forEach(inv => {
-      if (inv.status === 'cancelled') return
+      if (!isBillable(inv)) return
       const d = parseDate(inv.date) || parseDate(inv.createdAt)
       if (!d) return
       const key = periodKey(d, period)
@@ -155,7 +152,7 @@ export default function ReportsPage() {
   const statusBreakdown = useMemo(() => {
     const byStatus = {}
     invoices.forEach(inv => {
-      const s = inv.status || 'draft'
+      const s = displayStatus(inv)
       if (!byStatus[s]) byStatus[s] = { status: s, count: 0, amount: 0 }
       byStatus[s].count += 1
       byStatus[s].amount += invoiceTotal(inv)
@@ -163,13 +160,57 @@ export default function ReportsPage() {
     return Object.values(byStatus).map(s => ({ ...s, amount: Math.round(s.amount) }))
   }, [invoices])
 
+  // ---- GST summary (month-wise) — GST return bharte waqt kaam aata hai ----
+  const gstSummary = useMemo(() => {
+    const byMonth = {}
+    invoices.forEach(inv => {
+      if (!isBillable(inv)) return
+      const d = parseDate(inv.date) || parseDate(inv.createdAt)
+      if (!d) return
+      const key = periodKey(d, 'monthly')
+      const c = calcInvoice(inv)
+      if (!byMonth[key]) byMonth[key] = { key, count: 0, taxable: 0, cgst: 0, sgst: 0, igst: 0, total: 0 }
+      const m = byMonth[key]
+      m.count += 1; m.taxable += c.taxable; m.cgst += c.cgst; m.sgst += c.sgst; m.igst += c.igst; m.total += c.total
+    })
+    return Object.values(byMonth).sort((a, b) => b.key.localeCompare(a.key)).slice(0, 12)
+  }, [invoices])
+
+  const exportGstCsv = () => {
+    const rows = [['Invoice No', 'Date', 'Client', 'Client GSTIN', 'Taxable value', 'CGST', 'SGST', 'IGST', 'Invoice total', 'Status']]
+    invoices.filter(isBillable).forEach(inv => {
+      const c = calcInvoice(inv)
+      rows.push([inv.no, inv.date || '', inv.clientName || '', inv.clientGst || '', c.taxable, c.cgst, c.sgst, c.igst, c.total, displayStatus(inv)])
+    })
+    const csv = rows.map(r => r.map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',')).join('\n')
+    downloadText('\uFEFF' + csv, 'zerofy-gst-report.csv', 'text/csv;charset=utf-8')
+  }
+
+  // ---- Kis client par kitna baaki hai ----
+  const receivables = useMemo(() => {
+    const byClient = {}
+    invoices.forEach(inv => {
+      if (!isBillable(inv)) return
+      const bal = inv.balance !== undefined ? Number(inv.balance) : invoiceTotal(inv)
+      if (!(bal > 0)) return
+      const name = inv.clientName || 'Unknown client'
+      if (!byClient[name]) byClient[name] = { name, amount: 0, count: 0, overdue: 0 }
+      byClient[name].amount += bal
+      byClient[name].count += 1
+      if (displayStatus(inv) === 'overdue') byClient[name].overdue += bal
+    })
+    return Object.values(byClient).sort((a, b) => b.amount - a.amount).slice(0, 10)
+  }, [invoices])
+
+  const clientCount = Math.max(customers.length, new Set(invoices.map(i => (i.clientName || '').trim().toLowerCase()).filter(Boolean)).size)
+
   const statCards = [
     { label: 'Total invoiced', value: fmt(totals.totalInvoiced) },
     { label: 'Total received', value: fmt(totals.totalReceived), tone: 'green' },
     { label: 'Outstanding', value: fmt(totals.pending), tone: 'orange' },
     { label: 'Collection rate', value: `${totals.collectionRate.toFixed(1)}%` },
     { label: 'Avg. invoice value', value: fmt(totals.avgInvoice) },
-    { label: 'Active clients', value: customers.length },
+    { label: 'Clients', value: clientCount },
   ]
 
   return (
@@ -270,12 +311,68 @@ export default function ReportsPage() {
                         <Cell key={i} fill={STATUS_COLORS[s.status] || CHART_COLORS[i % CHART_COLORS.length]} />
                       ))}
                     </Pie>
-                    <Tooltip formatter={(v, n, props) => [fmt2(v), `${props.payload.status} (${props.payload.count})`]} contentStyle={{ borderRadius: 10, border: '1px solid #E1D9C4', fontSize: 12.5 }} />
-                    <Legend wrapperStyle={{ fontSize: 12.5 }} formatter={(v) => v.charAt(0).toUpperCase() + v.slice(1)} />
+                    <Tooltip formatter={(v, n, props) => [fmt2(v), `${STATUS_LABELS[props.payload.status] || props.payload.status} (${props.payload.count})`]} contentStyle={{ borderRadius: 10, border: '1px solid #E1D9C4', fontSize: 12.5 }} />
+                    <Legend wrapperStyle={{ fontSize: 12.5 }} formatter={(v) => STATUS_LABELS[v] || v} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
             </div>
+          </div>
+
+          <div className={styles.panel}>
+            <div className={styles.panelHeadRow}>
+              <div>
+                <p className={styles.panelTitle}>GST summary</p>
+                <p className={styles.panelSub}>Month-wise taxable value aur tax (draft / cancelled invoices shamil nahi)</p>
+              </div>
+              <button className={styles.exportBtn} onClick={exportGstCsv}>Export CSV</button>
+            </div>
+            <div className={styles.tableScroll}>
+              <table className={styles.dataTable}>
+                <thead>
+                  <tr><th>Month</th><th>Invoices</th><th>Taxable value</th><th>CGST</th><th>SGST</th><th>IGST</th><th>Total</th></tr>
+                </thead>
+                <tbody>
+                  {gstSummary.map(m => (
+                    <tr key={m.key}>
+                      <td>{periodLabel(m.key, 'monthly')}</td>
+                      <td>{m.count}</td>
+                      <td>{fmt2(m.taxable)}</td>
+                      <td>{fmt2(m.cgst)}</td>
+                      <td>{fmt2(m.sgst)}</td>
+                      <td>{fmt2(m.igst)}</td>
+                      <td><strong>{fmt2(m.total)}</strong></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div className={styles.panel}>
+            <p className={styles.panelTitle}>Outstanding by client</p>
+            <p className={styles.panelSub}>Kis client par kitna paisa baaki hai</p>
+            {receivables.length === 0 ? (
+              <p className={styles.empty}>Koi balance baaki nahi hai. 🎉</p>
+            ) : (
+              <div className={styles.tableScroll}>
+                <table className={styles.dataTable}>
+                  <thead>
+                    <tr><th>Client</th><th>Unpaid invoices</th><th>Overdue</th><th>Outstanding</th></tr>
+                  </thead>
+                  <tbody>
+                    {receivables.map(r => (
+                      <tr key={r.name}>
+                        <td>{r.name}</td>
+                        <td>{r.count}</td>
+                        <td className={r.overdue > 0 ? styles.overdueCell : ''}>{fmt2(r.overdue)}</td>
+                        <td><strong>{fmt2(r.amount)}</strong></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         </>
       )}

@@ -1,31 +1,37 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
-import { openPrintWindow, shareViaWhatsApp, shareViaEmail } from '../../utils/invoiceShare'
+import { api, fetchIsPro } from '../../utils/api'
+import { downloadInvoicePdf } from '../../utils/invoiceShare'
+import { invoiceTotal, displayStatus, STATUS_LABELS, formatDate, fmtMoney } from '../../utils/invoiceCalc'
+import InvoiceViewModal from '../../components/invoice/InvoiceViewModal'
+import ConfirmDialog from '../../components/ConfirmDialog'
 import styles from './InvoicesPage.module.css'
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 const PAGE_SIZE = 10
 
-const fmt = (n) => `₹${Number(n || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 const initials = (name) => (name || '?').trim().split(/\s+/).slice(0, 2).map(w => w[0]?.toUpperCase()).join('') || '?'
-
-const invoiceTotal = (inv) => {
-  const sub = (inv.items || []).reduce((s, it) => s + (Number(it.qty) || 0) * (Number(it.rate) || 0), 0)
-  const afterDisc = sub - (sub * (Number(inv.discPct) || 0) / 100)
-  return afterDisc + (afterDisc * (Number(inv.taxPct) || 0) / 100)
-}
+const totalOf = (inv) => inv.grandTotal !== undefined ? Number(inv.grandTotal) : invoiceTotal(inv)
+const money = (inv, n) => fmtMoney(n, inv.currency || '₹')
 
 const icons = {
   plus: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M12 5v14M5 12h14"/></svg>,
   search: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>,
   eye: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M1.5 12S5 5 12 5s10.5 7 10.5 7-3.5 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3"/></svg>,
-  share: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.8l7.6-4.2M8.2 13.2l7.6 4.2"/></svg>,
+  more: <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>,
   chevLeft: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18l-6-6 6-6"/></svg>,
   chevRight: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18l6-6-6-6"/></svg>,
 }
 
-const STATUS_FILTERS = ['all', 'draft', 'sent', 'paid', 'cancelled']
+// Filter chips → kaun se display-status us chip mein aate hain
+const FILTERS = [
+  { key: 'all', label: 'All' },
+  { key: 'draft', label: 'Draft', match: ['draft'] },
+  { key: 'unpaid', label: 'Unpaid', match: ['sent', 'partial', 'overdue'] },
+  { key: 'overdue', label: 'Overdue', match: ['overdue'] },
+  { key: 'paid', label: 'Paid', match: ['paid'] },
+  { key: 'cancelled', label: 'Cancelled', match: ['cancelled'] },
+]
 
 export default function InvoicesPage() {
   const { token } = useAuth()
@@ -34,40 +40,41 @@ export default function InvoicesPage() {
   const [invoices, setInvoices] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [shareMenuId, setShareMenuId] = useState(null)
+  const [notice, setNotice] = useState(null)
+  const [isPro, setIsPro] = useState(false)
+
+  const [menuId, setMenuId] = useState(null)
+  const [viewing, setViewing] = useState(null)
+  const [confirm, setConfirm] = useState(null) // { type: 'delete' | 'cancel', inv }
+  const [working, setWorking] = useState(false)
 
   const [query, setQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [page, setPage] = useState(1)
 
+  const load = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true)
+    setError(null)
+    const res = await api('/api/invoices', token)
+    if (res.ok && res.data.success) setInvoices(res.data.invoices || [])
+    else setError(res.data.error || 'Invoices load nahi ho paye. Dobara try karein.')
+    setLoading(false)
+  }, [token])
+
   useEffect(() => {
     if (!token) return
-    let cancelled = false
-    async function load() {
-      setLoading(true)
-      setError(null)
-      try {
-        const res = await fetch(`${API}/api/invoices`, { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json())
-        if (cancelled) return
-        if (res.success) setInvoices(res.invoices || [])
-        else setError('Invoices load nahi ho paye.')
-      } catch (e) {
-        if (!cancelled) setError('Invoices load nahi ho paye. Dobara try karo.')
-      } finally {
-        if (!cancelled) setLoading(false)
-      }
-    }
     load()
-    return () => { cancelled = true }
-  }, [token])
+    fetchIsPro(token).then(setIsPro)
+  }, [token, load])
 
   // Filter + search reset page to 1
   useEffect(() => { setPage(1) }, [query, statusFilter])
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
+    const match = FILTERS.find(f => f.key === statusFilter)?.match
     return invoices.filter(inv => {
-      if (statusFilter !== 'all' && inv.status !== statusFilter) return false
+      if (match && !match.includes(displayStatus(inv))) return false
       if (!q) return true
       return (
         (inv.no || '').toLowerCase().includes(q) ||
@@ -76,6 +83,14 @@ export default function InvoicesPage() {
       )
     })
   }, [invoices, query, statusFilter])
+
+  const summary = useMemo(() => {
+    const live = filtered.filter(i => !['draft', 'cancelled'].includes(i.status))
+    return {
+      total: live.reduce((s, i) => s + totalOf(i), 0),
+      outstanding: live.reduce((s, i) => s + (i.balance !== undefined ? Number(i.balance) : totalOf(i)), 0),
+    }
+  }, [filtered])
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
   const currentPage = Math.min(page, totalPages)
@@ -96,6 +111,30 @@ export default function InvoicesPage() {
     }
     return nums
   }, [totalPages, currentPage])
+
+  const flash = (msg) => { setNotice(msg); setTimeout(() => setNotice(n => (n === msg ? null : n)), 4000) }
+
+  const setStatus = async (inv, status, msg) => {
+    setWorking(true)
+    const res = await api(`/api/invoices/${inv._id}`, token, { method: 'PUT', body: { status } })
+    setWorking(false)
+    setConfirm(null)
+    if (!res.ok) { setError(res.data.message || res.data.error || 'Update nahi ho paya.'); return }
+    flash(msg)
+    load(true)
+  }
+
+  const doDelete = async (inv) => {
+    setWorking(true)
+    const res = await api(`/api/invoices/${inv._id}`, token, { method: 'DELETE' })
+    setWorking(false)
+    setConfirm(null)
+    if (!res.ok) { setError(res.data.error || 'Delete nahi ho paya.'); return }
+    flash(`Invoice ${inv.no} delete ho gaya.`)
+    load(true)
+  }
+
+  const act = (fn) => () => { setMenuId(null); fn() }
 
   return (
     <div className={styles.wrap}>
@@ -121,18 +160,26 @@ export default function InvoicesPage() {
           />
         </div>
         <div className={styles.filters}>
-          {STATUS_FILTERS.map(s => (
+          {FILTERS.map(f => (
             <button
-              key={s}
-              className={`${styles.filterChip} ${statusFilter === s ? styles.filterChipActive : ''}`}
-              onClick={() => setStatusFilter(s)}
+              key={f.key}
+              className={`${styles.filterChip} ${statusFilter === f.key ? styles.filterChipActive : ''}`}
+              onClick={() => setStatusFilter(f.key)}
             >
-              {s === 'all' ? 'All' : s.charAt(0).toUpperCase() + s.slice(1)}
+              {f.label}
             </button>
           ))}
         </div>
       </div>
 
+      {!loading && filtered.length > 0 && (
+        <div className={styles.summary}>
+          <span>Billed: <strong>{fmtMoney(summary.total)}</strong></span>
+          <span>Outstanding: <strong>{fmtMoney(summary.outstanding)}</strong></span>
+        </div>
+      )}
+
+      {notice && <p className={styles.notice}>{notice}</p>}
       {error && <p className={styles.error}>{error}</p>}
 
       <div className={styles.panel}>
@@ -145,12 +192,15 @@ export default function InvoicesPage() {
         ) : pageInvoices.length === 0 ? (
           <p className={styles.empty}>
             {invoices.length === 0
-              ? <>Abhi tak koi invoice nahi bana. <a href="/tools/invoice-maker">Pehla invoice banao →</a></>
+              ? <>Abhi tak koi invoice nahi bana. <a href="/tools/invoice-maker" onClick={e => { e.preventDefault(); navigate('/tools/invoice-maker') }}>Pehla invoice banao →</a></>
               : 'Is filter/search se koi invoice nahi mila.'}
           </p>
         ) : (
           pageInvoices.map(inv => {
-            const total = invoiceTotal(inv)
+            const total = totalOf(inv)
+            const ds = displayStatus(inv)
+            const paid = Number(inv.paidAmount) || 0
+            const canPay = ['sent', 'partial', 'overdue'].includes(ds)
             return (
               <div key={inv._id} className={styles.tableRow}>
                 <span className={styles.invId}>{inv.no}</span>
@@ -161,25 +211,41 @@ export default function InvoicesPage() {
                     {inv.bizName && <div className={styles.clientBiz}>{inv.bizName}</div>}
                   </div>
                 </div>
-                <span className={styles.dateCell}>{inv.date || '—'}</span>
-                <span className={styles.amount}>{fmt(total)}</span>
-                <span className={`${styles.stamp} ${styles[inv.status] || ''}`}>{inv.status}</span>
+                <div className={styles.dateCell}>
+                  {formatDate(inv.date)}
+                  {inv.dueDate && ds !== 'paid' && ds !== 'cancelled' && (
+                    <div className={`${styles.subText} ${ds === 'overdue' ? styles.due : ''}`}>Due {formatDate(inv.dueDate)}</div>
+                  )}
+                </div>
+                <div className={`${styles.amount} ${styles.amountCell}`}>
+                  {money(inv, total)}
+                  {paid > 0 && ds !== 'paid' && <div className={`${styles.subText} ${styles.bal}`}>Bal {money(inv, inv.balance)}</div>}
+                </div>
+                <span className={`${styles.stamp} ${styles.statusCell} ${styles[ds] || ''}`}>{STATUS_LABELS[ds] || ds}</span>
                 <div className={styles.rowActions}>
-                  <button className={styles.actionBtn} title="View" onClick={() => openPrintWindow(inv)}>{icons.eye}</button>
+                  <button className={styles.actionBtn} title="View" aria-label={`View ${inv.no}`} onClick={() => setViewing(inv)}>{icons.eye}</button>
                   <button
                     className={styles.actionBtn}
-                    title="Share"
-                    onClick={() => setShareMenuId(id => id === inv._id ? null : inv._id)}
+                    title="More actions"
+                    aria-label={`More actions for ${inv.no}`}
+                    onClick={() => setMenuId(id => id === inv._id ? null : inv._id)}
                   >
-                    {icons.share}
+                    {icons.more}
                   </button>
 
-                  {shareMenuId === inv._id && (
+                  {menuId === inv._id && (
                     <>
-                      <div className={styles.menuOverlay} onClick={() => setShareMenuId(null)} />
-                      <div className={styles.shareMenu}>
-                        <button onClick={() => { setShareMenuId(null); shareViaWhatsApp(inv) }}>💬 WhatsApp</button>
-                        <button onClick={() => { setShareMenuId(null); shareViaEmail(inv) }}>✉️ Email</button>
+                      <div className={styles.menuOverlay} onClick={() => setMenuId(null)} />
+                      <div className={styles.rowMenu}>
+                        <button onClick={act(() => navigate(`/tools/invoice-maker?edit=${inv._id}`))}>Edit</button>
+                        <button onClick={act(() => navigate(`/tools/invoice-maker?copy=${inv._id}`))}>Duplicate</button>
+                        {canPay && <button onClick={act(() => navigate(`/app/payments?invoice=${inv._id}`))}>Record payment</button>}
+                        <button onClick={act(() => downloadInvoicePdf(inv, { hideBranding: isPro }).catch(() => setError('PDF nahi ban paya. Dobara try karein.')))}>Download PDF</button>
+                        <hr />
+                        {inv.status === 'cancelled'
+                          ? <button onClick={act(() => setStatus(inv, 'sent', `Invoice ${inv.no} dobara active ho gaya.`))}>Restore invoice</button>
+                          : <button onClick={act(() => setConfirm({ type: 'cancel', inv }))}>Cancel invoice</button>}
+                        <button className={styles.danger} onClick={act(() => setConfirm({ type: 'delete', inv }))}>Delete</button>
                       </div>
                     </>
                   )}
@@ -222,6 +288,37 @@ export default function InvoicesPage() {
             {icons.chevRight}
           </button>
         </div>
+      )}
+
+      {viewing && (
+        <InvoiceViewModal
+          invoice={viewing}
+          hideBranding={isPro}
+          onClose={() => setViewing(null)}
+          onEdit={(inv) => navigate(`/tools/invoice-maker?edit=${inv._id}`)}
+        />
+      )}
+
+      {confirm?.type === 'delete' && (
+        <ConfirmDialog
+          danger
+          busy={working}
+          title={`Invoice ${confirm.inv.no} delete karein?`}
+          message="Ye invoice aur iske payment records hamesha ke liye hat jayenge. Ye wapas nahi aa sakta."
+          confirmLabel="Delete"
+          onConfirm={() => doDelete(confirm.inv)}
+          onCancel={() => setConfirm(null)}
+        />
+      )}
+      {confirm?.type === 'cancel' && (
+        <ConfirmDialog
+          busy={working}
+          title={`Invoice ${confirm.inv.no} cancel karein?`}
+          message="Cancelled invoice totals aur reports mein nahi gina jata. Aap ise baad mein restore kar sakte hain."
+          confirmLabel="Cancel invoice"
+          onConfirm={() => setStatus(confirm.inv, 'cancelled', `Invoice ${confirm.inv.no} cancel ho gaya.`)}
+          onCancel={() => setConfirm(null)}
+        />
       )}
     </div>
   )

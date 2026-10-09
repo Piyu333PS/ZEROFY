@@ -1,11 +1,12 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 
-export default function SettingsPage({ theme, toggleTheme }) {
-  const { user, token, logout } = useAuth()
+// `embedded` = billing dashboard (/app/settings) ke andar — wahan light theme aur sidebar ke saath dikhta hai
+export default function SettingsPage({ embedded = false }) {
+  const { user, token, logout, initializing } = useAuth()
   const navigate = useNavigate()
 
   const [emailForm, setEmailForm] = useState({ newEmail: '', password: '' })
@@ -15,10 +16,25 @@ export default function SettingsPage({ theme, toggleTheme }) {
   const [emailLoading, setEmailLoading] = useState(false)
   const [pwdLoading, setPwdLoading] = useState(false)
 
-  if (!user) {
-    navigate('/')
-    return null
-  }
+  // Google se login karne walon ka password nahi hota — unhe email/password forms dikhana galat hai
+  const [account, setAccount] = useState(null)
+  useEffect(() => {
+    if (!token) return
+    let cancelled = false
+    fetch(`${API}/api/user/me`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => (r.ok ? r.json() : null))
+      .then(d => { if (!cancelled && d) setAccount(d) })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [token])
+
+  // Session check poora hone se pehle redirect mat karo (warna page refresh par logged-in user bhi bahar ho jata tha)
+  useEffect(() => {
+    if (!initializing && !user) navigate('/')
+  }, [initializing, user, navigate])
+  if (initializing || !user) return null
+
+  const passwordless = account?.hasPassword === false
 
   const handleEmailChange = async (e) => {
     e.preventDefault()
@@ -92,18 +108,53 @@ export default function SettingsPage({ theme, toggleTheme }) {
   })
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg, #0f1117)', padding: '48px 24px 80px' }}>
-      <div style={{ maxWidth: 560, margin: '0 auto' }}>
+    <div style={embedded ? {
+      // Dashboard ke andar light palette
+      '--bg2': '#FFFFFF', '--border2': '#E1D9C4', '--surface': '#F7F3EA',
+      '--text': '#1B2340', '--text2': '#69708A', '--text3': '#8890A6',
+      padding: '26px 34px 60px',
+    } : { minHeight: '100vh', background: 'var(--bg, #0f1117)', padding: '48px 24px 80px' }}>
+      <div style={{ maxWidth: 560, margin: embedded ? 0 : '0 auto' }}>
 
         {/* Header */}
-        <div style={{ marginBottom: 32 }}>
-          <button onClick={() => navigate(-1)} style={{ background: 'none', border: 'none', color: 'var(--text2)', cursor: 'pointer', fontSize: 14, marginBottom: 16, padding: 0 }}>
-            ← Back
-          </button>
-          <h1 style={{ fontSize: 28, fontWeight: 800, color: 'var(--text)', fontFamily: 'var(--font-display)', margin: 0 }}>⚙️ Settings</h1>
+        <div style={{ marginBottom: embedded ? 22 : 32 }}>
+          {!embedded && (
+            <button onClick={() => navigate(-1)} style={{ background: 'none', border: 'none', color: 'var(--text2)', cursor: 'pointer', fontSize: 14, marginBottom: 16, padding: 0 }}>
+              ← Back
+            </button>
+          )}
+          <h1 style={{ fontSize: embedded ? 26 : 28, fontWeight: embedded ? 600 : 800, color: 'var(--text)', fontFamily: embedded ? "'Space Grotesk', sans-serif" : 'var(--font-display)', margin: 0 }}>{embedded ? 'Settings' : '⚙️ Settings'}</h1>
           <p style={{ color: 'var(--text2)', fontSize: 14, marginTop: 6 }}>{user.email}</p>
         </div>
 
+        {/* Plan */}
+        {account && (
+          <div style={cardStyle}>
+            <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 8, marginTop: 0 }}>Plan</h2>
+            <p style={{ fontSize: 14, color: 'var(--text2)', margin: '0 0 14px' }}>
+              {account.isPro
+                ? <>Zerofy Pro{account.proExpiry ? ` — ${new Date(account.proExpiry).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })} tak valid` : ''}</>
+                : <>Free plan — {Math.max(0, 3 - (account.invoiceCount || 0))} free invoice baaki</>}
+            </p>
+            <button onClick={() => navigate(account.isPro ? '/billing' : '/pricing')} style={{
+              padding: '9px 20px', borderRadius: 10, border: '1px solid var(--border2)', background: 'var(--surface)',
+              color: 'var(--text)', fontWeight: 600, fontSize: 13.5, cursor: 'pointer',
+            }}>
+              {account.isPro ? 'Manage billing' : 'Upgrade to Pro'}
+            </button>
+          </div>
+        )}
+
+        {passwordless && (
+          <div style={cardStyle}>
+            <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 8, marginTop: 0 }}>Login</h2>
+            <p style={{ fontSize: 14, color: 'var(--text2)', margin: 0, lineHeight: 1.6 }}>
+              Aap Google account se login karte hain, isliye yahan email ya password badalne ki zaroorat nahi — wo aapke Google account se manage hota hai.
+            </p>
+          </div>
+        )}
+
+        {!passwordless && (<>
         {/* Change Email */}
         <div style={cardStyle}>
           <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 20, marginTop: 0 }}>📧 Change Email</h2>
@@ -191,6 +242,8 @@ export default function SettingsPage({ theme, toggleTheme }) {
             {pwdMsg && <div style={msgStyle(pwdMsg.type)}>{pwdMsg.type === 'success' ? '✅' : '⚠️'} {pwdMsg.text}</div>}
           </form>
         </div>
+
+        </>)}
 
         {/* Danger Zone */}
         <div style={{ ...cardStyle, borderColor: 'rgba(248,113,113,0.2)' }}>

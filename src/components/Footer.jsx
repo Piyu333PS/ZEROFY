@@ -47,7 +47,7 @@ const Footer = () => {
       {/* Bottom Bar */}
       <div className={styles.bottom}>
         <p className={styles.copyright}>
-          © 2025 <strong>Zerofy</strong>. All rights reserved. Made with ♥ in Jaipur, Rajasthan 🇮🇳
+          © {new Date().getFullYear()} <strong>Zerofy</strong>. All rights reserved. Made with ♥ in Jaipur, Rajasthan 🇮🇳
         </p>
       </div>
     </footer>

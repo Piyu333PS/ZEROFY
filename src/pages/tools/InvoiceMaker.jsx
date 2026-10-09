@@ -1,49 +1,51 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import AuthModal from '../../components/AuthModal'
 import { GOODS_HSN, UQC_CODES, SERVICES_SAC, CURRENCIES, TEMPLATES } from '../../data/invoiceCodes'
 import { CSS } from '../../data/invoiceMakerStyles'
 import { InvoicePreview } from '../../components/invoice/InvoicePreview'
-import { openPrintWindow, shareViaWhatsApp as shareInvoiceViaWhatsApp, shareViaEmail as shareInvoiceViaEmail } from '../../utils/invoiceShare'
+import { printInvoice } from '../../utils/invoiceShare'
+import { api, clearProCache } from '../../utils/api'
+import {
+  calcInvoice, fmtMoney, localToday, addDays, formatDate, GST_STATES, stateCodeOf, stateName, itemGstRate,
+} from '../../utils/invoiceCalc'
 
 /* ─── Utilities ──────────────────────────────────────────────── */
 const uid = () => Math.random().toString(36).slice(2, 9)
-const today = () => new Date().toISOString().slice(0, 10)
-// ─── Cloud API Helpers ────────────────────────────────────────
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000'
+const today = localToday
+const fmt = fmtMoney
 
-const apiFetch = (path, token, options = {}) =>
-  fetch(`${API_BASE}${path}`, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-      ...(options.headers || {})
-    },
-    body: options.body ? JSON.stringify(options.body) : undefined
-  }).then(r => r.json())
-
-// Businesses
-const fetchBusinesses = (token) =>
-  apiFetch('/api/invoices/businesses', token).then(d => d.businesses || []).catch(() => [])
-
-const saveBusinesses = (businesses, token) =>
-  apiFetch('/api/invoices/businesses', token, { method: 'PUT', body: { businesses } }).catch(() => {})
-
-// Invoices
-const fetchInvoices = (token) =>
-  apiFetch('/api/invoices', token).then(d => d.invoices || []).catch(() => [])
-
-const saveInvoice = (invoice, token) =>
-  apiFetch('/api/invoices', token, { method: 'POST', body: invoice }).catch(() => {})
-
-const updateInvoice = (id, data, token) =>
-  apiFetch(`/api/invoices/${id}`, token, { method: 'PUT', body: data }).catch(() => {})
-
-const deleteInvoice = (id, token) =>
-  apiFetch(`/api/invoices/${id}`, token, { method: 'DELETE' }).catch(() => {})
-const fmt = (n, sym = '₹') => `${sym}${Number(n || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+/* ─── Logo: chhota karke data-URL banao (business profile ke saath save hota hai) ── */
+const MAX_LOGO_CHARS = 140000
+function fileToLogoDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    if (!file || !file.type.startsWith('image/')) return reject(new Error('Sirf image file chunein (PNG / JPG).'))
+    const reader = new FileReader()
+    reader.onerror = () => reject(new Error('File padhi nahi ja saki.'))
+    reader.onload = () => {
+      const img = new Image()
+      img.onerror = () => reject(new Error('Ye image khul nahi rahi. Koi aur file try karein.'))
+      img.onload = () => {
+        let size = 240
+        // Jab tak size limit mein na aa jaye, chhota karte jao
+        for (let i = 0; i < 4; i++) {
+          const scale = Math.min(1, size / Math.max(img.width, img.height))
+          const canvas = document.createElement('canvas')
+          canvas.width = Math.max(1, Math.round(img.width * scale))
+          canvas.height = Math.max(1, Math.round(img.height * scale))
+          canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height)
+          const png = canvas.toDataURL('image/png')
+          if (png.length <= MAX_LOGO_CHARS) return resolve(png)
+          size = Math.round(size * 0.7)
+        }
+        reject(new Error('Logo bahut bada hai. Chhoti image use karein.'))
+      }
+      img.src = reader.result
+    }
+    reader.readAsDataURL(file)
+  })
+}
 
 /* ─── Validation ─────────────────────────────────────────────── */
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
@@ -146,18 +148,26 @@ function CodePicker({ type, value, onSelect }) {
 
 /* ─── Business Modal ─────────────────────────────────────────── */
 function BizModal({ businesses, onSave, onClose }) {
-  const empty = { name: '', email: '', phone: '', altPhone: '', altEmail: '', gst: '', addr: '', prefix: 'INV' }
+  const empty = { name: '', email: '', phone: '', altPhone: '', altEmail: '', gst: '', addr: '', prefix: 'INV', logo: '', bankDetails: '', upiId: '', terms: '', signatory: '' }
   const [editing, setEditing] = useState(null)
   const [form, setForm] = useState(empty)
   const [touched, setTouched] = useState({})
+  const [formMsg, setFormMsg] = useState('')
+  const [confirmDel, setConfirmDel] = useState(null)
   const set = (k) => (e) => setForm(f => ({ ...f, [k]: e.target.value }))
   const markTouched = k => () => setTouched(p => ({ ...p, [k]: true }))
+  const pickLogo = async (e) => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    try {
+      const logo = await fileToLogoDataUrl(file)
+      setForm(f => ({ ...f, logo }))
+      setFormMsg('')
+    } catch (err) { setFormMsg(err.message) }
+  }
   const setDigits = (k, max = 10) => (e) => setForm(f => ({ ...f, [k]: e.target.value.replace(/\D/g, '').slice(0, max) }))
   const setGst = (k) => (e) => setForm(f => ({ ...f, [k]: e.target.value.toUpperCase().replace(/[^0-9A-Z]/g, '').slice(0, 15) }))
-  const formHasErrors =
-    !validateEmail(form.email) || !validateEmail(form.altEmail) || !validateGstin(form.gst) ||
-    (form.phone && form.phone.length !== 10)
-
   return (
     <div className="modal-bg" onClick={e => e.target === e.currentTarget && onClose()}>
       <div className="modal">
@@ -174,14 +184,24 @@ function BizModal({ businesses, onSave, onClose }) {
                   <div style={{ fontSize: 11, color: 'var(--text3)', marginTop: 2 }}>{b.email}{b.gst ? ` · GSTIN: ${b.gst}` : ''}</div>
                 </div>
                 <div style={{ display: 'flex', gap: 6 }}>
-                  <button className="btn btn-sm" onClick={() => { setEditing(b.id); setForm({ ...b }); setTouched({}) }}>Edit</button>
-                  <button className="btn btn-sm" style={{ color: 'var(--red)', borderColor: 'rgba(193,68,60,0.3)', background: 'rgba(193,68,60,0.08)' }}
-                    onClick={() => { if (window.confirm('Delete?')) onSave(null, b.id) }}>Del</button>
+                  {confirmDel === b.id ? (
+                    <>
+                      <button className="btn btn-sm" style={{ color: '#fff', borderColor: 'var(--red)', background: 'var(--red)' }}
+                        onClick={() => { setConfirmDel(null); onSave(null, b.id) }}>Yes, delete</button>
+                      <button className="btn btn-sm" onClick={() => setConfirmDel(null)}>No</button>
+                    </>
+                  ) : (
+                    <>
+                      <button className="btn btn-sm" onClick={() => { setEditing(b.id); setForm({ ...empty, ...b }); setTouched({}); setFormMsg('') }}>Edit</button>
+                      <button className="btn btn-sm" style={{ color: 'var(--red)', borderColor: 'rgba(193,68,60,0.3)', background: 'rgba(193,68,60,0.08)' }}
+                        onClick={() => setConfirmDel(b.id)}>Del</button>
+                    </>
+                  )}
                 </div>
               </div>
             ))}
             <button className="btn btn-accent" style={{ width: '100%', justifyContent: 'center', marginTop: 8 }}
-              onClick={() => { setEditing('new'); setForm(empty); setTouched({}) }}>+ Add New Business</button>
+              onClick={() => { setEditing('new'); setForm(empty); setTouched({}); setFormMsg('') }}>+ Add New Business</button>
           </>
         )}
         {editing && (
@@ -212,14 +232,35 @@ function BizModal({ businesses, onSave, onClose }) {
               </div>
             </div>
             <div className="field"><label className="lbl">Address</label><textarea className="inp" value={form.addr} onChange={set('addr')} placeholder="Street, City, State, PIN" /></div>
+
+            <div className="sec-label" style={{ marginTop: 14 }}><span className="sec-dot" />Invoice par dikhne wali details (optional)</div>
+            <div className="field">
+              <label className="lbl">Logo</label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                {form.logo && <img src={form.logo} alt="Logo preview" style={{ width: 48, height: 48, objectFit: 'contain', border: '1px solid var(--border)', borderRadius: 8, background: '#fff' }} />}
+                <label className="btn btn-sm" style={{ cursor: 'pointer' }}>
+                  {form.logo ? 'Change logo' : 'Upload logo'}
+                  <input type="file" accept="image/png,image/jpeg,image/webp" onChange={pickLogo} style={{ display: 'none' }} />
+                </label>
+                {form.logo && <button type="button" className="btn btn-sm btn-ghost" onClick={() => setForm(f => ({ ...f, logo: '' }))}>Remove</button>}
+              </div>
+            </div>
+            <div className="grid-2">
+              <div className="field"><label className="lbl">UPI ID</label><input className="inp" value={form.upiId || ''} onChange={set('upiId')} placeholder="yourname@upi" /></div>
+              <div className="field"><label className="lbl">Signatory name</label><input className="inp" value={form.signatory || ''} onChange={set('signatory')} placeholder="Authorised Signatory" /></div>
+            </div>
+            <div className="field"><label className="lbl">Bank details</label><textarea className="inp" rows={3} value={form.bankDetails || ''} onChange={set('bankDetails')} placeholder={'Account name\nAccount no.\nIFSC · Bank & branch'} /></div>
+            <div className="field"><label className="lbl">Default terms &amp; conditions</label><textarea className="inp" rows={2} value={form.terms || ''} onChange={set('terms')} placeholder="Payment due within 15 days. Goods once sold will not be taken back." /></div>
+
+            {formMsg && <div className="field-err" style={{ fontSize: 12, marginBottom: 6 }}>{formMsg}</div>}
             <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-              <button className="btn btn-accent" disabled={formHasErrors} style={{ opacity: formHasErrors ? 0.6 : 1, cursor: formHasErrors ? 'not-allowed' : 'pointer' }} onClick={() => {
-                if (!form.name.trim()) return alert('Business name required')
-                if (!validateEmail(form.email)) return alert('Email format sahi nahi hai.')
-                if (!validateEmail(form.altEmail)) return alert('Alt. email format sahi nahi hai.')
-                if (!validateGstin(form.gst)) return alert('GSTIN sahi format mein nahi hai (15 characters, e.g. 22AAAAA0000A1Z5).')
-                if (form.phone && form.phone.length !== 10) return alert('Phone 10 digits ka hona chahiye.')
-                onSave({ ...form, id: editing === 'new' ? uid() : editing })
+              <button className="btn btn-accent" onClick={() => {
+                if (!form.name.trim()) return setFormMsg('Business name zaroori hai.')
+                if (!validateEmail(form.email)) return setFormMsg('Email format sahi nahi hai.')
+                if (!validateEmail(form.altEmail)) return setFormMsg('Alt. email format sahi nahi hai.')
+                if (!validateGstin(form.gst)) return setFormMsg('GSTIN sahi format mein nahi hai (15 characters, jaise 22AAAAA0000A1Z5).')
+                if (form.phone && form.phone.length !== 10) return setFormMsg('Phone 10 digits ka hona chahiye.')
+                onSave({ ...form, name: form.name.trim(), id: editing === 'new' ? uid() : editing })
                 setEditing(null)
               }}>Save</button>
               <button className="btn" onClick={() => setEditing(null)}>Cancel</button>
@@ -459,55 +500,73 @@ function UpgradePaymentFlow({ token, API, onSuccess, onClose }) {
 }
 
 /* ─── Main Component ─────────────────────────────────────────── */
+const blankForm = () => ({
+  bizName: '', bizEmail: '', bizPhone: '', bizAltPhone: '', bizAltEmail: '', bizGst: '', bizAddr: '', bizLogo: '',
+  clientName: '', clientEmail: '', clientPhone: '', clientGst: '', clientAddr: '', placeOfSupply: '',
+  notes: '', terms: '', bankDetails: '', upiId: '', signatory: '',
+  date: today(), dueDate: '', poNumber: '',
+})
+
+// Saved invoice ke items ko form ke shape mein lao (purane invoices mein gstRate/hsnSac nahi the)
+const itemsFromInvoice = (inv) => {
+  const list = (inv.items || []).map(it => ({
+    id: uid(),
+    type: it.type === 'service' ? 'service' : 'goods',
+    hsnSac: it.hsnSac || it.hsn || '',
+    desc: it.desc || '',
+    qty: it.qty ?? '',
+    uqc: it.uqc || 'PCS',
+    rate: it.rate ?? '',
+    gstRate: itemGstRate(it, inv),
+  }))
+  return list.length ? list : [defaultItem()]
+}
+
 export default function InvoiceMaker() {
   useCSS()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const editParam = searchParams.get('edit')
+  const copyParam = searchParams.get('copy')
+  const clientParam = searchParams.get('client')
 
   const [businesses, setBusinesses] = useState([])
   const [savedInvoices, setSavedInvoices] = useState([])
+  const [customers, setCustomers] = useState([])
   const [cloudLoaded, setCloudLoaded] = useState(false)
   const [activeBizId, setActiveBizId] = useState(null)
-  const [status, setStatus] = useState('draft')
+  const [editing, setEditing] = useState(null) // jo saved invoice edit ho raha hai
   const [showBizModal, setShowBizModal] = useState(false)
   const [template, setTemplate] = useState('modern')
   const [currency, setCurrency] = useState('₹')
   const [discPct, setDiscPct] = useState(0)
-  const [taxPct, setTaxPct] = useState(18)
+  const [shipping, setShipping] = useState('')
+  const [roundOff, setRoundOff] = useState(false)
   const [items, setItems] = useState([defaultItem()])
   const [invNo, setInvNo] = useState('')
-  const [generating, setGenerating] = useState(false)
+  const [saving, setSaving] = useState('') // '' | 'draft' | 'final'
+  const [formError, setFormError] = useState('')
+  const [showProblems, setShowProblems] = useState(false)
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
-  const [showLoginPrompt, setShowLoginPrompt] = useState(false)
   const [showAuthModal, setShowAuthModal] = useState(false)
-  const [showPreviewModal, setShowPreviewModal] = useState(false)
-  const [previewInvoice, setPreviewInvoice] = useState(null) // saved invoice preview ke liye
-  const [showShareModal, setShowShareModal] = useState(false)
-  const [shareInvoice, setShareInvoice] = useState(null)
-  const pendingGenerate = useRef(false)
+  const pendingSave = useRef(null)
   const [invoiceCount, setInvoiceCount] = useState(0)
   const [isPro, setIsPro] = useState(false)
   const FREE_LIMIT = 3
   const { token } = useAuth()
   const API = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 
-  useEffect(() => {
+  const refreshStatus = useCallback(() => {
     if (!token) return
-    fetch(`${API}/api/invoices/status`, {
-      headers: { Authorization: `Bearer ${token}` }
+    api('/api/invoices/status', token).then(r => {
+      if (!r.ok) return
+      setInvoiceCount(r.data.invoiceCount || 0)
+      setIsPro(Boolean(r.data.isPro))
     })
-      .then(r => r.json())
-      .then(d => {
-        setInvoiceCount(d.invoiceCount || 0)
-        setIsPro(d.isPro || false)
-      })
-      .catch(() => {})
   }, [token])
+  useEffect(() => { refreshStatus() }, [refreshStatus])
 
-  const [f, setF] = useState({
-    bizName: '', bizEmail: '', bizPhone: '', bizAltPhone: '', bizAltEmail: '', bizGst: '', bizAddr: '',
-    clientName: '', clientEmail: '', clientPhone: '', clientGst: '', clientAddr: '',
-    notes: '', date: today(),
-  })
+  const [f, setF] = useState(blankForm)
   const sf = k => e => setF(p => ({ ...p, [k]: e.target.value }))
 
   // Track which fields the user has left at least once, so validation
@@ -520,264 +579,323 @@ export default function InvoiceMaker() {
     const v = e.target.value.toUpperCase().replace(/[^0-9A-Z]/g, '').slice(0, 15)
     setF(p => ({ ...p, [k]: v }))
   }
-
-  // Alt phone: digits only, same as the main phone field (max 10)
-  const setAltPhone = k => e => {
+  const setPhone = k => e => {
     const v = e.target.value.replace(/\D/g, '').slice(0, 10)
     setF(p => ({ ...p, [k]: v }))
   }
 
-  // ── Cloud Load on login ────────────────────────────────────
+  // Business profiles server par save karo. Sirf tab call hota hai jab user ne sach mein kuch badla ho —
+  // pehle ye har state-change par chalta tha aur load fail hone par khaali list save karke sab mita sakta tha.
+  // Jab tak server se list load na ho jaye tab tak kabhi save mat karo (warna adhoori list purani ko mita degi)
+  const cloudLoadedRef = useRef(false)
+  const persistBusinesses = useCallback((list) => {
+    if (!token || !cloudLoadedRef.current) return
+    api('/api/invoices/businesses', token, { method: 'PUT', body: { businesses: list } }).then(r => {
+      if (!r.ok) setFormError('Business profile save nahi ho paya. Internet check karke dobara try karein.')
+    })
+  }, [token])
+
+  // Invoice numbering: for the very FIRST invoice of a business, we leave the
+  // field blank so the user types their own starting number. From the second
+  // invoice onward, we pick up the numeric tail of their last invoice for that
+  // business and increment it — the field always stays editable.
+  const genInvNo = useCallback((bizId, invoices = savedInvoices) => {
+    const existing = invoices.filter(i => (i.bizId || null) === (bizId || null))
+    if (existing.length === 0) return ''
+    const last = [...existing].sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')))[0]
+    const taken = new Set(existing.map(i => i.no))
+    let candidate = last.no || ''
+    // Agla number jo abhi tak use nahi hua
+    for (let i = 0; i < 500; i++) {
+      const m = candidate.match(/^(.*?)(\d+)(\D*)$/)
+      if (!m) {
+        candidate = `INV-${new Date().getFullYear()}-001`
+        if (!taken.has(candidate)) return candidate
+        continue
+      }
+      const [, before, digits, after] = m
+      candidate = `${before}${String(parseInt(digits, 10) + 1).padStart(digits.length, '0')}${after}`
+      if (!taken.has(candidate)) return candidate
+    }
+    return ''
+  }, [savedInvoices])
+
+  const applyBusiness = useCallback((biz, { keepInvoiceFields = false, invoices } = {}) => {
+    setActiveBizId(biz.id)
+    try { localStorage.setItem('zerofy-last-biz-id', biz.id) } catch { /* ignore */ }
+    setF(p => ({
+      ...p,
+      bizName: biz.name || '', bizEmail: biz.email || '', bizPhone: biz.phone || '', bizAltPhone: biz.altPhone || '',
+      bizAltEmail: biz.altEmail || '', bizGst: biz.gst || '', bizAddr: biz.addr || '', bizLogo: biz.logo || '',
+      // Business ke default bank details / terms — par user ne is invoice mein kuch likha ho to use mat chhedo
+      ...(keepInvoiceFields ? {} : {
+        bankDetails: biz.bankDetails || '', upiId: biz.upiId || '', terms: biz.terms || '', signatory: biz.signatory || '',
+      }),
+    }))
+    if (!keepInvoiceFields) setInvNo(genInvNo(biz.id, invoices))
+  }, [genInvNo])
+
+  const loadBusiness = id => {
+    const biz = businesses.find(b => b.id === id)
+    if (biz) applyBusiness(biz, { keepInvoiceFields: Boolean(editing) })
+  }
+
+  // Saved invoice ko form mein bharo (edit ya duplicate ke liye)
+  const fillFromInvoice = useCallback((inv, { asCopy, invoices }) => {
+    setF({
+      ...blankForm(),
+      bizName: inv.bizName || '', bizEmail: inv.bizEmail || '', bizPhone: inv.bizPhone || '', bizAltPhone: inv.bizAltPhone || '',
+      bizAltEmail: inv.bizAltEmail || '', bizGst: inv.bizGst || '', bizAddr: inv.bizAddr || '', bizLogo: inv.bizLogo || '',
+      clientName: inv.clientName || '', clientEmail: inv.clientEmail || '', clientPhone: inv.clientPhone || '',
+      clientGst: inv.clientGst || '', clientAddr: inv.clientAddr || '', placeOfSupply: inv.placeOfSupply || '',
+      notes: inv.notes || '', terms: inv.terms || '', bankDetails: inv.bankDetails || '', upiId: inv.upiId || '', signatory: inv.signatory || '',
+      date: asCopy ? today() : (inv.date || today()),
+      dueDate: asCopy ? '' : (inv.dueDate || ''),
+      poNumber: asCopy ? '' : (inv.poNumber || ''),
+    })
+    setItems(itemsFromInvoice(inv))
+    setTemplate(inv.template || 'modern')
+    setCurrency(inv.currency || '₹')
+    setDiscPct(Number(inv.discPct) || 0)
+    setShipping(Number(inv.shipping) ? String(inv.shipping) : '')
+    setRoundOff(Boolean(inv.roundOff))
+    setActiveBizId(inv.bizId || null)
+    if (asCopy) { setEditing(null); setInvNo(genInvNo(inv.bizId || null, invoices)) }
+    else { setEditing(inv); setInvNo(inv.no || '') }
+  }, [genInvNo])
+
+  // ── Cloud load (login ke baad) ─────────────────────────────
   useEffect(() => {
     if (!token) return
     let cancelled = false
-    let attempt = 0
+    ;(async () => {
+      const [bizRes, invRes, custRes] = await Promise.all([
+        api('/api/invoices/businesses', token),
+        api('/api/invoices', token),
+        api('/api/customers', token),
+      ])
+      if (cancelled) return
+      const invoices = invRes.ok ? (invRes.data.invoices || []) : []
+      let bizList = bizRes.ok ? (bizRes.data.businesses || []) : []
+      const custList = custRes.ok ? (custRes.data.customers || []) : []
 
-    const load = () => {
-      attempt++
-      Promise.all([
-        fetchBusinesses(token),
-        fetchInvoices(token)
-      ]).then(([bizData, invData]) => {
-        if (cancelled) return
-        console.log(`Zerofy: cloud load attempt ${attempt} — businesses:`, bizData.length, 'invoices:', invData.length)
-        if (bizData.length === 0 && attempt === 1) {
-          console.warn('Zerofy: businesses list khaali aayi, retry kar rahe hain...')
-          setTimeout(load, 1200)
-          return
+      // Recovery: ek purane bug ki wajah se business profiles save nahi ho rahe the.
+      // Agar list khaali hai par invoices hain, to invoices se profiles dobara bana lo.
+      if (bizRes.ok) cloudLoadedRef.current = true
+      if (bizRes.ok && bizList.length === 0 && invoices.length > 0) {
+        const seen = new Set()
+        for (const inv of invoices) { // newest first
+          const key = inv.bizId || inv.bizName
+          if (!inv.bizName || !key || seen.has(key)) continue
+          seen.add(key)
+          bizList.push({
+            id: inv.bizId || uid(), name: inv.bizName, email: inv.bizEmail || '', phone: String(inv.bizPhone || '').replace(/\D/g, '').slice(-10),
+            altPhone: inv.bizAltPhone || '', altEmail: inv.bizAltEmail || '', gst: inv.bizGst || '', addr: inv.bizAddr || '',
+            prefix: 'INV', logo: inv.bizLogo || '', bankDetails: inv.bankDetails || '', upiId: inv.upiId || '', terms: inv.terms || '', signatory: inv.signatory || '',
+          })
         }
-        setBusinesses(bizData)
-        setSavedInvoices(invData)
-        setCloudLoaded(true)
-      }).catch(err => {
-        console.error('Zerofy: cloud data load fail hua', err)
-        if (!cancelled) setCloudLoaded(true)
-      })
-    }
-    load()
+        if (bizList.length) persistBusinesses(bizList)
+      }
+
+      setBusinesses(bizList)
+      setSavedInvoices(invoices)
+      setCustomers(custList)
+      if (bizRes.ok) cloudLoadedRef.current = true
+      setCloudLoaded(true)
+      // Login se pehle bhara hua form (pending save) — use mat chhedo
+      if (pendingSave.current) return
+      if (!bizRes.ok || !invRes.ok) {
+        setFormError('Aapka saved data load nahi ho paya. Page refresh karke dobara try karein.')
+        return
+      }
+
+      const wantedId = editParam || copyParam
+      if (wantedId) {
+        const inv = invoices.find(i => i._id === wantedId)
+        if (inv) { fillFromInvoice(inv, { asCopy: !editParam, invoices }); return }
+        setFormError('Ye invoice nahi mila — ho sakta hai delete ho chuka ho. Naya invoice bana sakte hain.')
+      }
+
+      // Naya invoice: pichhli baar wali business apne aap select ho jaye
+      let lastId = null
+      try { lastId = localStorage.getItem('zerofy-last-biz-id') } catch { /* ignore */ }
+      const biz = bizList.find(b => b.id === lastId) || bizList[0]
+      if (biz) applyBusiness(biz, { invoices })
+
+      if (clientParam) {
+        const c = custList.find(x => x._id === clientParam)
+        if (c) setF(p => ({ ...p, clientName: c.name || '', clientEmail: c.email || '', clientPhone: String(c.phone || '').replace(/\D/g, '').slice(-10), clientGst: c.gst || '', clientAddr: c.addr || '' }))
+      }
+    })()
     return () => { cancelled = true }
-  }, [token])
-
-  // ── Cloud Save businesses on change ───────────────────────
-  useEffect(() => {
-    if (!token || !cloudLoaded) return
-    saveBusinesses(businesses, token)
-  }, [businesses, token, cloudLoaded])
-
-  // Invoice numbering: for the very FIRST invoice of a business, we leave the
-  // field blank so the user types their own starting number (e.g. an existing
-  // series they already use). From the second invoice onward, we pick up the
-  // numeric tail of their last invoice for that business and increment it —
-  // but the field always stays editable, so they can override it any time.
-  const invoiceExistsForBiz = useCallback((biz) => {
-    return savedInvoices.some(i => i.bizId === (biz?.id || null))
-  }, [savedInvoices])
-
-  const genInvNo = useCallback((biz) => {
-    const existing = savedInvoices.filter(i => i.bizId === (biz?.id || null))
-    if (existing.length === 0) return '' // first invoice — let the user enter it manually
-    // Most recent invoice for this business (by timestamp) sets the series to continue from
-    const last = [...existing].sort((a, b) => (b.ts || 0) - (a.ts || 0))[0]
-    const m = last.no?.match(/^(.*?)(\d+)(\D*)$/)
-    if (m) {
-      const [, before, digits, after] = m
-      const nextDigits = String(parseInt(digits, 10) + 1).padStart(digits.length, '0')
-      return `${before}${nextDigits}${after}`
-    }
-    // Fallback if the last invoice number had no digits at all
-    const prefix = biz?.prefix || 'INV'
-    const year = new Date().getFullYear()
-    return `${prefix}-${year}-001`
-  }, [savedInvoices])
-
-  useEffect(() => {
-    if (!invNo && invoiceExistsForBiz(businesses.find(b => b.id === activeBizId))) {
-      setInvNo(genInvNo(businesses.find(b => b.id === activeBizId)))
-    }
-  }, [activeBizId, businesses]) // eslint-disable-line
-
-  const loadBusiness = id => {
-    setActiveBizId(id)
-    localStorage.setItem('zerofy-last-biz-id', id)
-    const biz = businesses.find(b => b.id === id)
-    if (!biz) return
-    setF(p => ({ ...p, bizName: biz.name, bizEmail: biz.email || '', bizPhone: biz.phone || '', bizAltPhone: biz.altPhone || '', bizAltEmail: biz.altEmail || '', bizGst: biz.gst || '', bizAddr: biz.addr || '' }))
-    // First invoice for this business → leave blank for manual entry.
-    // Otherwise → auto-continue the serial from their last invoice.
-    setInvNo(genInvNo(biz))
-  }
-
-  // Naya invoice khulte hi pichhli baar use hui business automatically select ho jaye,
-  // taaki har baar business details dobara type na karni padein
-  useEffect(() => {
-    if (!cloudLoaded || activeBizId || businesses.length === 0) {
-      console.log('Zerofy: auto-select skip —', { cloudLoaded, activeBizId, businessCount: businesses.length })
-      return
-    }
-    const lastId = localStorage.getItem('zerofy-last-biz-id')
-    const toLoad = businesses.find(b => b.id === lastId) || businesses[0]
-    console.log('Zerofy: auto-selecting business —', toLoad?.name)
-    if (toLoad) loadBusiness(toLoad.id)
-  }, [cloudLoaded, businesses]) // eslint-disable-line
+  }, [token]) // eslint-disable-line
 
   const handleBizSave = (biz, deleteId) => {
-    if (deleteId) { setBusinesses(p => p.filter(b => b.id !== deleteId)); if (activeBizId === deleteId) setActiveBizId(null); return }
-    setBusinesses(p => p.find(b => b.id === biz.id) ? p.map(b => b.id === biz.id ? biz : b) : [...p, biz])
+    let next
+    if (deleteId) {
+      next = businesses.filter(b => b.id !== deleteId)
+      if (activeBizId === deleteId) setActiveBizId(null)
+    } else {
+      next = businesses.find(b => b.id === biz.id) ? businesses.map(b => b.id === biz.id ? biz : b) : [...businesses, biz]
+    }
+    setBusinesses(next)
+    persistBusinesses(next)
+    // Jo business abhi form mein khula hai (ya pehla business) use turant form mein dikhao
+    if (biz && (biz.id === activeBizId || !activeBizId) && !editing) {
+      applyBusiness(biz, { keepInvoiceFields: biz.id === activeBizId && Boolean(invNo) })
+    }
   }
 
-  // Bug fix: business details typed directly in the form (without going through
-  // "+ Add Business") were never saved to the businesses list, so they'd vanish
-  // on the next visit. Auto-save/update the business whenever an invoice is
-  // generated, so it's remembered and auto-selected next time.
+  // Form mein seedha type ki gayi business details bhi profile mein save ho jati hain,
+  // taaki agli baar dobara type na karni padein.
   const upsertBusinessFromForm = () => {
     const existing = businesses.find(b => b.id === activeBizId)
-      || businesses.find(b => b.name.trim().toLowerCase() === f.bizName.trim().toLowerCase())
+      || businesses.find(b => (b.name || '').trim().toLowerCase() === f.bizName.trim().toLowerCase())
     const bizData = {
+      ...(existing || {}),
       id: existing ? existing.id : uid(),
       name: f.bizName.trim(),
-      email: f.bizEmail || '',
-      phone: f.bizPhone || '',
-      altPhone: f.bizAltPhone || '',
-      altEmail: f.bizAltEmail || '',
-      gst: f.bizGst || '',
-      addr: f.bizAddr || '',
+      email: f.bizEmail || '', phone: f.bizPhone || '', altPhone: f.bizAltPhone || '', altEmail: f.bizAltEmail || '',
+      gst: f.bizGst || '', addr: f.bizAddr || '',
       prefix: existing?.prefix || 'INV',
+      logo: f.bizLogo || existing?.logo || '',
+      bankDetails: f.bankDetails || existing?.bankDetails || '',
+      upiId: f.upiId || existing?.upiId || '',
+      terms: f.terms || existing?.terms || '',
+      signatory: f.signatory || existing?.signatory || '',
     }
-    setBusinesses(p => existing ? p.map(b => b.id === bizData.id ? bizData : b) : [...p, bizData])
+    const next = existing ? businesses.map(b => b.id === bizData.id ? bizData : b) : [...businesses, bizData]
+    if (JSON.stringify(next) !== JSON.stringify(businesses)) {
+      setBusinesses(next)
+      persistBusinesses(next)
+    }
     setActiveBizId(bizData.id)
-    localStorage.setItem('zerofy-last-biz-id', bizData.id)
+    try { localStorage.setItem('zerofy-last-biz-id', bizData.id) } catch { /* ignore */ }
     return bizData.id
   }
 
   const updateItem = (id, k, v) => setItems(p => p.map(i => i.id === id ? { ...i, [k]: v } : i))
   const removeItem = id => setItems(p => p.length > 1 ? p.filter(i => i.id !== id) : p)
 
-  const sub = items.reduce((s, i) => s + (parseFloat(i.qty) || 0) * (parseFloat(i.rate) || 0), 0)
-  const disc = sub * (discPct / 100)
-  const gstTotal = items.reduce((s, i) => s + (parseFloat(i.qty)||0)*(parseFloat(i.rate)||0)*((i.gstRate||0)/100), 0)
-  const tax = gstTotal
-  const total = sub - disc + gstTotal
+  // Client picker: naam type karte hi saved clients ke suggestions; poora naam match ho to details bhar do
+  const onClientName = (e) => {
+    const name = e.target.value
+    const match = customers.find(c => (c.name || '').trim().toLowerCase() === name.trim().toLowerCase())
+    setF(p => {
+      if (!match || p.clientName.trim().toLowerCase() === name.trim().toLowerCase()) return { ...p, clientName: name }
+      return {
+        ...p, clientName: match.name,
+        clientEmail: match.email || p.clientEmail,
+        clientPhone: String(match.phone || '').replace(/\D/g, '').slice(-10) || p.clientPhone,
+        clientGst: match.gst || p.clientGst,
+        clientAddr: match.addr || p.clientAddr,
+      }
+    })
+  }
 
-  useEffect(() => {
-    if (token && pendingGenerate.current) {
-      pendingGenerate.current = false
-      generateInvoice()
-    }
-  }, [token])
+  // Poora invoice object — preview, totals aur save teeno isi se bante hain
+  const draftInv = useMemo(() => ({
+    ...f, no: invNo.trim(), template, currency, discPct, taxPct: 18,
+    shipping: Number(shipping) || 0, roundOff,
+    items,
+    status: editing ? editing.status : 'draft',
+    paidAmount: editing ? editing.paidAmount : 0,
+  }), [f, invNo, template, currency, discPct, shipping, roundOff, items, editing])
+  const totals = useMemo(() => calcInvoice(draftInv), [draftInv])
+  const total = totals.total
 
-  const generateInvoice = async () => {
-    if (!f.bizName.trim()) { alert('Please enter your Business Name.'); return }
-    if (!f.clientName.trim()) { alert('Please enter Client Name.'); return }
-    if (items.every(i => !i.desc && !i.rate)) { alert('Please add at least one item.'); return }
+  // Jo cheezein save hone se rokti hain — saaf-saaf list (pehle sirf "format sahi nahi" dikhta tha)
+  const problems = useMemo(() => {
+    const p = []
+    if (!invNo.trim()) p.push('Invoice number daalein')
+    if (!f.bizName.trim()) p.push('Apne business ka naam daalein')
+    if (!f.clientName.trim()) p.push('Client ka naam daalein')
+    if (totals.lines.length === 0) p.push('Kam se kam ek item jodein (description ya rate ke saath)')
+    else if (totals.lines.some(l => !(l.qty > 0))) p.push('Har item ki quantity 0 se zyada honi chahiye')
+    if (!validateEmail(f.bizEmail)) p.push('Business email sahi format mein nahi hai')
+    if (!validateEmail(f.bizAltEmail)) p.push('Business alt. email sahi format mein nahi hai')
+    if (!validateEmail(f.clientEmail)) p.push('Client email sahi format mein nahi hai')
+    if (!validateGstin(f.bizGst)) p.push('Business GSTIN 15 characters ka hona chahiye')
+    if (!validateGstin(f.clientGst)) p.push('Client GSTIN 15 characters ka hona chahiye')
+    if (f.bizPhone && f.bizPhone.length !== 10) p.push('Business phone 10 digits ka hona chahiye')
+    if (f.clientPhone && f.clientPhone.length !== 10) p.push('Client phone 10 digits ka hona chahiye')
+    if (f.dueDate && f.date && f.dueDate < f.date) p.push('Due date invoice date se pehle nahi ho sakti')
+    return p
+  }, [invNo, f, totals])
 
-    // Format validation — email / GSTIN fields, if filled in, must be valid
-    if (!validateEmail(f.bizEmail)) { alert('Business email format sahi nahi hai.'); return }
-    if (!validateEmail(f.bizAltEmail)) { alert('Business alt. email format sahi nahi hai.'); return }
-    if (!validateEmail(f.clientEmail)) { alert('Client email format sahi nahi hai.'); return }
-    if (!validateGstin(f.bizGst)) { alert('Business GSTIN sahi format mein nahi hai (15 characters, e.g. 22AAAAA0000A1Z5).'); return }
-    if (!validateGstin(f.clientGst)) { alert('Client GSTIN sahi format mein nahi hai (15 characters, e.g. 22AAAAA0000A1Z5).'); return }
-    if (f.bizPhone && f.bizPhone.length !== 10) { alert('Business phone 10 digits ka hona chahiye.'); return }
-    if (f.clientPhone && f.clientPhone.length !== 10) { alert('Client phone 10 digits ka hona chahiye.'); return }
+  // mode: 'draft' (sirf save) | 'final' (save + print)
+  const saveInvoice = async (mode) => {
+    setFormError('')
+    if (problems.length) { setShowProblems(true); return }
 
     // Login required
     if (!token) {
-      pendingGenerate.current = true
+      pendingSave.current = mode
       setShowAuthModal(true)
       return
     }
 
-    // Check invoice limit with backend
-    try {
-      const res = await fetch(`${API}/api/invoices/generate`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
-      })
-      const data = await res.json()
-      if (res.status === 403 && data.error === 'free_limit_reached') {
-        setShowUpgradeModal(true)
-        return
-      }
-      if (res.ok) {
-        setInvoiceCount(data.invoiceCount)
-      }
-    } catch (err) {
-      console.error('Invoice count error:', err)
+    setSaving(mode)
+    const bizId = upsertBusinessFromForm()
+    const wasDraft = !editing || editing.status === 'draft'
+    const status = mode === 'draft'
+      ? (editing && editing.status !== 'draft' ? editing.status : 'draft')
+      : (wasDraft ? 'sent' : editing.status)
+
+    const body = {
+      ...f, no: invNo.trim(), bizId, status, template, currency,
+      discPct: Number(discPct) || 0, taxPct: 18,
+      shipping: Number(shipping) || 0, roundOff,
+      items: items
+        .filter(i => i.desc || Number(i.rate))
+        .map(i => ({ id: i.id, type: i.type, desc: i.desc, hsnSac: i.hsnSac, uqc: i.uqc || 'PCS', qty: Number(i.qty) || 0, rate: Number(i.rate) || 0, gstRate: Number(i.gstRate) || 0 })),
+    }
+
+    const res = editing
+      ? await api(`/api/invoices/${editing._id}`, token, { method: 'PUT', body })
+      : await api('/api/invoices', token, { method: 'POST', body: { ...body, countUsage: true } })
+    setSaving('')
+
+    if (res.status === 403 && res.data.error === 'free_limit_reached') {
+      setInvoiceCount(res.data.invoiceCount || FREE_LIMIT)
+      setShowUpgradeModal(true)
+      return
+    }
+    if (!res.ok || !res.data.success) {
+      setFormError(res.data.message || res.data.error || 'Invoice save nahi ho paya. Dobara try karein.')
       return
     }
 
-    setGenerating(true)
-    await new Promise(r => setTimeout(r, 600))
-
-    // Bug fix: persist the business details typed in the form so they're
-    // remembered next time, even if the user never opened "+ Add Business".
-    const bizId = upsertBusinessFromForm()
-
-    const inv = {
-      id: uid(), ts: Date.now(), no: invNo,
-      bizId, bizName: f.bizName,
-      clientName: f.clientName, clientEmail: f.clientEmail,
-      clientAddr: f.clientAddr, clientPhone: f.clientPhone, clientGst: f.clientGst,
-      bizEmail: f.bizEmail, bizPhone: f.bizPhone, bizAltPhone: f.bizAltPhone || '', bizAltEmail: f.bizAltEmail || '', bizAddr: f.bizAddr, bizGst: f.bizGst,
-      date: f.date, notes: f.notes,
-      total: fmt(total, currency),
-      status: 'sent',
-      template, currency, discPct, taxPct,
-      items: [...items],
-    }
-    const updatedInvoices = [inv, ...savedInvoices.filter(i => i.no !== invNo)].slice(0, 100)
-    setSavedInvoices(updatedInvoices)
-
-    // ── Cloud mein save karo ──────────────────────────────────
-    if (token) {
-      saveInvoice(inv, token)
-    }
-
-    // Bug fix: print dialog opens in its own tab and no longer blocks the
-    // app — we don't wait on it, and we no longer show a modal that had to
-    // be dismissed before the rest of Zerofy became usable again.
-    openPrintWindow(inv)
-
-    setGenerating(false)
-    // Straight back to the dashboard — no confirmation modal in the way.
-    navigate('/app')
+    const saved = res.data.invoice
+    if (res.data.invoiceCount !== undefined) setInvoiceCount(res.data.invoiceCount)
+    navigate('/app/invoices')
+    if (mode === 'final') printInvoice(saved, { hideBranding: isPro })
   }
 
-  // Bug fix: Preview now only opens the preview modal — it no longer shares
-  // or prints anything by itself, so it can't be confused with WhatsApp/Email.
-  const previewSavedInvoice = (inv) => {
-    setPreviewInvoice(inv)
-    setShowPreviewModal(true)
-  }
+  // Login ke baad jo save pending tha use poora karo
+  useEffect(() => {
+    if (token && cloudLoaded && pendingSave.current) {
+      const mode = pendingSave.current
+      pendingSave.current = null
+      saveInvoice(mode)
+    }
+  }, [token, cloudLoaded]) // eslint-disable-line
 
-  // Bug fix: WhatsApp/Email now render straight from the invoice object
-  // (via the shared invoiceShare utils) instead of grabbing whatever
-  // preview happened to be on screen — so they always act on the exact
-  // invoice that was clicked, and they no longer just "look like Preview".
-  const shareViaWhatsApp = (inv) => shareInvoiceViaWhatsApp(inv)
-  const shareViaEmail = (inv) => shareInvoiceViaEmail(inv)
-
-  const statusMeta = { draft: '#69708A', sent: '#C97423', paid: '#1F6F54', overdue: '#C1443C', cancelled: '#9CA3AF' }
-  const invData = { ...f, no: invNo }
-  const t = TEMPLATES.find(t => t.key === template) || TEMPLATES[0]
-
-  // Any bad-format field currently blocks Generate — used to grey out the button
-  const hasFormErrors =
-    !invNo.trim() ||
-    !validateEmail(f.bizEmail) || !validateEmail(f.bizAltEmail) || !validateEmail(f.clientEmail) ||
-    !validateGstin(f.bizGst) || !validateGstin(f.clientGst) ||
-    (f.bizPhone && f.bizPhone.length !== 10) || (f.clientPhone && f.clientPhone.length !== 10)
+  const limitReached = Boolean(token) && !isPro && !editing && invoiceCount >= FREE_LIMIT
+  const sellerState = stateCodeOf(f.bizGst)
+  const busy = Boolean(saving)
+  const mono = { fontFamily: "'JetBrains Mono', monospace" }
 
   return (
     <div className="ig-root">
-      {/* TOP BAR — back, breadcrumb, brand and actions combined into one compact row
-          (was two stacked bars) so the tool starts higher and the theme reads as
-          one continuous surface instead of a flat strip on top of the gradient. */}
+      {/* TOP BAR */}
       <div className="ig-top">
         <div className="ig-top-inner">
           <div className="ig-top-left">
-            <button className="ig-back" onClick={() => window.history.back()}>‹ Back</button>
+            <button className="ig-back" onClick={() => navigate(token ? '/app/invoices' : '/')}>‹ Back</button>
             <div className="ig-crumb">
-              <span>Home</span><span className="ig-crumb-sep">›</span><span className="ig-crumb-cur">Invoice Generator</span>
+              <span>Invoices</span><span className="ig-crumb-sep">›</span>
+              <span className="ig-crumb-cur">{editing ? `Edit ${editing.no}` : 'New invoice'}</span>
             </div>
             <div className="ig-vsep" />
             <div className="ig-brand">
@@ -795,47 +913,63 @@ export default function InvoiceMaker() {
             <button className="btn" onClick={() => navigate('/app/invoices')}>
               📄 All Invoices
             </button>
-            <select className="inp" value={currency} onChange={e => setCurrency(e.target.value)} style={{ width: 'auto', padding: '8px 12px' }}>
+            <select className="inp" aria-label="Currency" value={currency} onChange={e => setCurrency(e.target.value)} style={{ width: 'auto', padding: '8px 12px' }}>
               {CURRENCIES.map(c => <option key={c.sym} value={c.sym}>{c.sym} {c.code}</option>)}
             </select>
           </div>
         </div>
       </div>
 
-      {/* MAIN LAYOUT — left form panel and right preview panel each scroll
-          independently within the fixed viewport, so the page itself never
-          needs to scroll and the live preview stays visible while you work. */}
       <div className="ig-layout">
 
         {/* LEFT — FORM */}
         <div className="ig-left">
 
-          {/* Invoice No + Status */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14, flexWrap: 'wrap' }}>
-            <div className="inv-no" style={{ marginBottom: 0 }}>
-              🧾 <input
-                value={invNo}
-                onChange={e => setInvNo(e.target.value)}
-                placeholder={invoiceExistsForBiz(businesses.find(b => b.id === activeBizId)) ? '' : 'Enter starting invoice no.'}
-              />
-            </div>
-            <input type="date" className="inp" value={f.date} onChange={sf('date')} style={{ width: 'auto', flex: '0 0 auto' }} />
-          </div>
-          {!invNo.trim() && (
-            <div style={{ fontSize: 11.5, color: 'var(--text3)', marginTop: -8, marginBottom: 14 }}>
-              🧾 This looks like your first invoice for this business — type your starting invoice number. Every invoice after this will number itself automatically, and you can still edit it any time.
+          {editing && (
+            <div className="ig-banner">
+              Aap saved invoice <strong>{editing.no}</strong> edit kar rahe hain — save karne par wahi invoice update hoga (free limit mein nahi gina jayega).
             </div>
           )}
-          <div className="status-strip">
-            {Object.entries(statusMeta).map(([k, c]) => (
-              <button key={k} className="s-pill" onClick={() => setStatus(k)}
-                style={{ background: status === k ? c + '22' : 'transparent', borderColor: status === k ? c : 'var(--border)', color: status === k ? c : 'var(--text3)' }}>
-                <span style={{ display: 'inline-block', width: 5, height: 5, borderRadius: '50%', background: status === k ? c : 'var(--text3)', marginRight: 5, verticalAlign: 'middle' }} />
-                {k}
-              </button>
-            ))}
+
+          {/* Invoice No + dates */}
+          <div className="ig-card" style={{ paddingBottom: 14 }}>
+            <div className="meta-grid">
+              <div className="field">
+                <label className="lbl">Invoice No. *</label>
+                <input className={`inp ${showProblems && !invNo.trim() ? 'inp-err' : ''}`} style={mono}
+                  value={invNo} onChange={e => setInvNo(e.target.value)} maxLength={30}
+                  placeholder="e.g. INV-2026-001" />
+              </div>
+              <div className="field">
+                <label className="lbl">Invoice Date</label>
+                <input type="date" className="inp" value={f.date} onChange={sf('date')} />
+              </div>
+              <div className="field">
+                <label className="lbl">Due Date</label>
+                <input type="date" className="inp" value={f.dueDate} min={f.date || undefined} onChange={sf('dueDate')} />
+              </div>
+              <div className="field">
+                <label className="lbl">PO / Ref No.</label>
+                <input className="inp" value={f.poNumber} onChange={sf('poNumber')} maxLength={40} placeholder="Optional" />
+              </div>
+            </div>
+            <div className="due-chips">
+              <span>Due in:</span>
+              {[0, 7, 15, 30, 45].map(d => (
+                <button key={d} type="button"
+                  className={`biz-pill ${f.dueDate && f.dueDate === addDays(f.date, d) ? 'on' : ''}`}
+                  onClick={() => setF(p => ({ ...p, dueDate: addDays(p.date, d) }))}>
+                  {d === 0 ? 'On receipt' : `${d} days`}
+                </button>
+              ))}
+              {f.dueDate && <button type="button" className="biz-pill" onClick={() => setF(p => ({ ...p, dueDate: '' }))}>Clear</button>}
+            </div>
+            {!invNo.trim() && !editing && (
+              <div style={{ fontSize: 11.5, color: 'var(--text3)', marginTop: 8 }}>
+                Is business ka pehla invoice hai — apna starting invoice number likhein. Iske baad har invoice ka number apne aap aage badhta jayega (aap kabhi bhi badal sakte hain).
+              </div>
+            )}
           </div>
-          <hr className="divider" />
 
           {/* Business Selector */}
           {businesses.length > 0 && (
@@ -848,7 +982,7 @@ export default function InvoiceMaker() {
                   </button>
                 ))}
                 <button className="biz-pill" style={{ color: 'var(--accent-deep)', borderColor: 'rgba(232,147,60,0.35)', background: 'var(--accent-dim)' }}
-                  onClick={() => setShowBizModal(true)}>+ Add</button>
+                  onClick={() => setShowBizModal(true)}>+ Add / Edit</button>
               </div>
             </div>
           )}
@@ -857,7 +991,7 @@ export default function InvoiceMaker() {
           <div className="grid-2">
             <div className="ig-card">
               <div className="sec-label"><span className="sec-dot" />From (Your Business)</div>
-              <div className="field"><label className="lbl">Business Name *</label><input className="inp" value={f.bizName} onChange={sf('bizName')} placeholder="Your Company Pvt Ltd" /></div>
+              <div className="field"><label className="lbl">Business Name *</label><input className={`inp ${showProblems && !f.bizName.trim() ? 'inp-err' : ''}`} value={f.bizName} onChange={sf('bizName')} placeholder="Your Company Pvt Ltd" /></div>
               <div className="field">
                 <label className="lbl">Email</label>
                 <input
@@ -867,9 +1001,9 @@ export default function InvoiceMaker() {
                 />
                 <FieldError show={touched.bizEmail && !validateEmail(f.bizEmail)} message="Valid email daalein, jaise hello@company.com" />
               </div>
-              <div className="field"><label className="lbl">Phone</label><input className="inp" value={f.bizPhone} onChange={e => { const v = e.target.value.replace(/\D/g, '').slice(0, 10); setF(p => ({ ...p, bizPhone: v })) }} placeholder="10-digit number" maxLength={10} inputMode="numeric" pattern="[0-9]*" /></div>
+              <div className="field"><label className="lbl">Phone</label><input className="inp" value={f.bizPhone} onChange={setPhone('bizPhone')} placeholder="10-digit number" maxLength={10} inputMode="numeric" pattern="[0-9]*" /></div>
               <div className="field">
-                <label className="lbl">GSTIN / PAN</label>
+                <label className="lbl">GSTIN</label>
                 <input
                   className={`inp ${touched.bizGst && !validateGstin(f.bizGst) ? 'inp-err' : ''}`}
                   value={f.bizGst} onChange={setGst('bizGst')} onBlur={markTouched('bizGst')}
@@ -877,7 +1011,7 @@ export default function InvoiceMaker() {
                 />
                 <FieldError show={touched.bizGst && !validateGstin(f.bizGst)} message="GSTIN 15 characters ka hona chahiye, jaise 22AAAAA0000A1Z5" />
               </div>
-              <div className="field"><label className="lbl">Alt. Phone <span style={{ fontSize: 9, color: 'var(--text3)' }}>(optional)</span></label><input className="inp" value={f.bizAltPhone} onChange={setAltPhone('bizAltPhone')} placeholder="10-digit number" maxLength={10} inputMode="numeric" pattern="[0-9]*" /></div>
+              <div className="field"><label className="lbl">Alt. Phone <span style={{ fontSize: 9, color: 'var(--text3)' }}>(optional)</span></label><input className="inp" value={f.bizAltPhone} onChange={setPhone('bizAltPhone')} placeholder="10-digit number" maxLength={10} inputMode="numeric" pattern="[0-9]*" /></div>
               <div className="field">
                 <label className="lbl">Alt. Email <span style={{ fontSize: 9, color: 'var(--text3)' }}>(optional)</span></label>
                 <input
@@ -891,7 +1025,14 @@ export default function InvoiceMaker() {
             </div>
             <div className="ig-card">
               <div className="sec-label"><span className="sec-dot" style={{ background: 'var(--blue)' }} />Bill To (Client)</div>
-              <div className="field"><label className="lbl">Client Name *</label><input className="inp" value={f.clientName} onChange={sf('clientName')} placeholder="Client Company" /></div>
+              <div className="field">
+                <label className="lbl">Client Name *</label>
+                <input className={`inp ${showProblems && !f.clientName.trim() ? 'inp-err' : ''}`} list="zerofy-client-list"
+                  value={f.clientName} onChange={onClientName} placeholder={customers.length ? 'Naam likhein ya saved client chunein' : 'Client Company'} autoComplete="off" />
+                <datalist id="zerofy-client-list">
+                  {customers.map(c => <option key={c._id} value={c.name}>{[c.phone, c.gst].filter(Boolean).join(' · ')}</option>)}
+                </datalist>
+              </div>
               <div className="field">
                 <label className="lbl">Email</label>
                 <input
@@ -901,15 +1042,27 @@ export default function InvoiceMaker() {
                 />
                 <FieldError show={touched.clientEmail && !validateEmail(f.clientEmail)} message="Valid email daalein, jaise client@email.com" />
               </div>
-              <div className="field"><label className="lbl">Phone</label><input className="inp" value={f.clientPhone} onChange={e => { const v = e.target.value.replace(/\D/g, '').slice(0, 10); setF(p => ({ ...p, clientPhone: v })) }} placeholder="10-digit number" maxLength={10} inputMode="numeric" pattern="[0-9]*" /></div>
+              <div className="field"><label className="lbl">Phone</label><input className="inp" value={f.clientPhone} onChange={setPhone('clientPhone')} placeholder="10-digit number" maxLength={10} inputMode="numeric" pattern="[0-9]*" /></div>
               <div className="field">
-                <label className="lbl">GSTIN / PAN</label>
+                <label className="lbl">GSTIN</label>
                 <input
                   className={`inp ${touched.clientGst && !validateGstin(f.clientGst) ? 'inp-err' : ''}`}
                   value={f.clientGst} onChange={setGst('clientGst')} onBlur={markTouched('clientGst')}
                   placeholder="Client GSTIN" maxLength={15}
                 />
                 <FieldError show={touched.clientGst && !validateGstin(f.clientGst)} message="GSTIN 15 characters ka hona chahiye, jaise 22AAAAA0000A1Z5" />
+              </div>
+              <div className="field">
+                <label className="lbl">Place of Supply</label>
+                <select className="inp" value={f.placeOfSupply} onChange={sf('placeOfSupply')}>
+                  <option value="">{stateCodeOf(f.clientGst) ? `Auto — ${stateName(stateCodeOf(f.clientGst))} (client GSTIN se)` : 'Auto (client GSTIN se)'}</option>
+                  {GST_STATES.map(s => <option key={s.code} value={s.code}>{s.code} — {s.name}</option>)}
+                </select>
+                {sellerState && (
+                  <div style={{ fontSize: 10.5, color: 'var(--text3)', marginTop: 4 }}>
+                    {totals.inter ? 'Doosre state mein supply → IGST lagega' : 'Same state (ya state pata nahi) → CGST + SGST lagega'}
+                  </div>
+                )}
               </div>
               <div className="field"><label className="lbl">Address</label><textarea className="inp" rows={2} value={f.clientAddr} onChange={sf('clientAddr')} placeholder="Client address" /></div>
             </div>
@@ -936,15 +1089,15 @@ export default function InvoiceMaker() {
               <div key={it.id} className="item-row">
                 {/* Type */}
                 <div>
-                  <select className="inp" value={it.type}
-                    onChange={e => { updateItem(it.id, 'type', e.target.value); updateItem(it.id, 'hsnSac', ''); updateItem(it.id, 'desc', '') }}>
+                  <select className="inp" aria-label="Item type" value={it.type}
+                    onChange={e => { updateItem(it.id, 'type', e.target.value); updateItem(it.id, 'hsnSac', '') }}>
                     <option value="goods">🟡 Goods</option>
                     <option value="service">🔵 Service</option>
                   </select>
                 </div>
                 {/* Description */}
                 <div>
-                  <input className="inp" value={it.desc} onChange={e => updateItem(it.id, 'desc', e.target.value)} placeholder="Item description…" />
+                  <input className="inp" aria-label="Item description" value={it.desc} onChange={e => updateItem(it.id, 'desc', e.target.value)} placeholder="Item description…" />
                   {it.hsnSac && (
                     <div style={{ marginTop: 3, fontSize: 10, color: 'var(--text3)' }}>
                       {it.type === 'goods' ? 'HSN' : 'SAC'}: <span style={{ color: 'var(--accent-deep)', fontWeight: 700 }}>{it.hsnSac}</span>
@@ -953,7 +1106,7 @@ export default function InvoiceMaker() {
                 </div>
                 {/* HSN/SAC */}
                 <div>
-                  <CodePicker type={it.type} value={it.hsnSac}
+                  <CodePicker key={it.type} type={it.type} value={it.hsnSac}
                     onSelect={sel => {
                       const key = it.type === 'goods' ? 'hsn' : 'sac'
                       updateItem(it.id, 'hsnSac', sel[key])
@@ -964,7 +1117,7 @@ export default function InvoiceMaker() {
                 </div>
                 {/* GST Rate — dropdown + manual override */}
                 <div className="gst-rate-wrap">
-                  <select className="inp" value={it.gstRate}
+                  <select className="inp" aria-label="GST rate" value={it.gstRate}
                     onChange={e => updateItem(it.id, 'gstRate', parseFloat(e.target.value))}
                     style={{ textAlign: 'center', fontSize: 12, fontWeight: 700, color: 'var(--accent)' }}
                     title="Select GST rate or type custom below"
@@ -979,6 +1132,7 @@ export default function InvoiceMaker() {
                   <input
                     className="gst-manual-inp"
                     type="number" min="0" max="100" step="0.01"
+                    aria-label="Custom GST rate"
                     value={it.gstRate}
                     onChange={e => {
                       const v = e.target.value === '' ? 0 : parseFloat(e.target.value)
@@ -990,7 +1144,7 @@ export default function InvoiceMaker() {
                 </div>
                 {/* UQC */}
                 <div>
-                  <select className="inp" value={it.uqc || 'PCS'}
+                  <select className="inp" aria-label="Unit" value={it.uqc || 'PCS'}
                     onChange={e => updateItem(it.id, 'uqc', e.target.value)}
                     style={{ textAlign: 'center', fontSize: 11, padding: '7px 4px' }}
                     title="Unit Quantity Code"
@@ -1002,22 +1156,21 @@ export default function InvoiceMaker() {
                 </div>
                 {/* Qty */}
                 <div>
-                  <input className="inp" type="number" min="0" value={it.qty}
-                    onChange={e => updateItem(it.id, 'qty', e.target.value === '' ? '' : +e.target.value)}
+                  <input className="inp" type="number" min="0" step="any" aria-label="Quantity" value={it.qty}
+                    onChange={e => updateItem(it.id, 'qty', e.target.value === '' ? '' : Math.max(0, +e.target.value))}
                     placeholder="Qty"
                     style={{ textAlign: 'center' }} />
                 </div>
                 {/* Rate */}
                 <div>
-                  <input className="inp" type="number" min="0" value={it.rate}
-                    onChange={e => updateItem(it.id, 'rate', e.target.value)}
+                  <input className="inp" type="number" min="0" step="any" aria-label="Rate" value={it.rate}
+                    onChange={e => updateItem(it.id, 'rate', e.target.value === '' ? '' : String(Math.max(0, +e.target.value)))}
                     placeholder="0.00" style={{ textAlign: 'right' }} />
                 </div>
                 {/* Amount (auto) */}
                 <div style={{ paddingTop: 8, textAlign: 'right' }}>
                   <span style={{
-                    fontFamily: "'JetBrains Mono', monospace",
-                    fontSize: 12, fontWeight: 700,
+                    ...mono, fontSize: 12, fontWeight: 700,
                     color: (parseFloat(it.qty) || 0) * (parseFloat(it.rate) || 0) > 0 ? 'var(--accent)' : 'var(--text3)'
                   }}>
                     {fmt((parseFloat(it.qty) || 0) * (parseFloat(it.rate) || 0), currency)}
@@ -1025,36 +1178,66 @@ export default function InvoiceMaker() {
                 </div>
                 {/* Remove */}
                 <div style={{ paddingTop: 8 }}>
-                  <button className="btn btn-icon btn-ghost btn-sm" onClick={() => removeItem(it.id)}
-                    style={{ color: 'var(--red)', fontSize: 16, lineHeight: 1 }}>×</button>
+                  <button className="btn btn-icon btn-ghost btn-sm" onClick={() => removeItem(it.id)} aria-label="Remove item"
+                    disabled={items.length === 1}
+                    style={{ color: 'var(--red)', fontSize: 16, lineHeight: 1, opacity: items.length === 1 ? 0.3 : 1 }}>×</button>
                 </div>
               </div>
             ))}
 
             {/* Totals */}
             <div className="totals">
-              <div className="t-row"><span>Subtotal (excl. GST)</span><span style={{ fontFamily: "'JetBrains Mono', monospace" }}>{fmt(sub, currency)}</span></div>
+              <div className="t-row"><span>Subtotal (excl. GST)</span><span style={mono}>{fmt(totals.sub, currency)}</span></div>
               <div className="t-row">
-                <span>Discount <input type="number" min="0" max="100" value={discPct} onChange={e => setDiscPct(+e.target.value)} className="pct-inp" />%</span>
-                <span style={{ fontFamily: "'JetBrains Mono', monospace", color: discPct > 0 ? 'var(--green)' : 'var(--text3)' }}>−{fmt(disc, currency)}</span>
+                <span>Discount <input type="number" min="0" max="100" step="any" aria-label="Discount percent" value={discPct}
+                  onChange={e => setDiscPct(Math.min(100, Math.max(0, +e.target.value || 0)))} className="pct-inp" />%</span>
+                <span style={{ ...mono, color: totals.disc > 0 ? 'var(--green)' : 'var(--text3)' }}>−{fmt(totals.disc, currency)}</span>
+              </div>
+              {totals.split ? (
+                totals.inter
+                  ? <div className="t-row"><span>IGST</span><span style={mono}>{fmt(totals.igst, currency)}</span></div>
+                  : <>
+                    <div className="t-row"><span>CGST</span><span style={mono}>{fmt(totals.cgst, currency)}</span></div>
+                    <div className="t-row"><span>SGST</span><span style={mono}>{fmt(totals.sgst, currency)}</span></div>
+                  </>
+              ) : (
+                <div className="t-row"><span>GST (discount ke baad ki value par)</span><span style={mono}>{fmt(totals.gst, currency)}</span></div>
+              )}
+              <div className="t-row">
+                <span>Shipping / other charges</span>
+                <input type="number" min="0" step="any" aria-label="Shipping or other charges" value={shipping}
+                  onChange={e => setShipping(e.target.value === '' ? '' : String(Math.max(0, +e.target.value)))}
+                  className="pct-inp" style={{ width: 110, textAlign: 'right' }} placeholder="0.00" />
               </div>
               <div className="t-row">
-                <span>GST (as per HSN/SAC)</span>
-                <span style={{ fontFamily: "'JetBrains Mono', monospace" }}>{fmt(gstTotal, currency)}</span>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                  <input type="checkbox" checked={roundOff} onChange={e => setRoundOff(e.target.checked)} />
+                  Total ko round off karein
+                </label>
+                <span style={{ ...mono, color: 'var(--text3)' }}>{totals.roundAdj !== 0 ? `${totals.roundAdj > 0 ? '+' : '−'}${fmt(Math.abs(totals.roundAdj), currency)}` : ''}</span>
               </div>
               <div className="t-row grand"><span>Total</span><span>{fmt(total, currency)}</span></div>
             </div>
           </div>
 
-          {/* Notes */}
+          {/* Payment details, notes, terms */}
           <div className="ig-card">
-            <div className="sec-label"><span className="sec-dot" style={{ background: 'var(--green)' }} />Notes (optional)</div>
-            <textarea className="inp" rows={3} value={f.notes} onChange={sf('notes')} placeholder="Bank details, payment instructions, thank you note…" />
+            <div className="sec-label"><span className="sec-dot" style={{ background: 'var(--green)' }} />Payment details &amp; notes (optional)</div>
+            <div className="grid-2">
+              <div className="field"><label className="lbl">Bank details</label><textarea className="inp" rows={3} value={f.bankDetails} onChange={sf('bankDetails')} placeholder={'Account name\nAccount no.\nIFSC · Bank & branch'} /></div>
+              <div>
+                <div className="field"><label className="lbl">UPI ID</label><input className="inp" value={f.upiId} onChange={sf('upiId')} placeholder="yourname@upi" /></div>
+                <div className="field"><label className="lbl">Signatory name</label><input className="inp" value={f.signatory} onChange={sf('signatory')} placeholder="Authorised Signatory" /></div>
+              </div>
+            </div>
+            <div className="field"><label className="lbl">Notes</label><textarea className="inp" rows={2} value={f.notes} onChange={sf('notes')} placeholder="Thank you note, delivery details…" /></div>
+            <div className="field"><label className="lbl">Terms &amp; conditions</label><textarea className="inp" rows={2} value={f.terms} onChange={sf('terms')} placeholder="Payment due within 15 days…" /></div>
+            <div style={{ fontSize: 10.5, color: 'var(--text3)' }}>Bank details, UPI, signatory aur terms aapke business profile mein save ho jate hain — agle invoice mein apne aap bhar jayenge.</div>
           </div>
 
         </div>
 
-        {/* RIGHT — PREVIEW + GENERATE */}
+        {/* RIGHT — PREVIEW + SAVE */}
         <div className="ig-right">
           <div className="preview-panel">
 
@@ -1074,28 +1257,25 @@ export default function InvoiceMaker() {
               ))}
             </div>
 
-            {/* Generate button */}
+            {/* Save area */}
             <div className="gen-area">
               <div className="gen-label">Total Amount</div>
               <div className="gen-total">{fmt(total, currency)}</div>
+              {f.dueDate && <div style={{ fontSize: 11.5, color: 'var(--text3)', marginTop: 4 }}>Due {formatDate(f.dueDate)}</div>}
 
               {/* Free limit indicator */}
-              {token && !isPro && (
-                invoiceCount >= FREE_LIMIT ? (
+              {token && !isPro && !editing && (
+                limitReached ? (
                   <div style={{
-                    margin: '14px 0 0',
-                    padding: '14px 16px',
+                    margin: '14px 0 0', padding: '14px 16px',
                     background: 'linear-gradient(135deg, rgba(232,147,60,0.1), rgba(31,111,84,0.08))',
-                    border: '1px solid rgba(232,147,60,0.35)',
-                    borderRadius: 14,
-                    textAlign: 'center',
+                    border: '1px solid rgba(232,147,60,0.35)', borderRadius: 14, textAlign: 'center',
                   }}>
-                    <div style={{ fontSize: 22, marginBottom: 6 }}>🎉</div>
                     <div style={{ fontSize: 13, fontWeight: 700, color: '#C97423', marginBottom: 4 }}>
-                      {FREE_LIMIT} free invoices used!
+                      {FREE_LIMIT} free invoices use ho chuke hain
                     </div>
                     <div style={{ fontSize: 12, color: 'var(--text2)', lineHeight: 1.5, marginBottom: 10 }}>
-                      Unlimited invoices on Pro — starting at <strong style={{ color: '#C97423' }}>₹19/month</strong> 
+                      Pro par unlimited invoices — <strong style={{ color: '#C97423' }}>₹49/month</strong> se shuru
                     </div>
                     <button
                       onClick={() => setShowUpgradeModal(true)}
@@ -1111,40 +1291,40 @@ export default function InvoiceMaker() {
                   </div>
                 ) : (
                   <div style={{
-                    margin: '12px 0 0',
-                    padding: '8px 14px',
-                    background: 'rgba(232,147,60,0.08)',
-                    border: '1px solid rgba(232,147,60,0.25)',
-                    borderRadius: 10,
-                    fontSize: 13,
-                    color: 'var(--text2)',
-                    textAlign: 'center'
+                    margin: '12px 0 0', padding: '8px 14px',
+                    background: 'rgba(232,147,60,0.08)', border: '1px solid rgba(232,147,60,0.25)',
+                    borderRadius: 10, fontSize: 13, color: 'var(--text2)', textAlign: 'center'
                   }}>
                     ⚡ {FREE_LIMIT - invoiceCount} free invoice{FREE_LIMIT - invoiceCount === 1 ? '' : 's'} remaining
                   </div>
                 )
               )}
 
-              {/* Free limit reached — hide generate buttons */}
-              {(!token || isPro || invoiceCount < FREE_LIMIT) && (
+              {!limitReached && (
                 <>
                   <div style={{ marginTop: 16, display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
-                    <button className="btn btn-accent" onClick={generateInvoice} disabled={generating || hasFormErrors}
-                      title={hasFormErrors ? 'Kuch fields ka format sahi nahi hai — upar red-marked fields check karein' : ''}
-                      style={{ fontSize: 14, padding: '10px 24px', opacity: (generating || hasFormErrors) ? 0.6 : 1, cursor: (generating || hasFormErrors) ? 'not-allowed' : 'pointer' }}>
-                      {generating ? '⏳ Generating…' : '⚡ Generate & Print'}
+                    <button className="btn btn-accent" onClick={() => saveInvoice('final')} disabled={busy}
+                      style={{ fontSize: 14, padding: '10px 22px', opacity: busy ? 0.6 : 1, cursor: busy ? 'wait' : 'pointer' }}>
+                      {saving === 'final' ? '⏳ Saving…' : '⚡ Save & Print'}
+                    </button>
+                    <button className="btn" onClick={() => saveInvoice('draft')} disabled={busy}
+                      style={{ fontSize: 13, padding: '10px 16px', opacity: busy ? 0.6 : 1, cursor: busy ? 'wait' : 'pointer' }}>
+                      {saving === 'draft' ? 'Saving…' : (editing && editing.status !== 'draft' ? 'Save changes' : 'Save as draft')}
                     </button>
                   </div>
-                  {hasFormErrors && (
-                    <div style={{ fontSize: 11, color: '#C1443C', marginTop: 8, textAlign: 'center' }}>
-                      Kuch fields ka format sahi nahi hai — upar check karein
-                    </div>
-                  )}
                   <div style={{ fontSize: 11, color: 'var(--text3)', marginTop: 10 }}>
-                  Saves to Sent → opens print / PDF dialog
+                    Save &amp; Print: invoice save hokar print / PDF dialog khulta hai
                   </div>
                 </>
               )}
+
+              {showProblems && problems.length > 0 && (
+                <div className="ig-problems" role="alert">
+                  <strong>Save karne se pehle ye theek karein:</strong>
+                  <ul>{problems.map(p => <li key={p}>{p}</li>)}</ul>
+                </div>
+              )}
+              {formError && <div className="ig-problems" role="alert">{formError}</div>}
             </div>
 
             {/* Upgrade Modal — Razorpay integrated */}
@@ -1159,18 +1339,13 @@ export default function InvoiceMaker() {
                   display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16
                 }}>
                   <div style={{
-                    background: '#FFFFFF',
-                    border: '1px solid #E1D9C4',
+                    background: '#FFFFFF', border: '1px solid #E1D9C4',
                     borderRadius: 20, padding: '36px 28px',
-                    maxWidth: 420, width: '100%',
-                    textAlign: 'center',
+                    maxWidth: 420, width: '100%', textAlign: 'center',
                     boxShadow: '0 24px 60px rgba(27,35,64,0.22)',
-                    animation: 'slideUp 0.25s ease',
-                    position: "relative",
+                    animation: 'slideUp 0.25s ease', position: 'relative',
                   }}>
-                    {/* Close button */}
-                    <button onClick={() => setShowUpgradeModal(false)} style={{ position: "absolute", top: 14, right: 14, background: "#F3EEE0", border: "1px solid #E1D9C4", borderRadius: 8, width: 30, height: 30, color: "#4B5566", fontSize: 18, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>×</button>
-                    {/* Header */}
+                    <button onClick={() => setShowUpgradeModal(false)} aria-label="Close" style={{ position: 'absolute', top: 14, right: 14, background: '#F3EEE0', border: '1px solid #E1D9C4', borderRadius: 8, width: 30, height: 30, color: '#4B5566', fontSize: 18, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>×</button>
                     <div style={{ fontSize: 44, marginBottom: 10 }}>⚡</div>
                     <h2 style={{
                       fontFamily: "'Space Grotesk', sans-serif",
@@ -1179,25 +1354,15 @@ export default function InvoiceMaker() {
                       WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'
                     }}>Go Pro — Unlimited Invoices!</h2>
                     <p style={{ color: '#4B5566', fontSize: 13, marginBottom: 22, lineHeight: 1.6 }}>
-                      You've used <strong style={{ color: '#1B2340' }}>{FREE_LIMIT} free invoices</strong> . Upgrade to Pro for unlimited invoice generation.
+                      You've used <strong style={{ color: '#1B2340' }}>{FREE_LIMIT} free invoices</strong>. Upgrade to Pro for unlimited invoice generation. Aapka bhara hua form safe hai.
                     </p>
-
-                    {/* Plan selector */}
                     <UpgradePaymentFlow
                       token={token}
                       API={API}
                       onSuccess={() => {
                         setShowUpgradeModal(false)
-                        // Re-fetch status so buttons show again
-                        fetch(`${API}/api/invoices/status`, {
-                          headers: { Authorization: `Bearer ${token}` }
-                        })
-                          .then(r => r.json())
-                          .then(d => {
-                            setInvoiceCount(d.invoiceCount || 0)
-                            setIsPro(d.isPro || false)
-                          })
-                          .catch(() => {})
+                        clearProCache()
+                        refreshStatus()
                       }}
                       onClose={() => setShowUpgradeModal(false)}
                     />
@@ -1210,7 +1375,7 @@ export default function InvoiceMaker() {
             <div className="sec-label" style={{ margin: '18px 0 10px' }}><span className="sec-dot" />Live Preview</div>
             <div className="prev-frame">
               <div className="prev-box" id="ig-print-zone">
-                <InvoicePreview inv={invData} items={items} currency={currency} discPct={discPct} taxPct={taxPct} template={template} status={status} />
+                <InvoicePreview inv={draftInv} hideBranding={isPro} />
               </div>
             </div>
           </div>
@@ -1219,116 +1384,14 @@ export default function InvoiceMaker() {
 
       {showBizModal && <BizModal businesses={businesses} onSave={handleBizSave} onClose={() => setShowBizModal(false)} />}
 
-      {/* Bug 4: Saved Invoice Preview Modal */}
-      {showPreviewModal && previewInvoice && (
-        <>
-          <div onClick={() => setShowPreviewModal(false)} style={{
-            position: 'fixed', inset: 0, zIndex: 2000,
-            background: 'rgba(27,35,64,0.5)', backdropFilter: 'blur(6px)'
-          }} />
-          <div style={{
-            position: 'fixed', inset: 0, zIndex: 2001,
-            display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
-            padding: '20px', overflowY: 'auto'
-          }}>
-            <div style={{ width: '100%', maxWidth: 780, background: '#FFFFFF', borderRadius: 16, overflow: 'hidden', boxShadow: '0 24px 60px rgba(27,35,64,0.25)' }}>
-              {/* Modal Header */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 20px', borderBottom: '1px solid #E1D9C4', background: '#FFFFFF' }}>
-                <div>
-                  <div style={{ fontWeight: 700, fontSize: 15, color: '#C97423' }}>📄 {previewInvoice.no}</div>
-                  <div style={{ fontSize: 12, color: '#8890A6', marginTop: 2 }}>{previewInvoice.clientName} · {previewInvoice.date}</div>
-                </div>
-                <div style={{ display: 'flex', gap: 8 }}>
-                  <button
-                    onClick={() => openPrintWindow(previewInvoice)}
-                    className="btn btn-green btn-sm"
-                  >🖨️ Print / Download</button>
-                  <button
-                    onClick={() => shareViaWhatsApp(previewInvoice)}
-                    className="btn btn-sm"
-                    style={{ background: 'rgba(37,211,102,0.1)', borderColor: 'rgba(37,211,102,0.3)', color: '#1F9C5A' }}
-                  >💬 WhatsApp</button>
-                  <button
-                    onClick={() => shareViaEmail(previewInvoice)}
-                    className="btn btn-sm"
-                    style={{ background: 'rgba(232,147,60,0.1)', borderColor: 'rgba(232,147,60,0.3)', color: '#C97423' }}
-                  >✉️ Email</button>
-                  <button className="btn btn-icon btn-ghost" onClick={() => setShowPreviewModal(false)} style={{ fontSize: 18 }}>×</button>
-                </div>
-              </div>
-              {/* Invoice Preview */}
-              <div style={{ padding: 20 }}>
-                <div id="saved-preview-zone" style={{ background: '#fff', borderRadius: 8, overflow: 'hidden' }}>
-                  <InvoicePreview
-                    inv={{ ...previewInvoice, no: previewInvoice.no }}
-                    items={previewInvoice.items || []}
-                    currency={previewInvoice.currency || '₹'}
-                    discPct={previewInvoice.discPct || 0}
-                    taxPct={previewInvoice.taxPct || 18}
-                    template={previewInvoice.template || 'modern'}
-                    status={previewInvoice.status || 'sent'}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </>
-      )}
-
-      {showLoginPrompt && (
-        <>
-          <div onClick={() => setShowLoginPrompt(false)} style={{
-            position: 'fixed', inset: 0, zIndex: 2000,
-            background: 'rgba(27,35,64,0.45)', backdropFilter: 'blur(6px)'
-          }} />
-          <div style={{
-            position: 'fixed', inset: 0, zIndex: 2001,
-            display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16
-          }}>
-            <div style={{
-              background: '#FFFFFF',
-              border: '1px solid #E1D9C4',
-              borderRadius: 20, padding: '36px 28px',
-              maxWidth: 380, width: '100%',
-              textAlign: 'center',
-              boxShadow: '0 24px 60px rgba(27,35,64,0.2)'
-            }}>
-              <div style={{ fontSize: 48, marginBottom: 12 }}>👤</div>
-              <h2 style={{
-                fontFamily: "'Space Grotesk', sans-serif", fontSize: 22, fontWeight: 800,
-                marginBottom: 8,
-                background: 'linear-gradient(135deg, #E8933C, #C97423)',
-                WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'
-              }}>Sign in to Continue</h2>
-              <p style={{ color: '#4B5566', fontSize: 14, marginBottom: 24, lineHeight: 1.6 }}>
-                Please sign in to generate and save your invoices.
-              </p>
-              <button
-                onClick={() => {
-                  setShowLoginPrompt(false)
-                  pendingGenerate.current = true
-                  setShowAuthModal(true)
-                }}
-                style={{
-                  width: '100%', padding: '13px',
-                  borderRadius: 12, border: 'none',
-                  background: 'linear-gradient(135deg, #E8933C, #C97423)',
-                  color: '#fff', fontSize: 15, fontWeight: 700,
-                  cursor: 'pointer', marginBottom: 10
-                }}
-              >
-                Sign in to Continue
-              </button>
-            </div>
-          </div>
-        </>
-      )}
-
       <AuthModal
         isOpen={showAuthModal}
         onClose={() => {
           setShowAuthModal(false)
-          pendingGenerate.current = false
+          // Login safal hua ho to token turant localStorage mein aa jata hai — tabhi pending save rakho
+          let loggedIn = false
+          try { loggedIn = Boolean(localStorage.getItem('zerofy-token')) } catch { /* ignore */ }
+          if (!loggedIn) pendingSave.current = null
         }}
         defaultTab="login"
       />

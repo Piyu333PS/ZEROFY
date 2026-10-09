@@ -139,7 +139,7 @@ function AppInner() {
           <Route path="/all-tools" element={<AllToolsPage />} />
           <Route path="/tools" element={<AllToolsPage />} />
           <Route path="/pricing" element={<PricingPage />} />
-          <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/settings" element={<Navigate to="/app/settings" replace />} />
           <Route path="/billing" element={<BillingPage />} />
           <Route path="/refund" element={<RefundPage />} />
           <Route path="/contact" element={<ContactPage />} />
@@ -211,6 +211,7 @@ function AppInner() {
             <Route path="customers" element={<CustomersPage />} />
             <Route path="payments" element={<PaymentsPage />} />
             <Route path="reports" element={<ReportsPage />} />
+            <Route path="settings" element={<SettingsPage embedded />} />
           </Route>
 
           {/* Document */}
