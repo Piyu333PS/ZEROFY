@@ -113,18 +113,18 @@ function explainJSON(data, stats) {
   const rootType = Array.isArray(data) ? 'list' : 'object'
   cards.push({
     icon: rootType === 'list' ? '📋' : '📦',
-    title: rootType === 'list' ? 'Ye ek List hai' : 'Ye ek Object/Record hai',
+    title: rootType === 'list' ? 'This is a list' : 'This is an object / record',
     desc: rootType === 'list'
-      ? `Is file mein ${data.length} item${data.length !== 1 ? 's' : ''} hain ek list mein. Sochiye jaise ek register jisme ${data.length} entries hain.`
-      : `Is file mein ek single record hai jisme multiple fields hain. Jaise ek form ka filled data.`,
+      ? `This file has ${data.length} item${data.length !== 1 ? 's' : ''} in a list. Think of it as a register with ${data.length} entries.`
+      : `This file has one record with several fields, like a filled-in form.`,
     color: '#EFA02F'
   })
 
   // Size insight
   cards.push({
     icon: '🔢',
-    title: 'Data ka size',
-    desc: `Is file mein kul ${stats.totalKeys} fields hain, jisme ${stats.totalStrings} text values, ${stats.totalNumbers} numbers, aur ${stats.totalArrays} lists hain. Structure ${stats.maxDepth} levels gehri hai.`,
+    title: 'Size of the data',
+    desc: `This file has ${stats.totalKeys} fields in total: ${stats.totalStrings} text values, ${stats.totalNumbers} numbers and ${stats.totalArrays} lists. The structure is ${stats.maxDepth} levels deep.`,
     color: '#00D4AA'
   })
 
@@ -134,7 +134,7 @@ function explainJSON(data, stats) {
     cards.push({
       icon: '🗂️',
       title: 'Main sections',
-      desc: `Is file ke main fields hain: ${keys.slice(0, 6).map(k => `"${k}"`).join(', ')}${keys.length > 6 ? ` aur ${keys.length - 6} aur...` : ''}`,
+      desc: `The main fields in this file are: ${keys.slice(0, 6).map(k => `"${k}"`).join(', ')}${keys.length > 6 ? ` and ${keys.length - 6} more...` : ''}`,
       color: '#FFB347'
     })
   }
@@ -144,7 +144,7 @@ function explainJSON(data, stats) {
     cards.push({
       icon: '📝',
       title: 'Lists/Arrays',
-      desc: `${stats.totalArrays} jagah lists hain — ye tab use hoti hain jab ek field mein multiple values hongi, jaise products ki list, users ki list wagera.`,
+      desc: `There are lists in ${stats.totalArrays} places. Lists are used when one field holds several values, such as a list of products or users.`,
       color: '#FF6B9D'
     })
   }
@@ -153,7 +153,7 @@ function explainJSON(data, stats) {
   if (stats.nulls > 0) {
     cards.push({
       icon: '⚠️',
-      title: 'Khaali values',
+      title: 'Empty values',
       desc: `${stats.nulls} field${stats.nulls !== 1 ? 's' : ''} fields have no value (null). This may be intentional or indicate missing data.`,
       color: '#FF8C42'
     })
@@ -167,27 +167,27 @@ function explainXML(stats) {
   cards.push({
     icon: '🌳',
     title: 'XML Tree Structure',
-    desc: `Is file ka root element "<${stats.root}>" hai. Andar ${stats.elements} total elements hain jo ek tree ki tarah nested hain — ${stats.maxDepth} levels gehre.`,
+    desc: `The root element of this file is "<${stats.root}>". Inside it are ${stats.elements} elements nested like a tree, ${stats.maxDepth} levels deep.`,
     color: '#EFA02F'
   })
   cards.push({
     icon: '🏷️',
-    title: 'Tags aur Attributes',
-    desc: `${Object.keys(stats.tagNames).length} alag-alag tarah ke tags hain aur ${stats.attributes} attributes hain. Sabse zyada use hone wala tag: "${Object.entries(stats.tagNames).sort((a,b) => b[1]-a[1])[0]?.[0]}" (${Object.entries(stats.tagNames).sort((a,b) => b[1]-a[1])[0]?.[1]} baar).`,
+    title: 'Tags and attributes',
+    desc: `${Object.keys(stats.tagNames).length} different kinds of tags and ${stats.attributes} attributes. Most used tag: "${Object.entries(stats.tagNames).sort((a,b) => b[1]-a[1])[0]?.[0]}" (${Object.entries(stats.tagNames).sort((a,b) => b[1]-a[1])[0]?.[1]} baar).`,
     color: '#00D4AA'
   })
   cards.push({
     icon: '📝',
     title: 'Content',
-    desc: `${stats.textNodes} jagah actual text content hai. Baki elements sirf structure ke liye hain (containers ki tarah).`,
+    desc: `${stats.textNodes} places contain actual text. The other elements are only for structure, like containers.`,
     color: '#FFB347'
   })
   const topTags = Object.entries(stats.tagNames).sort((a, b) => b[1] - a[1]).slice(0, 5)
   if (topTags.length > 1) {
     cards.push({
       icon: '📊',
-      title: 'Sabse common tags',
-      desc: topTags.map(([tag, count]) => `<${tag}> — ${count} baar`).join(' · '),
+      title: 'Most common tags',
+      desc: topTags.map(([tag, count]) => `<${tag}> — ${count} times`).join(' · '),
       color: '#FF6B9D'
     })
   }
@@ -205,26 +205,26 @@ function explainTXT(stats) {
     icon: stats.isCSV ? '📊' : stats.isLog ? '📋' : stats.isCode ? '💻' : '📄',
     title: fileType,
     desc: stats.isCSV
-      ? `Ye file spreadsheet ki tarah hai jisme comma se values alag ki gayi hain. ${stats.lines} rows hain.`
+      ? `This file is like a spreadsheet, with values separated by commas. It has ${stats.lines} rows.`
       : stats.isLog
-      ? `Ye ek log file hai jisme system ya application ke events record hain. ${stats.lines} log entries hain.`
+      ? `This is a log file recording system or application events. It has ${stats.lines} entries.`
       : stats.isCode
-      ? `Ye ek code file lagti hai. ${stats.lines} lines ka code hai.`
-      : `Ye ek normal text file hai ${stats.lines} lines ke saath.`,
+      ? `This looks like a code file with ${stats.lines} lines of code.`
+      : `This is a plain text file with ${stats.lines} lines.`,
     color: '#EFA02F'
   })
 
   cards.push({
     icon: '🔢',
-    title: 'File ka size',
-    desc: `${stats.lines} lines, ${stats.words} words, ${stats.chars} characters. Average ${stats.avgWordsPerLine} words per line. ${stats.emptyLines} empty lines hain.`,
+    title: 'File size',
+    desc: `${stats.lines} lines, ${stats.words} words, ${stats.chars} characters. Average ${stats.avgWordsPerLine} words per line. ${stats.emptyLines} empty lines.`,
     color: '#00D4AA'
   })
 
   if (stats.longestLine) {
     cards.push({
       icon: '📏',
-      title: 'Sabse lambi line',
+      title: 'Longest line',
       desc: `"${stats.longestLine.slice(0, 80)}${stats.longestLine.length > 80 ? '...' : ''}" (${stats.longestLine.length} characters)`,
       color: '#FFB347'
     })
@@ -470,7 +470,7 @@ export default function FileAnalyzer() {
               {activeTab === 'raw' && (
                 <div className="fa-raw">
                   <pre style={{ margin: 0, color: 'rgba(255,255,255,0.6)', fontFamily: 'JetBrains Mono, monospace', fontSize: 12, lineHeight: 1.7, whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
-                    {file.raw.slice(0, 5000)}{file.raw.length > 5000 ? '\n\n... (baaki content chhupa diya, file bahut badi hai)' : ''}
+                    {file.raw.slice(0, 5000)}{file.raw.length > 5000 ? '\n\n... (the rest is hidden because the file is very large)' : ''}
                   </pre>
                 </div>
               )}

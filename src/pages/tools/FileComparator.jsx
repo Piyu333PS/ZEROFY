@@ -355,7 +355,7 @@ export default function FileComparator() {
                     {pair.diffs.length === 0 ? (
                       <div className="fc-empty">
                         <div className="big">🎉</div>
-                        <div style={{ color: '#00d478', fontWeight: 600 }}>Dono files bilkul same hain!</div>
+                        <div style={{ color: '#00d478', fontWeight: 600 }}>Both files are identical.</div>
                         <div style={{ fontSize: 13, marginTop: 6 }}>No differences found</div>
                       </div>
                     ) : (
@@ -364,7 +364,7 @@ export default function FileComparator() {
                         {['added', 'removed', 'changed', 'type_changed'].map(dtype => {
                           const items = pair.diffs.filter(d => d.type === dtype)
                           if (!items.length) return null
-                          const labels = { added: '✚ Naye items', removed: '✖ Hataye gaye', changed: '~ Badlay hue', type_changed: '⚡ Type change' }
+                          const labels = { added: '✚ Added', removed: '✖ Removed', changed: '~ Changed', type_changed: '⚡ Type change' }
                           return (
                             <div key={dtype} className="fc-section">
                               <div className="fc-section-title">{labels[dtype]} ({items.length})</div>
@@ -379,8 +379,8 @@ export default function FileComparator() {
                                   <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)', marginBottom: 8, lineHeight: 1.5 }}>
                                     {d.type === 'added' && <>📥 <strong style={{ color: '#00d478' }}>New item in File 2</strong> not present in File 1</>}
                                     {d.type === 'removed' && <>📤 <strong style={{ color: '#ff6060' }}>Present in File 1</strong> but missing in File 2</>}
-                                    {d.type === 'changed' && <>✏️ <strong style={{ color: '#ffb432' }}>Value alag hai</strong> dono files mein</>}
-                                    {d.type === 'type_changed' && <>⚡ <strong style={{ color: '#F6B24E' }}>Data type badal gaya</strong> ({d.from} → {d.to})</>}
+                                    {d.type === 'changed' && <>✏️ <strong style={{ color: '#ffb432' }}>Value is different</strong> in the two files</>}
+                                    {d.type === 'type_changed' && <>⚡ <strong style={{ color: '#F6B24E' }}>Data type changed</strong> ({d.from} → {d.to})</>}
                                   </div>
 
                                   <div className="fc-vals">

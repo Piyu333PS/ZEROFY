@@ -16,7 +16,7 @@ export async function api(path, token, { method = 'GET', body } = {}) {
     try { data = await res.json() } catch { data = null }
     return { ok: res.ok, status: res.status, data: data || {} }
   } catch (e) {
-    return { ok: false, status: 0, data: { error: 'Network error — internet check karke dobara try karein' } }
+    return { ok: false, status: 0, data: { error: 'Network error. Check your internet connection and try again.' } }
   }
 }
 

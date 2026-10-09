@@ -59,14 +59,14 @@ export default function VideoToAudio() {
     if (!file) return
     setProcessing(true)
     try {
-      setProgress('Video load ho raha hai...')
+      setProgress('Loading the video...')
       const arrayBuffer = await file.arrayBuffer()
 
-      setProgress('Audio extract ho raha hai...')
+      setProgress('Extracting audio...')
       const audioCtx = new AudioContext()
       const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer)
 
-      setProgress('WAV file ban raha hai...')
+      setProgress('Creating the WAV file...')
       const wav = audioBufferToWav(audioBuffer)
       const blob = new Blob([wav], { type: 'audio/wav' })
       const url = URL.createObjectURL(blob)
@@ -126,7 +126,7 @@ export default function VideoToAudio() {
           {result && (
             <div style={{ marginTop: 16 }}>
               <div className={styles.success}>
-                ✅ Audio extract ho gaya! ({fmtSize(result.size)})
+                ✅ Audio extracted. ({fmtSize(result.size)})
               </div>
               <audio controls src={previewUrl} style={{ width: '100%', marginTop: 12, borderRadius: 8 }} />
               <button className={styles.actionBtn} onClick={download} style={{ marginTop: 12 }}>

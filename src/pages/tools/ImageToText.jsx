@@ -90,7 +90,7 @@ export default function ImageToText() {
           onClick={() => document.getElementById('ocr-upload').click()}>
           <div style={{ fontSize: 48, marginBottom: 12 }}>🔤</div>
           <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 8 }}>Drop an image or click to upload</div>
-          <div style={{ fontSize: 13, color: 'var(--text3)' }}>JPG, PNG, WebP, BMP — screenshot bhi kaam karta hai</div>
+          <div style={{ fontSize: 13, color: 'var(--text3)' }}>JPG, PNG, WebP, BMP — screenshots work too</div>
           <input id="ocr-upload" type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFile} />
         </div>
       ) : (

@@ -1,0 +1,43 @@
+.root { position: fixed; inset: 0; z-index: 4000; font-family: 'Inter', system-ui, sans-serif; }
+.dim { position: absolute; inset: 0; background: rgba(8, 18, 32, 0.62); }
+
+/* The highlight: a clear window with everything else dimmed by a huge shadow */
+.spot {
+  position: absolute; border-radius: 12px; pointer-events: none;
+  box-shadow: 0 0 0 9999px rgba(8, 18, 32, 0.62), 0 0 0 3px #EFA02F;
+  transition: top 0.28s ease, left 0.28s ease, width 0.28s ease, height 0.28s ease;
+}
+
+.card {
+  position: absolute; background: #fff; color: #12263F; border-radius: 14px; padding: 20px 20px 16px;
+  box-shadow: 0 24px 60px rgba(8, 18, 32, 0.4); outline: none;
+  animation: tourIn 0.22s ease both;
+}
+@keyframes tourIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+/* centred cards keep their centring transform */
+.card[style*="translate(-50%"] { animation-name: tourFade; }
+@keyframes tourFade { from { opacity: 0; } to { opacity: 1; } }
+
+.count { font-size: 12px; color: #5C7189; margin-bottom: 6px; }
+.title { font-family: 'Fraunces', Georgia, serif; font-size: 21px; font-weight: 600; margin: 0 0 8px; letter-spacing: -0.01em; }
+.body { font-size: 14px; line-height: 1.6; color: #44566B; margin: 0 0 14px; }
+
+.dots { display: flex; gap: 5px; margin-bottom: 14px; }
+.dot, .dotOn, .dotDone { height: 4px; border-radius: 2px; background: #DDE1D9; flex: 1; }
+.dotOn { background: #EFA02F; }
+.dotDone { background: #12263F; }
+
+.actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.spacer { flex: 1; }
+.skip { background: none; border: none; color: #5C7189; font-size: 13px; cursor: pointer; padding: 8px 4px; font-family: inherit; }
+.skip:hover { color: #12263F; text-decoration: underline; }
+.back, .next {
+  font-family: inherit; font-size: 13.5px; font-weight: 600; padding: 9px 14px; border-radius: 9px; cursor: pointer;
+}
+.back { background: #fff; border: 1px solid #DDE1D9; color: #12263F; }
+.back:hover { background: #ECEEE8; }
+.next { background: #EFA02F; border: 1px solid #EFA02F; color: #12263F; font-weight: 700; }
+.next:hover { background: #F6B24E; }
+.card button:focus-visible { outline: 2px solid #12263F; outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) { .spot { transition: none; } .card { animation: none; } }

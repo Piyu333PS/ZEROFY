@@ -151,7 +151,7 @@ export default function ImageCollage() {
       </div>
 
       {images.length < needed && (
-        <div className={styles.hint}>💡 This layout needs {needed} images, currently {images.length} hain</div>
+        <div className={styles.hint}>💡 This layout needs {needed} images, you have {images.length}</div>
       )}
 
       <button className={styles.actionBtn} onClick={generate} disabled={processing || images.length === 0}>

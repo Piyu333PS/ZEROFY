@@ -64,7 +64,7 @@ export default function MergePDF() {
         </button>
       )}
       {files.length === 1 && <p className={styles.hint}>ℹ️ Please select at least 2 PDF files</p>}
-      {done && <div className={styles.success}>✅ Merge ho gaya! File download ho gayi.</div>}
+      {done && <div className={styles.success}>✅ Merged. Your file has been downloaded.</div>}
     </ToolLayout>
   )
 }

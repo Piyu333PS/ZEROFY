@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { useBilling } from '../../utils/billingStore'
+import GuidedTour, { TOUR_EVENT, isTourDone } from '../tour/GuidedTour'
 import styles from './DashboardLayout.module.css'
 
 const I = (d) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">{d}</svg>
@@ -20,12 +21,12 @@ const icons = {
 }
 
 const NAV_ITEMS = [
-  { to: '/app', label: 'Overview', icon: icons.overview, end: true },
-  { to: '/app/invoices', label: 'Invoices', icon: icons.invoices },
-  { to: '/app/customers', label: 'Clients', icon: icons.clients },
-  { to: '/app/items', label: 'Items', icon: icons.items },
-  { to: '/app/payments', label: 'Payments', icon: icons.payments },
-  { to: '/app/reports', label: 'Reports', icon: icons.reports },
+  { to: '/app', label: 'Overview', icon: icons.overview, end: true, tour: 'nav-overview' },
+  { to: '/app/invoices', label: 'Invoices', icon: icons.invoices, tour: 'nav-invoices' },
+  { to: '/app/customers', label: 'Clients', icon: icons.clients, tour: 'nav-clients' },
+  { to: '/app/items', label: 'Items', icon: icons.items, tour: 'nav-items' },
+  { to: '/app/payments', label: 'Payments', icon: icons.payments, tour: 'nav-payments' },
+  { to: '/app/reports', label: 'Reports', icon: icons.reports, tour: 'nav-reports' },
 ]
 
 /* Billing app ka shell. Site ka purana dark navbar aur marketing footer yahan nahi aate —
@@ -36,6 +37,18 @@ export default function DashboardLayout() {
   const location = useLocation()
   const { data } = useBilling(token)
   const [open, setOpen] = useState(false)
+  const [tour, setTour] = useState(false)
+
+  // Guided tour: starts by itself for a brand-new account (no invoices yet, tour never seen),
+  // and whenever Settings asks for it
+  useEffect(() => {
+    const start = () => setTour(true)
+    window.addEventListener(TOUR_EVENT, start)
+    return () => window.removeEventListener(TOUR_EVENT, start)
+  }, [])
+  useEffect(() => {
+    if (data && user && data.invoices.length === 0 && !isTourDone(user.email)) setTour(true)
+  }, [Boolean(data), user?.email]) // eslint-disable-line
 
   useEffect(() => {
     if (!initializing && !user) navigate('/')
@@ -77,13 +90,13 @@ export default function DashboardLayout() {
         </div>
         <div className={styles.brandSub}>Billing &amp; GST</div>
 
-        <button className={styles.newBtn} onClick={() => navigate('/tools/invoice-maker')}>
+        <button className={styles.newBtn} data-tour="new-invoice" onClick={() => navigate('/tools/invoice-maker')}>
           {icons.plus} New invoice
         </button>
 
         <nav className={styles.nav}>
           {NAV_ITEMS.map(item => (
-            <NavLink key={item.to} to={item.to} end={item.end} className={linkClass}>
+            <NavLink key={item.to} to={item.to} end={item.end} className={linkClass} data-tour={item.tour}>
               <span className={styles.navIcon}>{item.icon}</span>
               {item.label}
             </NavLink>
@@ -104,7 +117,7 @@ export default function DashboardLayout() {
             </div>
           )}
 
-          <NavLink to="/app/settings" className={linkClass}>
+          <NavLink to="/app/settings" className={linkClass} data-tour="nav-settings">
             <span className={styles.navIcon}>{icons.settings}</span>
             Settings
           </NavLink>
@@ -123,6 +136,8 @@ export default function DashboardLayout() {
       <main className={styles.content}>
         <Outlet />
       </main>
+
+      {tour && <GuidedTour email={user.email} onClose={() => setTour(false)} />}
     </div>
   )
 }

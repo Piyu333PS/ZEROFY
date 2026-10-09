@@ -145,7 +145,7 @@ export default function RingtoneMaker() {
 
           <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, color: 'var(--text2)', marginBottom: 20, cursor: 'pointer' }}>
             <input type="checkbox" checked={fade} onChange={e => setFade(e.target.checked)} style={{ accentColor: 'var(--accent)' }} />
-            Fade in/out lagao (professional sound)
+            Add fade in/out (professional sound)
           </label>
 
           <button className={styles.actionBtn} onClick={make} disabled={processing}>

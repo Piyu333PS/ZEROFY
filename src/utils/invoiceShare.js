@@ -91,7 +91,7 @@ export async function generateInvoicePdfBlob(inv, opts = {}) {
       const bytes = await buildInvoicePdf(inv, opts)
       return new Blob([bytes], { type: 'application/pdf' })
     } catch (e) {
-      console.error('Text PDF error, image PDF par ja rahe hain:', e)
+      console.error('Text PDF failed, falling back to image PDF:', e)
     }
   }
   return generateInvoiceImagePdfBlob(inv, opts)

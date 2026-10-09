@@ -109,7 +109,7 @@ export default function PricingPage() {
         modal: { ondismiss: () => setPayLoading(null) }
       })
       rzp.on('payment.failed', (r) => {
-        setPayError(r.error?.description || 'Payment fail ho gayi.')
+        setPayError(r.error?.description || 'Payment failed. Please try again.')
         setPayLoading(null)
       })
       rzp.open()
@@ -131,7 +131,7 @@ export default function PricingPage() {
         body: JSON.stringify({ planId })
       })
       const subData = await subRes.json()
-      if (!subRes.ok) throw new Error(subData.error || 'Subscription create nahi hua')
+      if (!subRes.ok) throw new Error(subData.error || 'Could not start the subscription')
 
       await loadRazorpay()
 
@@ -165,7 +165,7 @@ export default function PricingPage() {
         modal: { ondismiss: () => setPayLoading(null) }
       })
       rzp.on('payment.failed', (r) => {
-        setPayError(r.error?.description || 'Payment fail ho gayi.')
+        setPayError(r.error?.description || 'Payment failed. Please try again.')
         setPayLoading(null)
       })
       rzp.open()
@@ -593,7 +593,7 @@ export default function PricingPage() {
                   fontSize: 13, cursor: 'pointer'
                 }}
               >
-                Baad mein karta hoon
+                Maybe later
               </button>
             </div>
           </div>

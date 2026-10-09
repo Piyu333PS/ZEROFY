@@ -43,7 +43,7 @@ export function loadBilling(token, { force = false } = {}) {
     if (res.ok && res.data.success) {
       state = { token, data: normalize(res.data), error: null, at: Date.now() }
     } else {
-      state = { ...state, error: res.data.error || 'Data load nahi ho paya. Page refresh karke dobara try karein.' }
+      state = { ...state, error: res.data.error || 'Could not load your data. Refresh the page and try again.' }
     }
     emit()
     return state.data

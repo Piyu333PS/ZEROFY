@@ -32,7 +32,7 @@ export default function ContactPage() {
               <div className={styles.infoIcon}></div>
               <div className={styles.infoTitle}>Email Support</div>
               <a href="mailto:support@zerofy.co.in" className={styles.infoValue}>support@zerofy.co.in</a>
-              <div className={styles.infoNote}>24–48 hours mein reply</div>
+              <div className={styles.infoNote}>We reply within 24–48 hours</div>
             </div>
 
             <div className={styles.infoCard}>

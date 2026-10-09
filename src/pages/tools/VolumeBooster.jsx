@@ -104,7 +104,7 @@ export default function VolumeBooster() {
           <div className={styles.controlGroup} style={{ marginBottom: 20 }}>
             <label className={styles.controlLabel}>
               Volume Boost: <strong style={{ color: 'var(--accent2)' }}>{boost}x</strong>
-              {boost >= 3 && <span style={{ color: '#ffd700', marginLeft: 8, fontSize: 12 }}>⚠️ Distortion ho sakta hai</span>}
+              {boost >= 3 && <span style={{ color: '#ffd700', marginLeft: 8, fontSize: 12 }}>⚠️ May cause distortion</span>}
             </label>
             <input type="range" min={1} max={5} step={0.1} value={boost}
               onChange={e => setBoost(+e.target.value)} style={{ width: '100%', accentColor: 'var(--accent)' }} />
@@ -126,7 +126,7 @@ export default function VolumeBooster() {
 
       {result && (
         <div style={{ marginTop: 20 }}>
-          <div className={styles.success}>✅ Volume {boost}x boost ho gaya! ({fmtSize(result.size)})</div>
+          <div className={styles.success}>✅ Volume {boost}x boost applied. ({fmtSize(result.size)})</div>
           <audio controls src={previewUrl} style={{ width: '100%', marginTop: 12 }} />
           <button className={styles.actionBtn} onClick={download} style={{ marginTop: 12 }}>
             ⬇️ Download WAV ({fmtSize(result.size)})

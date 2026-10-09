@@ -26,7 +26,7 @@ export default function InvoiceViewModal({ invoice, hideBranding = false, onClos
     setError('')
     try { await fn(invoice, opts) } catch (e) {
       console.error(e)
-      setError('Ye action poora nahi ho paya. Dobara try karein.')
+      setError('That did not work. Please try again.')
     } finally { setBusy('') }
   }
 

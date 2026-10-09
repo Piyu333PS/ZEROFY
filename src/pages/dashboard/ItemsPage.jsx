@@ -48,7 +48,7 @@ export default function ItemsPage() {
     e.preventDefault()
     if (!form.name.trim()) return
     const gst = Number(form.gstRate)
-    if (isNaN(gst) || gst < 0 || gst > 100) { setError('GST % 0 se 100 ke beech hona chahiye.'); return }
+    if (isNaN(gst) || gst < 0 || gst > 100) { setError('GST % must be between 0 and 100.'); return }
     setSaving(true)
     setError(null)
     const body = { ...form, rate: Number(form.rate) || 0, gstRate: gst }
@@ -56,8 +56,8 @@ export default function ItemsPage() {
       ? await api(`/api/items/${editingId}`, token, { method: 'PUT', body })
       : await api('/api/items', token, { method: 'POST', body })
     setSaving(false)
-    if (!res.ok || !res.data.success) { setError(res.data.error || 'Save nahi hua. Dobara try karein.'); return }
-    setNotice(editingId ? 'Item update ho gaya.' : 'Item add ho gaya.')
+    if (!res.ok || !res.data.success) { setError(res.data.error || 'Could not save. Please try again.'); return }
+    setNotice(editingId ? 'Item updated.' : 'Item added.')
     setTimeout(() => setNotice(null), 4000)
     closeForm()
     refresh()
@@ -68,7 +68,7 @@ export default function ItemsPage() {
     const res = await api(`/api/items/${toDelete._id}`, token, { method: 'DELETE' })
     setDeleting(false)
     setToDelete(null)
-    if (!res.ok) { setError(res.data.error || 'Delete nahi ho paya.'); return }
+    if (!res.ok) { setError(res.data.error || 'Could not delete. Please try again.'); return }
     refresh()
   }
 
@@ -80,7 +80,7 @@ export default function ItemsPage() {
         <div>
           <h1 className={styles.title}>Items</h1>
           <p className={styles.subtitle}>
-            {loading ? 'Loading…' : `${items.length} saved item${items.length === 1 ? '' : 's'} — invoice mein daala gaya item yahan apne aap save ho jata hai`}
+            {loading ? 'Loading…' : `${items.length} saved item${items.length === 1 ? '' : 's'} — items you add to an invoice are saved here automatically`}
           </p>
         </div>
         <div className={styles.btnGroup}>
@@ -131,9 +131,9 @@ export default function ItemsPage() {
         {loading ? (
           <p className={styles.empty}>Loading...</p>
         ) : items.length === 0 ? (
-          <p className={styles.empty}>Abhi koi saved item nahi hai. "+ Add item" se jodein, ya invoice banayein — uske items yahan apne aap aa jayenge.</p>
+          <p className={styles.empty}>No saved items yet. Use "+ Add item", or create an invoice and its items will appear here.</p>
         ) : filtered.length === 0 ? (
-          <p className={styles.empty}>Is search se koi item nahi mila.</p>
+          <p className={styles.empty}>No items match your search.</p>
         ) : (
           filtered.map(it => (
             <div key={it._id} className={`${styles.tableRow} ${styles.itemRow}`} style={cols}>
@@ -156,8 +156,8 @@ export default function ItemsPage() {
         <ConfirmDialog
           danger
           busy={deleting}
-          title={`"${toDelete.name}" ko delete karein?`}
-          message="Ye sirf saved items ki list se hatega. Purane invoices par koi asar nahi padega."
+          title={`Delete "${toDelete.name}"?`}
+          message="It will only be removed from your saved items. Existing invoices are not affected."
           confirmLabel="Delete"
           onConfirm={handleDelete}
           onCancel={() => setToDelete(null)}

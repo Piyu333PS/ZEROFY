@@ -65,7 +65,7 @@ export default function UrlEncoder() {
           <label className={styles.controlLabel}>Encoding Type</label>
           <select className={styles.controlSelect} value={encodeType} onChange={e => setEncodeType(e.target.value)}>
             <option value="component">encodeURIComponent (recommended)</option>
-            <option value="uri">encodeURI (full URL ke liye)</option>
+            <option value="uri">encodeURI (for a full URL)</option>
           </select>
         </div>
       </div>

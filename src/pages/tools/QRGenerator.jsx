@@ -93,7 +93,7 @@ export default function QRGenerator() {
             </label>
             <input value={text} onChange={e => setText(e.target.value)}
               className={styles.controlInput}
-              placeholder={type === 'url' ? 'https://...' : type === 'email' ? 'example@gmail.com' : type === 'phone' ? '+91 98765 43210' : 'Koi bhi text...'} />
+              placeholder={type === 'url' ? 'https://...' : type === 'email' ? 'example@gmail.com' : type === 'phone' ? '+91 98765 43210' : 'Any text...'} />
           </div>
           <p style={{ fontSize: 13, color: 'var(--text3)', lineHeight: 1.6 }}>
             💡 QR code is generated on your device — no data is sent to any server.

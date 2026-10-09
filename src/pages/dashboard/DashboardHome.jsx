@@ -81,14 +81,14 @@ export default function DashboardHome() {
       ) : stats && (
         <div className={styles.summary}>
           {/* Sabse zaroori number: kitna paisa aana baaki hai */}
-          <div className={styles.hero}>
+          <div className={styles.hero} data-tour="to-collect">
             <p className={styles.heroLabel}>To collect</p>
             <p className={styles.heroValue}>{fmt(stats.pending)}</p>
             <div className={styles.meter} aria-hidden="true"><span style={{ width: `${collected}%` }} /></div>
             <p className={styles.heroNote}>
               {stats.totalInvoiced > 0
                 ? `${collected}% collected — ${fmt(stats.received)} of ${fmt(stats.totalInvoiced)} billed`
-                : 'Pehla invoice banate hi yahan hisaab dikhne lagega'}
+                : 'Your numbers will appear here once you create an invoice'}
             </p>
           </div>
           <div className={styles.side}>
@@ -128,7 +128,7 @@ export default function DashboardHome() {
           <p className={styles.empty}>Loading...</p>
         ) : recentInvoices.length === 0 ? (
           <p className={styles.empty}>
-            Abhi tak koi invoice nahi bana. <a href="/tools/invoice-maker" onClick={e => { e.preventDefault(); navigate('/tools/invoice-maker') }}>Pehla invoice banao →</a>
+            No invoices yet. <a href="/tools/invoice-maker" onClick={e => { e.preventDefault(); navigate('/tools/invoice-maker') }}>Create your first invoice</a>
           </p>
         ) : (
           recentInvoices.map(inv => {

@@ -215,7 +215,7 @@ export default function ReportsPage() {
       {loading ? (
         <p className={styles.empty}>Loading report data…</p>
       ) : invoices.length === 0 ? (
-        <p className={styles.empty}>Abhi tak koi invoice nahi bana — report yaha data aane ke baad dikhega.</p>
+        <p className={styles.empty}>No invoices yet. Reports will appear here once you create one.</p>
       ) : (
         <>
           <div className={styles.statsGrid}>
@@ -251,7 +251,7 @@ export default function ReportsPage() {
               <p className={styles.panelSub}>Highest paying clients, all-time</p>
               <div className={styles.chartBox}>
                 {topClients.length === 0 ? (
-                  <p className={styles.empty}>Abhi tak koi payment record nahi hua.</p>
+                  <p className={styles.empty}>No payments recorded yet.</p>
                 ) : (
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={topClients} layout="vertical" margin={{ top: 8, right: 24, left: 12, bottom: 0 }}>
@@ -300,7 +300,7 @@ export default function ReportsPage() {
             <div className={styles.panelHeadRow}>
               <div>
                 <p className={styles.panelTitle}>GST summary</p>
-                <p className={styles.panelSub}>Month-wise taxable value aur tax (draft / cancelled invoices shamil nahi)</p>
+                <p className={styles.panelSub}>Taxable value and tax by month (draft and cancelled invoices are not included)</p>
               </div>
               <button className={styles.exportBtn} onClick={exportGstCsv}>Export CSV</button>
             </div>
@@ -328,9 +328,9 @@ export default function ReportsPage() {
 
           <div className={styles.panel}>
             <p className={styles.panelTitle}>Outstanding by client</p>
-            <p className={styles.panelSub}>Kis client par kitna paisa baaki hai</p>
+            <p className={styles.panelSub}>How much each client still owes you</p>
             {receivables.length === 0 ? (
-              <p className={styles.empty}>Koi balance baaki nahi hai. 🎉</p>
+              <p className={styles.empty}>Nothing outstanding. All paid up.</p>
             ) : (
               <div className={styles.tableScroll}>
                 <table className={styles.dataTable}>

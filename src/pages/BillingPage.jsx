@@ -46,7 +46,7 @@ export default function BillingPage() {
 
   // 🆕 Auto Pay cancel handler
   const handleCancelAutoP = async () => {
-    if (!window.confirm('Auto Pay cancel karna chahte ho? Expiry tak Pro access rahega.')) return
+    if (!window.confirm('Cancel Auto Pay? You keep Pro access until your plan expires.')) return
     setCancelLoading(true)
     setCancelMsg('')
     try {
@@ -59,7 +59,7 @@ export default function BillingPage() {
         setCancelMsg(data.message)
         setInfo(prev => ({ ...prev, subscriptionStatus: 'cancelled' }))
       } else {
-        setCancelMsg(data.error || 'Kuch error aaya, dobara try karo.')
+        setCancelMsg(data.error || 'Something went wrong. Please try again.')
       }
     } catch {
       setCancelMsg('Network error. Please try again.')
@@ -190,7 +190,7 @@ export default function BillingPage() {
               {/* 🆕 Halted state — payment update karo */}
               {isHalted && (
                 <div style={{ marginTop: 16, padding: '12px 16px', background: 'rgba(248,113,113,0.08)', borderRadius: 10, fontSize: 13, color: '#F87171' }}>
-                  Last payment fail hua. UPI/Card update karo:
+                  Your last payment failed. Update your UPI or card:
                   <Link to="/pricing" style={{ color: '#EFA02F', marginLeft: 6 }}>Reactivate →</Link>
                 </div>
               )}
@@ -232,9 +232,9 @@ export default function BillingPage() {
                   {daysLeft(info?.proExpiry) <= 7 && daysLeft(info?.proExpiry) > 0 ? (
                     <span style={{ color: '#F87171' }}>Plan {daysLeft(info?.proExpiry)} days left until expiry! <Link to="/pricing" style={{ color: '#EFA02F' }}>Renew Now →</Link></span>
                   ) : isAutoActive ? (
-                    <span>Auto renew active — koi action nahi chahiye</span>
+                    <span>Auto-renew is on. No action needed.</span>
                   ) : (
-                    <span>Plan renew karne ke liye <Link to="/pricing" style={{ color: '#EFA02F' }}>Pricing page pe jao →</Link></span>
+                    <span>To renew your plan, go to the <Link to="/pricing" style={{ color: '#EFA02F' }}>Pricing page</Link></span>
                   )}
                 </div>
               </div>

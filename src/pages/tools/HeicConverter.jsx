@@ -79,7 +79,7 @@ export default function HeicConverter() {
           <span style={{ fontSize: 40 }}>📷</span>
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>Choose HEIC files</div>
-            <div style={{ fontSize: 13, color: 'var(--text3)' }}>.heic ya .heif files — multiple select kar sakte ho</div>
+            <div style={{ fontSize: 13, color: 'var(--text3)' }}>.heic or .heif files — you can select several</div>
           </div>
           <input type="file" accept=".heic,.heif,image/heic,image/heif" multiple onChange={onFiles} style={{ display: 'none' }} />
         </label>
@@ -125,7 +125,7 @@ export default function HeicConverter() {
               ))}
             </div>
             <button className={styles.actionBtn} onClick={convert} disabled={loading}>
-              {loading ? <><span className={styles.spinner} /> Convert ho raha hai...</> : `🔄 Convert to ${format.toUpperCase()} (${files.length} file)`}
+              {loading ? <><span className={styles.spinner} /> Converting...</> : `🔄 Convert to ${format.toUpperCase()} (${files.length} file)`}
             </button>
           </>
         )}

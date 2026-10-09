@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { startTour } from '../components/tour/GuidedTour'
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 
@@ -133,8 +134,8 @@ export default function SettingsPage({ embedded = false }) {
             <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 8, marginTop: 0 }}>Plan</h2>
             <p style={{ fontSize: 14, color: 'var(--text2)', margin: '0 0 14px' }}>
               {account.isPro
-                ? <>Zerofy Pro{account.proExpiry ? ` — ${new Date(account.proExpiry).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })} tak valid` : ''}</>
-                : <>Free plan — {Math.max(0, 3 - (account.invoiceCount || 0))} free invoice baaki</>}
+                ? <>Zerofy Pro{account.proExpiry ? ` — valid until ${new Date(account.proExpiry).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}` : ''}</>
+                : <>Free plan — {Math.max(0, 3 - (account.invoiceCount || 0))} free invoices left</>}
             </p>
             <button onClick={() => navigate(account.isPro ? '/billing' : '/pricing')} style={{
               padding: '9px 20px', borderRadius: 10, border: '1px solid var(--border2)', background: 'var(--surface)',
@@ -145,11 +146,26 @@ export default function SettingsPage({ embedded = false }) {
           </div>
         )}
 
+        {embedded && (
+          <div style={cardStyle}>
+            <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 8, marginTop: 0 }}>Guided tour</h2>
+            <p style={{ fontSize: 14, color: 'var(--text2)', margin: '0 0 14px', lineHeight: 1.6 }}>
+              A one-minute walk through invoices, clients, items, payments and reports.
+            </p>
+            <button onClick={() => startTour()} style={{
+              padding: '9px 20px', borderRadius: 10, border: '1px solid var(--border2)', background: 'var(--surface)',
+              color: 'var(--text)', fontWeight: 600, fontSize: 13.5, cursor: 'pointer',
+            }}>
+              Take the tour
+            </button>
+          </div>
+        )}
+
         {passwordless && (
           <div style={cardStyle}>
             <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 8, marginTop: 0 }}>Login</h2>
             <p style={{ fontSize: 14, color: 'var(--text2)', margin: 0, lineHeight: 1.6 }}>
-              Aap Google account se login karte hain, isliye yahan email ya password badalne ki zaroorat nahi — wo aapke Google account se manage hota hai.
+              You log in with your Google account, so there is no email or password to change here. Manage them in your Google account.
             </p>
           </div>
         )}
@@ -163,13 +179,13 @@ export default function SettingsPage({ embedded = false }) {
               <label style={labelStyle}>New Email</label>
               <input
                 type="email" required style={inputStyle}
-                placeholder="naya@email.com"
+                placeholder="new@email.com"
                 value={emailForm.newEmail}
                 onChange={e => setEmailForm(f => ({ ...f, newEmail: e.target.value }))}
               />
             </div>
             <div style={{ marginBottom: 16 }}>
-              <label style={labelStyle}>Current Password (confirm karne ke liye)</label>
+              <label style={labelStyle}>Current password (to confirm)</label>
               <input
                 type="password" required style={inputStyle}
                 placeholder="••••••••"
@@ -248,7 +264,7 @@ export default function SettingsPage({ embedded = false }) {
         {/* Danger Zone */}
         <div style={{ ...cardStyle, borderColor: 'rgba(248,113,113,0.2)' }}>
           <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 8, marginTop: 0 }}>Log out</h2>
-          <p style={{ fontSize: 13, color: 'var(--text3)', marginBottom: 16 }}>Is device par Zerofy se sign out karein</p>
+          <p style={{ fontSize: 13, color: 'var(--text3)', marginBottom: 16 }}>Sign out of Zerofy on this device</p>
           <button
             onClick={() => { logout() }}
             style={{

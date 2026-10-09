@@ -76,7 +76,7 @@ export default function ImageConverter() {
         onClick={() => document.getElementById('conv-upload').click()}>
         <div style={{ fontSize: 36, marginBottom: 8 }}>🔄</div>
         <div style={{ fontWeight: 600 }}>{images.length > 0 ? `${images.length} file(s) selected` : 'Drop images or click to upload'}</div>
-        <div style={{ fontSize: 12, color: 'var(--text3)', marginTop: 4 }}>Multiple files ek saath select kar sakte ho</div>
+        <div style={{ fontSize: 12, color: 'var(--text3)', marginTop: 4 }}>You can select several files at once</div>
         <input id="conv-upload" type="file" accept="image/*" multiple style={{ display: 'none' }} onChange={handleFiles} />
       </div>
 

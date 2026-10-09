@@ -138,7 +138,7 @@ export default function Mp3Trimmer() {
               </div>
 
               <div className={styles.success} style={{ marginBottom: 16 }}>
-                ✂️ Selected: <strong>{fmt(start)}</strong> se <strong>{fmt(end)}</strong> tak
+                ✂️ Selected: <strong>{fmt(start)}</strong> to <strong>{fmt(end)}</strong>
                 ({fmt(end - start)} ka clip)
               </div>
 
@@ -148,7 +148,7 @@ export default function Mp3Trimmer() {
             </div>
           )}
 
-          {done && <div className={styles.success} style={{ marginTop: 12 }}>✅ Download ho gayi!</div>}
+          {done && <div className={styles.success} style={{ marginTop: 12 }}>✅ Downloaded.</div>}
         </div>
       )}
     </ToolLayout>

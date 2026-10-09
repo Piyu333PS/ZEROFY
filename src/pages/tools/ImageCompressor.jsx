@@ -102,7 +102,7 @@ export default function ImageCompressor() {
                       <span style={{ fontSize: 12, color: 'var(--text3)' }}>Pehle: {formatSize(r.originalSize)}</span>
                       <span style={{ fontSize: 12, color: 'var(--green)' }}>Baad: {formatSize(r.compressedSize)}</span>
                       <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--accent2)' }}>
-                        {Math.round((1 - r.compressedSize / r.originalSize) * 100)}% kam hua!
+                        {Math.round((1 - r.compressedSize / r.originalSize) * 100)}% smaller
                       </span>
                     </div>
                   )

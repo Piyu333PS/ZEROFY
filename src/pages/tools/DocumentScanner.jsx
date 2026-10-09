@@ -92,7 +92,7 @@ async function makePdf(pages) {
 
 async function extractTextFromPages(pages, lang, onProgress) {
   if (!window.Tesseract) {
-    onProgress('OCR engine load ho raha hai...')
+    onProgress('Loading the OCR engine...')
     await new Promise((res, rej) => {
       const s = document.createElement('script')
       s.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'
@@ -102,7 +102,7 @@ async function extractTextFromPages(pages, lang, onProgress) {
   }
   let fullText = ''
   for (let i = 0; i < pages.length; i++) {
-    onProgress(`Page ${i + 1}/${pages.length} read ho raha hai...`)
+    onProgress(`Reading page ${i + 1} of ${pages.length}...`)
     const worker = await window.Tesseract.createWorker(lang, 1, {
       logger: m => {
         if (m.status === 'recognizing text')
@@ -156,7 +156,7 @@ export default function DocumentScanner() {
   const addPages = useCallback(async (files) => {
     const imgs = Array.from(files).filter(f => f.type.startsWith('image/'))
     if (!imgs.length) return
-    setProc(true); setProcMsg('Scan enhance ho raha hai...')
+    setProc(true); setProcMsg('Enhancing the scan...')
     const newPages = []
     for (const file of imgs) {
       const result = await processImage(file, { mode, sharpen, quality })
@@ -312,7 +312,7 @@ export default function DocumentScanner() {
                 <div style={{ fontSize:14, color:'var(--text2)', fontWeight:500 }}>
                   📑 {pages.length} Page{pages.length > 1 ? 's' : ''} scanned
                 </div>
-                <button onClick={startFresh} style={C.ghost}>🗑️ Sabhi hatao</button>
+                <button onClick={startFresh} style={C.ghost}>🗑️ Remove all</button>
               </div>
 
               <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(140px,1fr))', gap:10, marginBottom:20 }}>
@@ -343,12 +343,12 @@ export default function DocumentScanner() {
 
           {pages.length === 0 && (
             <div style={{ marginTop:24, padding:'16px 18px', background:'rgba(239,160,47,0.07)', border:'1px solid rgba(239,160,47,0.18)', borderRadius:'var(--radius)' }}>
-              <div style={{ fontSize:13, fontWeight:600, color:'var(--accent2)', marginBottom:8 }}>⚡ Yahan kya special hai?</div>
+              <div style={{ fontSize:13, fontWeight:600, color:'var(--accent2)', marginBottom:8 }}>⚡ What is special here?</div>
               <div style={{ fontSize:13, color:'var(--text3)', lineHeight:1.9 }}>
                 📸 Scan → choose <b style={{color:'var(--text2)'}}>PDF, JPG, or Text</b> output in one click<br/>
                 📄 Multiple pages → automatically <b style={{color:'var(--text2)'}}>merged into one PDF</b><br/>
                 🔤 OCR — Extract Hindi + English text from images<br/>
-                🎨 Auto-enhance — printed docs, handwriting, colour docs ke liye alag modes
+                🎨 Auto-enhance — separate modes for printed documents, handwriting and colour documents
               </div>
             </div>
           )}
@@ -377,8 +377,8 @@ export default function DocumentScanner() {
               </div>
               <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
                 {[
-                  { val:true,  icon:'📚', label:'Sabhi pages ek saath', sub:'Single PDF / saari JPG ek baar mein' },
-                  { val:false, icon:'📄', label:'Sirf pehla page',       sub:'Single file' },
+                  { val:true,  icon:'📚', label:'All pages together', sub:'One PDF / all JPGs at once' },
+                  { val:false, icon:'📄', label:'First page only',       sub:'Single file' },
                 ].map(opt => (
                   <button key={String(opt.val)} onClick={() => setMerge(opt.val)} style={{
                     padding:'14px 10px', borderRadius:10, cursor:'pointer', textAlign:'center', fontSize:13,
@@ -408,7 +408,7 @@ export default function DocumentScanner() {
                 {mergeAll && pages.length > 1 ? `${pages.length} pages → ek PDF` : 'Best for sharing'}
               </div>
               <button onClick={() => doExport('pdf')} disabled={processing} style={C.expBtn('#EFA02F','#fff')}>
-                {processing && exportType==='pdf' ? <><span className={styles.spinner}/> Ban raha hai...</> : '⬇ PDF Download'}
+                {processing && exportType==='pdf' ? <><span className={styles.spinner}/> Creating...</> : '⬇ PDF Download'}
               </button>
             </div>
 
@@ -447,13 +447,13 @@ export default function DocumentScanner() {
           )}
           {exportDone && exportType === 'jpg' && (
             <div style={{ ...C.successLink, cursor:'default' }}>
-              ✅ {mergeAll && pages.length > 1 ? `${pages.length} JPG files download ho rahe hain!` : 'JPG download ho gaya!'}
+              ✅ {mergeAll && pages.length > 1 ? `${pages.length} JPG files are downloading.` : 'JPG downloaded.'}
             </div>
           )}
           {exportDone && exportType === 'txt' && ocrText && (
             <div style={{ marginTop:4 }}>
               <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:8 }}>
-                <span style={{ fontSize:13, color:'var(--text2)' }}>✅ {ocrText.split(/\s+/).filter(Boolean).length} words extract hue</span>
+                <span style={{ fontSize:13, color:'var(--text2)' }}>✅ {ocrText.split(/\s+/).filter(Boolean).length} words extracted</span>
                 <div style={{ display:'flex', gap:8 }}>
                   <button onClick={copyTxt} style={{ ...C.ghost, color: copied ? 'var(--green)' : 'var(--text2)' }}>{copied ? '✅ Copied' : '📋 Copy'}</button>
                   <button onClick={downloadTxt} style={{ ...C.ghost, color:'var(--accent2)' }}>⬇ .txt</button>
@@ -493,7 +493,7 @@ export default function DocumentScanner() {
             </div>
           )}
           <div style={{ color:'var(--text3)', fontSize:12, textAlign:'center' }}>
-            Document flat rakho • Achhi roshni mein • Capture dabao
+            Keep the document flat • Use good light • Press Capture
           </div>
         </div>
       )}

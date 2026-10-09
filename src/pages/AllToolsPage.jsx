@@ -129,7 +129,7 @@ export default function AllToolsPage() {
             </span>
           </div>
           <p style={{ color: 'var(--text2)', fontSize: 14, margin: 0 }}>
-            PDF, Video, Audio, Image, Document — sab kuch ek jagah. Free mein use karo, bina signup ke.
+            PDF, video, audio, image and document tools in one place. Free to use, no signup needed.
           </p>
         </div>
 

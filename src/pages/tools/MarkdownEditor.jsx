@@ -34,15 +34,15 @@ const DEFAULT = `# Hello, Zerofy! 👋
 
 ## Markdown Editor
 
-Yahan apna markdown likhao aur **live preview** dekho!
+Write your markdown here and see the **live preview**!
 
 ### Features:
-- **Bold** aur *Italic* text
+- **Bold** and *Italic* text
 - ~~Strikethrough~~
 - \`Inline code\`
 - [Links](https://example.com)
 
-> Blockquote bhi work karta hai!
+> Blockquotes work too!
 
 ---
 
@@ -54,8 +54,8 @@ function hello() {
 \`\`\`
 
 1. Numbered lists
-2. Bhi kaam karte hain
-3. Easy hai!
+2. Work as well
+3. It is easy!
 `
 
 export default function MarkdownEditor() {

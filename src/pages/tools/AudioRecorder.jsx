@@ -123,7 +123,7 @@ export default function AudioRecorder() {
           {fmt(duration)}
         </div>
         <div style={{ fontSize: 13, color: 'var(--text3)', marginTop: 4, marginBottom: 12 }}>
-          {status === 'idle' && 'Record shuru karne ke liye button dabao'}
+          {status === 'idle' && 'Press the button to start recording'}
           {status === 'recording' && '🔴 Recording...'}
           {status === 'paused' && '⏸ Paused'}
           {status === 'done' && '✅ Recording complete'}

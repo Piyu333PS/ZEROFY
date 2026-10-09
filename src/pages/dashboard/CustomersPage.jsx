@@ -57,15 +57,15 @@ export default function CustomersPage() {
   const handleSave = async (e) => {
     e.preventDefault()
     if (!form.name.trim()) return
-    if (emailBad || gstBad || phoneBad) { setError('Laal fields theek karein, phir save karein.'); return }
+    if (emailBad || gstBad || phoneBad) { setError('Fix the fields marked in red, then save.'); return }
     setSaving(true)
     setError(null)
     const res = editingId
       ? await api(`/api/customers/${editingId}`, token, { method: 'PUT', body: form })
       : await api('/api/customers', token, { method: 'POST', body: form })
     setSaving(false)
-    if (!res.ok || !res.data.success) { setError(res.data.error || 'Save nahi hua. Dobara try karein.'); return }
-    setNotice(editingId ? 'Client update ho gaya.' : 'Client add ho gaya.')
+    if (!res.ok || !res.data.success) { setError(res.data.error || 'Could not save. Please try again.'); return }
+    setNotice(editingId ? 'Client updated.' : 'Client added.')
     setTimeout(() => setNotice(null), 4000)
     closeForm()
     load(true)
@@ -76,7 +76,7 @@ export default function CustomersPage() {
     const res = await api(`/api/customers/${toDelete._id}`, token, { method: 'DELETE' })
     setDeleting(false)
     setToDelete(null)
-    if (!res.ok) { setError(res.data.error || 'Delete nahi ho paya.'); return }
+    if (!res.ok) { setError(res.data.error || 'Could not delete. Please try again.'); return }
     load(true)
   }
 
@@ -87,7 +87,7 @@ export default function CustomersPage() {
       const res = await fetch(`${API}/api/customers/template`, {
         headers: { Authorization: `Bearer ${token}` }
       })
-      if (!res.ok) throw new Error('Template download nahi ho paya')
+      if (!res.ok) throw new Error('Could not download the template')
       const blob = await res.blob()
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
@@ -120,7 +120,7 @@ export default function CustomersPage() {
         headers: { Authorization: `Bearer ${token}` },
         body: formData
       }).then(r => r.json())
-      if (!res.success) throw new Error(res.error || 'Import nahi ho paya')
+      if (!res.success) throw new Error(res.error || 'Could not import the file')
       setImportResult(res)
       load(true)
     } catch (err) {
@@ -137,7 +137,7 @@ export default function CustomersPage() {
         <div>
           <h1 className={styles.title}>Clients</h1>
           <p className={styles.subtitle}>
-            {loading ? 'Loading…' : `${customers.length} client${customers.length === 1 ? '' : 's'} — invoice banate hi client yahan apne aap save ho jata hai`}
+            {loading ? 'Loading…' : `${customers.length} client${customers.length === 1 ? '' : 's'} — clients are saved here automatically when you create an invoice`}
           </p>
         </div>
         <div className={styles.btnGroup}>
@@ -163,8 +163,8 @@ export default function CustomersPage() {
       {importResult && (
         <div className={styles.importSummary}>
           <p>
-            ✅ {importResult.createdCount} client{importResult.createdCount === 1 ? '' : 's'} import ho gaye
-            {importResult.skippedCount > 0 && `, ${importResult.skippedCount} skip ho gaye (naam missing tha)`}.
+            ✅ {importResult.createdCount} client{importResult.createdCount === 1 ? '' : 's'} imported
+            {importResult.skippedCount > 0 && `, ${importResult.skippedCount} skipped (name was missing)`}.
           </p>
           {importResult.errors?.length > 0 && (
             <p className={styles.importErrors}>
@@ -196,7 +196,7 @@ export default function CustomersPage() {
           </div>
           {(emailBad || gstBad || phoneBad) && (
             <p className={styles.hint}>
-              {[phoneBad && 'Phone 10 digits ka hona chahiye', emailBad && 'Email sahi format mein nahi hai', gstBad && 'GSTIN 15 characters ka hona chahiye (jaise 22AAAAA0000A1Z5)'].filter(Boolean).join(' · ')}
+              {[phoneBad && 'Phone must be 10 digits', emailBad && 'Email is not valid', gstBad && 'GSTIN must be 15 characters (for example 22AAAAA0000A1Z5)'].filter(Boolean).join(' · ')}
             </p>
           )}
           {error && <p className={styles.error}>{error}</p>}
@@ -220,9 +220,9 @@ export default function CustomersPage() {
         {loading ? (
           <p className={styles.empty}>Loading...</p>
         ) : customers.length === 0 ? (
-          <p className={styles.empty}>Abhi tak koi client nahi hai. "+ Add client" se jodein, ya seedha invoice banayein — client apne aap yahan aa jayega.</p>
+          <p className={styles.empty}>No clients yet. Use "+ Add client", or just create an invoice and the client will appear here.</p>
         ) : filtered.length === 0 ? (
-          <p className={styles.empty}>Is search se koi client nahi mila.</p>
+          <p className={styles.empty}>No clients match your search.</p>
         ) : (
           filtered.map(c => (
             <div key={c._id} className={styles.tableRow}>
@@ -248,8 +248,8 @@ export default function CustomersPage() {
         <ConfirmDialog
           danger
           busy={deleting}
-          title={`${toDelete.name} ko delete karein?`}
-          message="Client list se hat jayega. Unke invoices delete nahi honge."
+          title={`Delete ${toDelete.name}?`}
+          message="The client will be removed from your list. Their invoices will not be deleted."
           confirmLabel="Delete"
           onConfirm={handleDelete}
           onCancel={() => setToDelete(null)}

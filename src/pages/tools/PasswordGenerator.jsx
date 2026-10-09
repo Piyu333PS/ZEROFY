@@ -42,7 +42,7 @@ export default function PasswordGenerator() {
     if (numbers) score++
     if (symbols) score++
     if (score <= 2) return { label: 'Kamzor', color: '#ff4d4d', pct: 30 }
-    if (score <= 3) return { label: 'Theek Hai', color: '#ffd700', pct: 60 }
+    if (score <= 3) return { label: 'Fair', color: '#ffd700', pct: 60 }
     return { label: 'Mazboot', color: '#00d4aa', pct: 100 }
   }
 

@@ -40,7 +40,7 @@ export default function ProtectPdf() {
   const handleFile = useCallback((file) => {
     if (!file) return;
     if (file.type !== "application/pdf") {
-      showError("Sirf .pdf files allowed hain.");
+      showError("Only .pdf files are allowed.");
       return;
     }
     fileNameRef.current = file.name.replace(/\.pdf$/i, "");
@@ -62,9 +62,9 @@ export default function ProtectPdf() {
   };
 
   const handleProtect = async () => {
-    if (!password) { setErrorMsg("Password enter karein."); return; }
-    if (password.length < 4) { setErrorMsg("Password kam se kam 4 characters ka hona chahiye."); return; }
-    if (password !== confirmPassword) { setErrorMsg("Dono passwords match nahi kar rahe."); return; }
+    if (!password) { setErrorMsg("Enter a password."); return; }
+    if (password.length < 4) { setErrorMsg("Password must be at least 4 characters."); return; }
+    if (password !== confirmPassword) { setErrorMsg("The two passwords do not match."); return; }
 
     setErrorMsg("");
     setStage("processing");
@@ -116,7 +116,7 @@ export default function ProtectPdf() {
         URL.revokeObjectURL(url);
         setStage("done");
       } catch (err2) {
-        showError("PDF protect nahi ho saki. Browser mein PDF encryption ke liye server support chahiye. Error: " + err.message);
+        showError("Could not protect the PDF. Error: " + err.message);
       }
     }
   };
@@ -162,7 +162,7 @@ export default function ProtectPdf() {
 
       <h1 style={{ fontSize: 22, fontWeight: 600, marginBottom: 6 }}>Protect PDF</h1>
       <p style={{ fontSize: 14, color: "#6b7280", marginBottom: 24 }}>
-        PDF ko password se lock karein — sirf aap hi open kar sakein
+        Lock a PDF with a password so only you can open it
       </p>
 
       {/* Drop Zone */}
@@ -184,7 +184,7 @@ export default function ProtectPdf() {
         >
           <div style={{ fontSize: 36, marginBottom: 10 }}>🔒</div>
           <p style={{ fontWeight: 500, fontSize: 15, margin: "0 0 4px" }}>
-            PDF drag karein ya click karein
+            Drag a PDF here or click to choose
           </p>
           <p style={{ fontSize: 13, color: "#9ca3af", margin: 0 }}>
             Sirf .pdf files supported
@@ -225,7 +225,7 @@ export default function ProtectPdf() {
                 type={showPass ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Password enter karein"
+                placeholder="Enter a password"
                 style={{
                   width: "100%",
                   padding: "10px 40px 10px 12px",
@@ -256,12 +256,12 @@ export default function ProtectPdf() {
           </div>
 
           <div style={{ marginBottom: 16 }}>
-            <label style={{ fontSize: 13, fontWeight: 500, display: "block", marginBottom: 6 }}>Password Confirm Karein</label>
+            <label style={{ fontSize: 13, fontWeight: 500, display: "block", marginBottom: 6 }}>Confirm password</label>
             <input
               type={showPass ? "text" : "password"}
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Dobara password enter karein"
+              placeholder="Enter the password again"
               style={{
                 width: "100%",
                 padding: "10px 12px",
@@ -273,7 +273,7 @@ export default function ProtectPdf() {
               }}
             />
             {confirmPassword && confirmPassword !== password && (
-              <p style={{ fontSize: 12, color: "#ef4444", marginTop: 4 }}>Passwords match nahi kar rahe</p>
+              <p style={{ fontSize: 12, color: "#ef4444", marginTop: 4 }}>Passwords do not match</p>
             )}
           </div>
 
@@ -297,7 +297,7 @@ export default function ProtectPdf() {
               transition: "background 0.2s",
             }}
           >
-            🔒 PDF Ko Protect Karein
+            🔒 Protect PDF
           </button>
         </div>
       )}
@@ -305,7 +305,7 @@ export default function ProtectPdf() {
       {/* Processing */}
       {stage === "processing" && (
         <div style={{ border: "1px solid #e5e7eb", borderRadius: 12, padding: "1rem 1.25rem" }}>
-          <p style={{ fontWeight: 500, fontSize: 14, margin: "0 0 12px" }}>PDF protect ho rahi hai...</p>
+          <p style={{ fontWeight: 500, fontSize: 14, margin: "0 0 12px" }}>Protecting your PDF...</p>
           <div style={{ height: 4, background: "#e5e7eb", borderRadius: 999 }}>
             <div
               style={{
@@ -318,7 +318,7 @@ export default function ProtectPdf() {
             />
           </div>
           <p style={{ fontSize: 12, color: "#6b7280", marginTop: 6 }}>
-            {progress < 50 ? "Library load ho rahi hai..." : progress < 80 ? "Encryption apply ho rahi hai..." : "Almost done..."}
+            {progress < 50 ? "Loading..." : progress < 80 ? "Applying encryption..." : "Almost done..."}
           </p>
         </div>
       )}
@@ -327,9 +327,9 @@ export default function ProtectPdf() {
       {stage === "done" && (
         <div>
           <div style={{ background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: 12, padding: "1rem 1.25rem", marginBottom: 12 }}>
-            <p style={{ fontWeight: 500, color: "#166534", margin: "0 0 4px" }}>✓ PDF protect ho gayi!</p>
+            <p style={{ fontWeight: 500, color: "#166534", margin: "0 0 4px" }}>✓ PDF protected.</p>
             <p style={{ fontSize: 13, color: "#6b7280", margin: 0 }}>
-              File download ho gayi — ab sirf password se hi open hogi
+              Your file has been downloaded. It now opens only with the password.
             </p>
           </div>
           <button
@@ -345,7 +345,7 @@ export default function ProtectPdf() {
               color: "#374151",
             }}
           >
-            Naya PDF Protect Karein
+            Protect another PDF
           </button>
         </div>
       )}
@@ -359,7 +359,7 @@ export default function ProtectPdf() {
             onClick={reset}
             style={{ padding: "6px 14px", fontSize: 13, cursor: "pointer", borderRadius: 8, border: "1px solid #e5e7eb", background: "#fff", color: "#374151" }}
           >
-            Dobara try karein
+            Try again
           </button>
         </div>
       )}

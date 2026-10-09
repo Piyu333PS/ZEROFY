@@ -143,7 +143,7 @@ export default function WatermarkImage() {
 
           <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, color: 'var(--text2)', marginBottom: 16, cursor: 'pointer' }}>
             <input type="checkbox" checked={repeat} onChange={e => setRepeat(e.target.checked)} style={{ accentColor: 'var(--accent)' }} />
-            Repeat pattern (poori image pe)
+            Repeat pattern (across the whole image)
           </label>
 
           {preview && (

@@ -95,7 +95,7 @@ export default function IpLookup() {
             <a href={`https://www.openstreetmap.org/?mlat=${result.latitude}&mlon=${result.longitude}&zoom=10`}
               target="_blank" rel="noopener noreferrer">
               <button className={styles.actionBtn} style={{ marginTop: 16 }}>
-                🗺️ Map pe dekho
+                🗺️ View on map
               </button>
             </a>
           )}

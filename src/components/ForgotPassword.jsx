@@ -26,20 +26,20 @@ export default function ForgotPassword({ styles, initialEmail = '', onDone, onBa
     setBusy(true); setError(''); setInfo('')
     const res = await api('/api/auth/forgot-password', null, { method: 'POST', body: { email: email.trim() } })
     setBusy(false)
-    if (!res.ok) { setError(res.data.message || res.data.error || 'Code nahi bhej paye. Dobara try karein.'); return }
-    setInfo(res.data.message || 'Code bhej diya gaya hai.')
+    if (!res.ok) { setError(res.data.message || res.data.error || 'Could not send the code. Please try again.'); return }
+    setInfo(res.data.message || 'We have sent the code.')
     setStep(2)
   }
 
   const reset = async (e) => {
     e.preventDefault()
-    if (code.length !== 6) { setError('6-digit code daalein jo email par aaya hai.'); return }
-    if (password.length < 6) { setError('Naya password kam se kam 6 characters ka hona chahiye.'); return }
+    if (code.length !== 6) { setError('Enter the 6-digit code from your email.'); return }
+    if (password.length < 6) { setError('New password must be at least 6 characters.'); return }
     setBusy(true); setError('')
     const res = await api('/api/auth/reset-password', null, { method: 'POST', body: { email: email.trim(), code, newPassword: password } })
     setBusy(false)
-    if (!res.ok) { setError(res.data.error || 'Password reset nahi ho paya. Dobara try karein.'); return }
-    onDone(email.trim(), res.data.message || 'Password badal gaya! Ab naye password se login karein.')
+    if (!res.ok) { setError(res.data.error || 'Could not reset the password. Please try again.'); return }
+    onDone(email.trim(), res.data.message || 'Password changed. Log in with your new password.')
   }
 
   return (
@@ -47,8 +47,8 @@ export default function ForgotPassword({ styles, initialEmail = '', onDone, onBa
       <h1 className={styles.heading}>Reset your password</h1>
       <p className={styles.subheading}>
         {step === 1
-          ? 'Apna registered email daalein — hum us par 6-digit code bhejenge.'
-          : 'Email par aaya code aur apna naya password daalein.'}
+          ? 'Enter your registered email and we will send you a 6-digit code.'
+          : 'Enter the code from your email and choose a new password.'}
       </p>
 
       {step === 1 ? (
@@ -84,8 +84,8 @@ export default function ForgotPassword({ styles, initialEmail = '', onDone, onBa
             {busy ? 'Please wait…' : 'Change password'}
           </button>
           <p className={styles.switchLine} style={{ marginTop: 0 }}>
-            Code nahi aaya? Spam folder dekhein, ya 1 minute baad{' '}
-            <button type="button" className={styles.switchBtn} disabled={busy} onClick={() => { setCode(''); sendCode() }}>dobara bhejein</button>
+            Did not get the code? Check your spam folder, or after 1 minute{' '}
+            <button type="button" className={styles.switchBtn} disabled={busy} onClick={() => { setCode(''); sendCode() }}>send it again</button>
           </p>
         </form>
       )}

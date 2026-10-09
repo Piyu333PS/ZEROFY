@@ -22,12 +22,12 @@ const fmt = fmtMoney
 const MAX_LOGO_CHARS = 140000
 function fileToLogoDataUrl(file) {
   return new Promise((resolve, reject) => {
-    if (!file || !file.type.startsWith('image/')) return reject(new Error('Sirf image file chunein (PNG / JPG).'))
+    if (!file || !file.type.startsWith('image/')) return reject(new Error('Choose an image file (PNG or JPG).'))
     const reader = new FileReader()
-    reader.onerror = () => reject(new Error('File padhi nahi ja saki.'))
+    reader.onerror = () => reject(new Error('Could not read the file.'))
     reader.onload = () => {
       const img = new Image()
-      img.onerror = () => reject(new Error('Ye image khul nahi rahi. Koi aur file try karein.'))
+      img.onerror = () => reject(new Error('This image could not be opened. Try another file.'))
       img.onload = () => {
         let size = 240
         // Jab tak size limit mein na aa jaye, chhota karte jao
@@ -41,7 +41,7 @@ function fileToLogoDataUrl(file) {
           if (png.length <= MAX_LOGO_CHARS) return resolve(png)
           size = Math.round(size * 0.7)
         }
-        reject(new Error('Logo bahut bada hai. Chhoti image use karein.'))
+        reject(new Error('The logo is too large. Use a smaller image.'))
       }
       img.src = reader.result
     }
@@ -215,14 +215,14 @@ function BizModal({ businesses, onSave, onClose }) {
                 <label className="lbl">Email</label>
                 <input className={`inp ${touched.email && !validateEmail(form.email) ? 'inp-err' : ''}`}
                   type="email" value={form.email} onChange={set('email')} onBlur={markTouched('email')} placeholder="hello@company.com" />
-                <FieldError show={touched.email && !validateEmail(form.email)} message="Valid email daalein, jaise hello@company.com" />
+                <FieldError show={touched.email && !validateEmail(form.email)} message="Enter a valid email, for example hello@company.com" />
               </div>
               <div className="field"><label className="lbl">Phone</label><input className="inp" value={form.phone} onChange={setDigits('phone')} placeholder="10-digit number" maxLength={10} inputMode="numeric" pattern="[0-9]*" /></div>
               <div className="field">
                 <label className="lbl">GSTIN / PAN</label>
                 <input className={`inp ${touched.gst && !validateGstin(form.gst) ? 'inp-err' : ''}`}
                   value={form.gst} onChange={setGst('gst')} onBlur={markTouched('gst')} placeholder="22AAAAA0000A1Z5" maxLength={15} />
-                <FieldError show={touched.gst && !validateGstin(form.gst)} message="GSTIN 15 characters ka hona chahiye, jaise 22AAAAA0000A1Z5" />
+                <FieldError show={touched.gst && !validateGstin(form.gst)} message="GSTIN must be 15 characters, for example 22AAAAA0000A1Z5" />
               </div>
               <div className="field"><label className="lbl">Invoice Prefix</label><input className="inp" value={form.prefix} onChange={set('prefix')} placeholder="INV" /></div>
               <div className="field"><label className="lbl">Alt. Phone <span style={{ fontSize: 9, color: 'var(--text3)' }}>(optional)</span></label><input className="inp" value={form.altPhone || ''} onChange={setDigits('altPhone')} placeholder="10-digit number" maxLength={10} inputMode="numeric" pattern="[0-9]*" /></div>
@@ -230,12 +230,12 @@ function BizModal({ businesses, onSave, onClose }) {
                 <label className="lbl">Alt. Email <span style={{ fontSize: 9, color: 'var(--text3)' }}>(optional)</span></label>
                 <input className={`inp ${touched.altEmail && !validateEmail(form.altEmail) ? 'inp-err' : ''}`}
                   type="email" value={form.altEmail || ''} onChange={set('altEmail')} onBlur={markTouched('altEmail')} placeholder="alt@company.com" />
-                <FieldError show={touched.altEmail && !validateEmail(form.altEmail)} message="Valid email daalein, jaise alt@company.com" />
+                <FieldError show={touched.altEmail && !validateEmail(form.altEmail)} message="Enter a valid email, for example alt@company.com" />
               </div>
             </div>
             <div className="field"><label className="lbl">Address</label><textarea className="inp" value={form.addr} onChange={set('addr')} placeholder="Street, City, State, PIN" /></div>
 
-            <div className="sec-label" style={{ marginTop: 14 }}><span className="sec-dot" />Invoice par dikhne wali details (optional)</div>
+            <div className="sec-label" style={{ marginTop: 14 }}><span className="sec-dot" />Shown on your invoices (optional)</div>
             <div className="field">
               <label className="lbl">Logo</label>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
@@ -257,11 +257,11 @@ function BizModal({ businesses, onSave, onClose }) {
             {formMsg && <div className="field-err" style={{ fontSize: 12, marginBottom: 6 }}>{formMsg}</div>}
             <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
               <button className="btn btn-accent" onClick={() => {
-                if (!form.name.trim()) return setFormMsg('Business name zaroori hai.')
-                if (!validateEmail(form.email)) return setFormMsg('Email format sahi nahi hai.')
-                if (!validateEmail(form.altEmail)) return setFormMsg('Alt. email format sahi nahi hai.')
-                if (!validateGstin(form.gst)) return setFormMsg('GSTIN sahi format mein nahi hai (15 characters, jaise 22AAAAA0000A1Z5).')
-                if (form.phone && form.phone.length !== 10) return setFormMsg('Phone 10 digits ka hona chahiye.')
+                if (!form.name.trim()) return setFormMsg('Business name is required.')
+                if (!validateEmail(form.email)) return setFormMsg('Email is not valid.')
+                if (!validateEmail(form.altEmail)) return setFormMsg('Alt. email is not valid.')
+                if (!validateGstin(form.gst)) return setFormMsg('GSTIN is not valid (15 characters, for example 22AAAAA0000A1Z5).')
+                if (form.phone && form.phone.length !== 10) return setFormMsg('Phone must be 10 digits.')
                 onSave({ ...form, name: form.name.trim(), id: editing === 'new' ? uid() : editing })
                 setEditing(null)
               }}>Save</button>
@@ -593,7 +593,7 @@ export default function InvoiceMaker() {
     if (!token || !cloudLoadedRef.current) return
     patchBilling({ businesses: list })
     api('/api/invoices/businesses', token, { method: 'PUT', body: { businesses: list } }).then(r => {
-      if (!r.ok) setFormError('Business profile save nahi ho paya. Internet check karke dobara try karein.')
+      if (!r.ok) setFormError('Could not save the business profile. Check your internet connection and try again.')
     })
   }, [token])
 
@@ -676,7 +676,7 @@ export default function InvoiceMaker() {
       if (cancelled) return
       if (!data) {
         setCloudLoaded(true)
-        setFormError('Aapka saved data load nahi ho paya. Page refresh karke dobara try karein.')
+        setFormError('Could not load your saved data. Refresh the page and try again.')
         return
       }
       const bizRes = { ok: true }, invRes = { ok: true }
@@ -713,7 +713,7 @@ export default function InvoiceMaker() {
       // Login se pehle bhara hua form (pending save) — use mat chhedo
       if (pendingSave.current) return
       if (!bizRes.ok || !invRes.ok) {
-        setFormError('Aapka saved data load nahi ho paya. Page refresh karke dobara try karein.')
+        setFormError('Could not load your saved data. Refresh the page and try again.')
         return
       }
 
@@ -721,7 +721,7 @@ export default function InvoiceMaker() {
       if (wantedId) {
         const inv = invoices.find(i => i._id === wantedId)
         if (inv) { fillFromInvoice(inv, { asCopy: !editParam, invoices }); return }
-        setFormError('Ye invoice nahi mila — ho sakta hai delete ho chuka ho. Naya invoice bana sakte hain.')
+        setFormError('This invoice was not found. It may have been deleted. You can create a new one.')
       }
 
       // Naya invoice: pichhli baar wali business apne aap select ho jaye
@@ -833,20 +833,20 @@ export default function InvoiceMaker() {
   // Jo cheezein save hone se rokti hain — saaf-saaf list (pehle sirf "format sahi nahi" dikhta tha)
   const problems = useMemo(() => {
     const p = []
-    if (!invNo.trim()) p.push('Invoice number daalein')
-    if (!f.bizName.trim()) p.push('Apne business ka naam daalein')
-    if (!f.clientName.trim()) p.push('Client ka naam daalein')
-    if (totals.lines.length === 0) p.push('Kam se kam ek item jodein (description ya rate ke saath)')
-    else if (totals.lines.some(l => !(l.qty > 0))) p.push('Har item ki quantity 0 se zyada honi chahiye')
-    if (!validateEmail(f.bizEmail)) p.push('Business email sahi format mein nahi hai')
-    if (!validateEmail(f.bizAltEmail)) p.push('Business alt. email sahi format mein nahi hai')
-    if (!validateEmail(f.clientEmail)) p.push('Client email sahi format mein nahi hai')
-    if (!validateGstin(f.bizGst)) p.push('Business GSTIN 15 characters ka hona chahiye')
-    if (!validateGstin(f.clientGst)) p.push('Client GSTIN 15 characters ka hona chahiye')
-    if (f.bizPhone && f.bizPhone.length !== 10) p.push('Business phone 10 digits ka hona chahiye')
-    if (f.clientPhone && f.clientPhone.length !== 10) p.push('Client phone 10 digits ka hona chahiye')
-    if (f.dueDate && f.date && f.dueDate < f.date) p.push('Due date invoice date se pehle nahi ho sakti')
-    if (f.upiId.trim() && !isValidUpiId(f.upiId)) p.push('UPI ID sahi format mein nahi hai (jaise yourname@upi)')
+    if (!invNo.trim()) p.push('Enter an invoice number')
+    if (!f.bizName.trim()) p.push('Enter your business name')
+    if (!f.clientName.trim()) p.push('Enter the client name')
+    if (totals.lines.length === 0) p.push('Add at least one item (with a description or rate)')
+    else if (totals.lines.some(l => !(l.qty > 0))) p.push('Every item needs a quantity above 0')
+    if (!validateEmail(f.bizEmail)) p.push('Business email is not valid')
+    if (!validateEmail(f.bizAltEmail)) p.push('Business alt. email is not valid')
+    if (!validateEmail(f.clientEmail)) p.push('Client email is not valid')
+    if (!validateGstin(f.bizGst)) p.push('Business GSTIN must be 15 characters')
+    if (!validateGstin(f.clientGst)) p.push('Client GSTIN must be 15 characters')
+    if (f.bizPhone && f.bizPhone.length !== 10) p.push('Business phone must be 10 digits')
+    if (f.clientPhone && f.clientPhone.length !== 10) p.push('Client phone must be 10 digits')
+    if (f.dueDate && f.date && f.dueDate < f.date) p.push('Due date cannot be before the invoice date')
+    if (f.upiId.trim() && !isValidUpiId(f.upiId)) p.push('UPI ID is not valid (for example yourname@upi)')
     return p
   }, [invNo, f, totals])
 
@@ -889,7 +889,7 @@ export default function InvoiceMaker() {
       return
     }
     if (!res.ok || !res.data.success) {
-      setFormError(res.data.message || res.data.error || 'Invoice save nahi ho paya. Dobara try karein.')
+      setFormError(res.data.message || res.data.error || 'Could not save the invoice. Please try again.')
       return
     }
 
@@ -944,12 +944,12 @@ export default function InvoiceMaker() {
         <div className="ig-left">
 
           {token && !cloudLoaded && (
-            <div className="ig-banner" role="status">Aapka saved business, clients aur items load ho rahe hain…</div>
+            <div className="ig-banner" role="status">Loading your saved business, clients and items…</div>
           )}
 
           {editing && (
             <div className="ig-banner">
-              Aap saved invoice <strong>{editing.no}</strong> edit kar rahe hain — save karne par wahi invoice update hoga (free limit mein nahi gina jayega).
+              You are editing saved invoice <strong>{editing.no}</strong>. Saving updates the same invoice and does not use up a free invoice.
             </div>
           )}
 
@@ -988,7 +988,7 @@ export default function InvoiceMaker() {
             </div>
             {!invNo.trim() && !editing && (
               <div style={{ fontSize: 11.5, color: 'var(--text3)', marginTop: 8 }}>
-                Is business ka pehla invoice hai — apna starting invoice number likhein. Iske baad har invoice ka number apne aap aage badhta jayega (aap kabhi bhi badal sakte hain).
+                This is the first invoice for this business, so enter your starting invoice number. After this, each new invoice is numbered automatically (you can still change it).
               </div>
             )}
           </div>
@@ -1021,7 +1021,7 @@ export default function InvoiceMaker() {
                   type="email" value={f.bizEmail} onChange={sf('bizEmail')} onBlur={markTouched('bizEmail')}
                   placeholder="hello@company.com"
                 />
-                <FieldError show={touched.bizEmail && !validateEmail(f.bizEmail)} message="Valid email daalein, jaise hello@company.com" />
+                <FieldError show={touched.bizEmail && !validateEmail(f.bizEmail)} message="Enter a valid email, for example hello@company.com" />
               </div>
               <div className="field"><label className="lbl">Phone</label><input className="inp" value={f.bizPhone} onChange={setPhone('bizPhone')} placeholder="10-digit number" maxLength={10} inputMode="numeric" pattern="[0-9]*" /></div>
               <div className="field">
@@ -1031,7 +1031,7 @@ export default function InvoiceMaker() {
                   value={f.bizGst} onChange={setGst('bizGst')} onBlur={markTouched('bizGst')}
                   placeholder="22AAAAA0000A1Z5" maxLength={15}
                 />
-                <FieldError show={touched.bizGst && !validateGstin(f.bizGst)} message="GSTIN 15 characters ka hona chahiye, jaise 22AAAAA0000A1Z5" />
+                <FieldError show={touched.bizGst && !validateGstin(f.bizGst)} message="GSTIN must be 15 characters, for example 22AAAAA0000A1Z5" />
               </div>
               <div className="field"><label className="lbl">Alt. Phone <span style={{ fontSize: 9, color: 'var(--text3)' }}>(optional)</span></label><input className="inp" value={f.bizAltPhone} onChange={setPhone('bizAltPhone')} placeholder="10-digit number" maxLength={10} inputMode="numeric" pattern="[0-9]*" /></div>
               <div className="field">
@@ -1041,7 +1041,7 @@ export default function InvoiceMaker() {
                   type="email" value={f.bizAltEmail} onChange={sf('bizAltEmail')} onBlur={markTouched('bizAltEmail')}
                   placeholder="alt@company.com"
                 />
-                <FieldError show={touched.bizAltEmail && !validateEmail(f.bizAltEmail)} message="Valid email daalein, jaise alt@company.com" />
+                <FieldError show={touched.bizAltEmail && !validateEmail(f.bizAltEmail)} message="Enter a valid email, for example alt@company.com" />
               </div>
               <div className="field"><label className="lbl">Address</label><textarea className="inp" rows={2} value={f.bizAddr} onChange={sf('bizAddr')} placeholder="Street, City, State, PIN" /></div>
             </div>
@@ -1050,7 +1050,7 @@ export default function InvoiceMaker() {
               <div className="field">
                 <label className="lbl">Client Name *</label>
                 <input className={`inp ${showProblems && !f.clientName.trim() ? 'inp-err' : ''}`} list="zerofy-client-list"
-                  value={f.clientName} onChange={onClientName} placeholder={customers.length ? 'Naam likhein ya saved client chunein' : 'Client Company'} autoComplete="off" />
+                  value={f.clientName} onChange={onClientName} placeholder={customers.length ? 'Type a name or pick a saved client' : 'Client Company'} autoComplete="off" />
                 <datalist id="zerofy-client-list">
                   {customers.map(c => <option key={c._id} value={c.name}>{[c.phone, c.gst].filter(Boolean).join(' · ')}</option>)}
                 </datalist>
@@ -1062,7 +1062,7 @@ export default function InvoiceMaker() {
                   type="email" value={f.clientEmail} onChange={sf('clientEmail')} onBlur={markTouched('clientEmail')}
                   placeholder="client@email.com"
                 />
-                <FieldError show={touched.clientEmail && !validateEmail(f.clientEmail)} message="Valid email daalein, jaise client@email.com" />
+                <FieldError show={touched.clientEmail && !validateEmail(f.clientEmail)} message="Enter a valid email, for example client@email.com" />
               </div>
               <div className="field"><label className="lbl">Phone</label><input className="inp" value={f.clientPhone} onChange={setPhone('clientPhone')} placeholder="10-digit number" maxLength={10} inputMode="numeric" pattern="[0-9]*" /></div>
               <div className="field">
@@ -1072,17 +1072,17 @@ export default function InvoiceMaker() {
                   value={f.clientGst} onChange={setGst('clientGst')} onBlur={markTouched('clientGst')}
                   placeholder="Client GSTIN" maxLength={15}
                 />
-                <FieldError show={touched.clientGst && !validateGstin(f.clientGst)} message="GSTIN 15 characters ka hona chahiye, jaise 22AAAAA0000A1Z5" />
+                <FieldError show={touched.clientGst && !validateGstin(f.clientGst)} message="GSTIN must be 15 characters, for example 22AAAAA0000A1Z5" />
               </div>
               <div className="field">
                 <label className="lbl">Place of Supply</label>
                 <select className="inp" value={f.placeOfSupply} onChange={sf('placeOfSupply')}>
-                  <option value="">{stateCodeOf(f.clientGst) ? `Auto — ${stateName(stateCodeOf(f.clientGst))} (client GSTIN se)` : 'Auto (client GSTIN se)'}</option>
+                  <option value="">{stateCodeOf(f.clientGst) ? `Auto — ${stateName(stateCodeOf(f.clientGst))} (from client GSTIN)` : 'Auto (from client GSTIN)'}</option>
                   {GST_STATES.map(s => <option key={s.code} value={s.code}>{s.code} — {s.name}</option>)}
                 </select>
                 {sellerState && (
                   <div style={{ fontSize: 10.5, color: 'var(--text3)', marginTop: 4 }}>
-                    {totals.inter ? 'Doosre state mein supply → IGST lagega' : 'Same state (ya state pata nahi) → CGST + SGST lagega'}
+                    {totals.inter ? 'Supply to another state: IGST applies' : 'Same state (or state not known): CGST + SGST apply'}
                   </div>
                 )}
               </div>
@@ -1121,7 +1121,7 @@ export default function InvoiceMaker() {
                 <div>
                   <input className="inp" aria-label="Item description" list="zerofy-item-list" autoComplete="off"
                     value={it.desc} onChange={e => onItemDesc(it.id, e.target.value)}
-                    placeholder={catalog.length ? 'Naam likhein ya saved item chunein' : 'Item description…'} />
+                    placeholder={catalog.length ? 'Type a name or pick a saved item' : 'Item description…'} />
                   {it.hsnSac && (
                     <div style={{ marginTop: 3, fontSize: 10, color: 'var(--text3)' }}>
                       {it.type === 'goods' ? 'HSN' : 'SAC'}: <span style={{ color: 'var(--accent-deep)', fontWeight: 700 }}>{it.hsnSac}</span>
@@ -1213,7 +1213,7 @@ export default function InvoiceMaker() {
               {catalog.map(c => <option key={c._id} value={c.name}>{`${fmt(c.rate, currency)} · GST ${c.gstRate}%`}</option>)}
             </datalist>
             <div style={{ fontSize: 10.5, color: 'var(--text3)', marginTop: 8 }}>
-              Jo items aap invoice mein daalte hain wo apne aap save ho jate hain — agli baar sirf naam chunna hoga.
+              Items you add here are saved automatically. Next time, just pick the name.
             </div>
 
             {/* Totals */}
@@ -1232,7 +1232,7 @@ export default function InvoiceMaker() {
                     <div className="t-row"><span>SGST</span><span style={mono}>{fmt(totals.sgst, currency)}</span></div>
                   </>
               ) : (
-                <div className="t-row"><span>GST (discount ke baad ki value par)</span><span style={mono}>{fmt(totals.gst, currency)}</span></div>
+                <div className="t-row"><span>GST (on the value after discount)</span><span style={mono}>{fmt(totals.gst, currency)}</span></div>
               )}
               <div className="t-row">
                 <span>Shipping / other charges</span>
@@ -1243,7 +1243,7 @@ export default function InvoiceMaker() {
               <div className="t-row">
                 <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
                   <input type="checkbox" checked={roundOff} onChange={e => setRoundOff(e.target.checked)} />
-                  Total ko round off karein
+                  Round off the total
                 </label>
                 <span style={{ ...mono, color: 'var(--text3)' }}>{totals.roundAdj !== 0 ? `${totals.roundAdj > 0 ? '+' : '−'}${fmt(Math.abs(totals.roundAdj), currency)}` : ''}</span>
               </div>
@@ -1260,14 +1260,14 @@ export default function InvoiceMaker() {
                 <div className="field">
                   <label className="lbl">UPI ID</label>
                   <input className={`inp ${f.upiId.trim() && !isValidUpiId(f.upiId) ? 'inp-err' : ''}`} value={f.upiId} onChange={e => setF(p => ({ ...p, upiId: e.target.value.trim() }))} placeholder="yourname@upi" />
-                  <div style={{ fontSize: 10.5, color: 'var(--text3)', marginTop: 4 }}>UPI ID daalne par invoice par "Scan to pay" QR code apne aap aa jata hai.</div>
+                  <div style={{ fontSize: 10.5, color: 'var(--text3)', marginTop: 4 }}>Add a UPI ID and a "Scan to pay" QR code appears on the invoice.</div>
                 </div>
                 <div className="field"><label className="lbl">Signatory name</label><input className="inp" value={f.signatory} onChange={sf('signatory')} placeholder="Authorised Signatory" /></div>
               </div>
             </div>
             <div className="field"><label className="lbl">Notes</label><textarea className="inp" rows={2} value={f.notes} onChange={sf('notes')} placeholder="Thank you note, delivery details…" /></div>
             <div className="field"><label className="lbl">Terms &amp; conditions</label><textarea className="inp" rows={2} value={f.terms} onChange={sf('terms')} placeholder="Payment due within 15 days…" /></div>
-            <div style={{ fontSize: 10.5, color: 'var(--text3)' }}>Bank details, UPI, signatory aur terms aapke business profile mein save ho jate hain — agle invoice mein apne aap bhar jayenge.</div>
+            <div style={{ fontSize: 10.5, color: 'var(--text3)' }}>Bank details, UPI, signatory and terms are saved to your business profile and filled in on your next invoice.</div>
           </div>
 
         </div>
@@ -1307,10 +1307,10 @@ export default function InvoiceMaker() {
                     border: '1px solid rgba(239,160,47,0.45)', borderRadius: 12, textAlign: 'center',
                   }}>
                     <div style={{ fontSize: 13, fontWeight: 700, color: '#A85E08', marginBottom: 4 }}>
-                      {FREE_LIMIT} free invoices use ho chuke hain
+                      You have used all {FREE_LIMIT} free invoices
                     </div>
                     <div style={{ fontSize: 12, color: '#44566B', lineHeight: 1.5, marginBottom: 10 }}>
-                      Pro par unlimited invoices — <strong style={{ color: '#A85E08' }}>₹49/month</strong> se shuru
+                      Unlimited invoices on Pro, from <strong style={{ color: '#A85E08' }}>₹49/month</strong>
                     </div>
                     <button
                       onClick={() => setShowUpgradeModal(true)}
@@ -1343,14 +1343,14 @@ export default function InvoiceMaker() {
                     </button>
                   </div>
                   <div className="gen-note">
-                    Save &amp; print karne par invoice save hota hai aur print / PDF dialog khulta hai
+                    Save &amp; print saves the invoice and opens the print / PDF dialog
                   </div>
                 </>
               )}
 
               {showProblems && problems.length > 0 && (
                 <div className="ig-problems" role="alert">
-                  <strong>Save karne se pehle ye theek karein:</strong>
+                  <strong>Fix these before saving:</strong>
                   <ul>{problems.map(p => <li key={p}>{p}</li>)}</ul>
                 </div>
               )}
@@ -1381,7 +1381,7 @@ export default function InvoiceMaker() {
                       fontSize: 24, fontWeight: 600, margin: '0 0 8px', color: '#12263F',
                     }}>Unlimited invoices with Pro</h2>
                     <p style={{ color: '#44566B', fontSize: 13, marginBottom: 22, lineHeight: 1.6 }}>
-                      You've used <strong style={{ color: '#12263F' }}>{FREE_LIMIT} free invoices</strong>. Upgrade to Pro for unlimited invoice generation. Aapka bhara hua form safe hai.
+                      You've used <strong style={{ color: '#12263F' }}>{FREE_LIMIT} free invoices</strong>. Upgrade to Pro for unlimited invoice generation. Your form is safe and will still be here.
                     </p>
                     <UpgradePaymentFlow
                       token={token}

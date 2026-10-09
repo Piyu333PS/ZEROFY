@@ -77,9 +77,9 @@ export default function CurrencyConverter() {
   return (
     <ToolLayout icon="💱" name="Currency Converter" desc="Convert 20+ currencies with live exchange rates">
 
-      {loading && <div className={styles.hint}>📡 Live rates load ho rahe hain...</div>}
+      {loading && <div className={styles.hint}>📡 Loading live rates...</div>}
       {!loading && usingFallback && (
-        <div className={styles.hint}>⚠️ Live rates unavailable — approximate rates use ho rahe hain</div>
+        <div className={styles.hint}>⚠️ Live rates unavailable — using approximate rates</div>
       )}
       {!loading && !usingFallback && lastUpdated && (
         <div style={{ fontSize: 12, color: 'var(--text3)', marginBottom: 12 }}>✅ Live rates • Updated: {lastUpdated}</div>

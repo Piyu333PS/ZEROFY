@@ -81,7 +81,7 @@ export default function HashGenerator() {
 
       {isFile && input && (
         <div className={styles.hint}>
-          📁 File loaded ({input.length.toLocaleString()} characters) — hashes calculate ho rahe hain
+          📁 File loaded ({input.length.toLocaleString()} characters) — calculating hashes
           <button onClick={() => { setInput(''); setIsFile(false) }} style={{
             marginLeft: 12, background: 'none', border: 'none', color: 'var(--accent2)', cursor: 'pointer', fontSize: 13
           }}>✕ Clear</button>

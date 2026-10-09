@@ -90,12 +90,12 @@ export default function TextToSpeech() {
 
       {speaking && (
         <div className={styles.success} style={{ marginTop: 16 }}>
-          🔊 {paused ? 'Paused...' : 'Bol raha hai...'}
+          🔊 {paused ? 'Paused...' : 'Speaking...'}
         </div>
       )}
 
       <div className={styles.hint} style={{ marginTop: 16 }}>
-        💡 Ye tool browser ki built-in speech synthesis use karta hai. Alag devices pe alag voices milte hain.
+        💡 This tool uses your browser's built-in speech. Available voices differ by device.
       </div>
     </ToolLayout>
   )

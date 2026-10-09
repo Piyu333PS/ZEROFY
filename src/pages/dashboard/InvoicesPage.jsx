@@ -107,7 +107,7 @@ export default function InvoicesPage() {
     const res = await api(`/api/invoices/${inv._id}`, token, { method: 'PUT', body: { status } })
     setWorking(false)
     setConfirm(null)
-    if (!res.ok) { setError(res.data.message || res.data.error || 'Update nahi ho paya.'); return }
+    if (!res.ok) { setError(res.data.message || res.data.error || 'Could not update. Please try again.'); return }
     flash(msg)
     refresh()
   }
@@ -117,8 +117,8 @@ export default function InvoicesPage() {
     const res = await api(`/api/invoices/${inv._id}`, token, { method: 'DELETE' })
     setWorking(false)
     setConfirm(null)
-    if (!res.ok) { setError(res.data.error || 'Delete nahi ho paya.'); return }
-    flash(`Invoice ${inv.no} delete ho gaya.`)
+    if (!res.ok) { setError(res.data.error || 'Could not delete. Please try again.'); return }
+    flash(`Invoice ${inv.no} deleted.`)
     refresh()
   }
 
@@ -177,8 +177,8 @@ export default function InvoicesPage() {
         ) : pageInvoices.length === 0 ? (
           <p className={styles.empty}>
             {invoices.length === 0
-              ? <>Abhi tak koi invoice nahi bana. <a href="/tools/invoice-maker" onClick={e => { e.preventDefault(); navigate('/tools/invoice-maker') }}>Pehla invoice banao →</a></>
-              : 'Is filter/search se koi invoice nahi mila.'}
+              ? <>No invoices yet. <a href="/tools/invoice-maker" onClick={e => { e.preventDefault(); navigate('/tools/invoice-maker') }}>Create your first invoice</a></>
+              : 'No invoices match this filter or search.'}
           </p>
         ) : (
           pageInvoices.map(inv => {
@@ -225,10 +225,10 @@ export default function InvoicesPage() {
                         <button onClick={act(() => navigate(`/tools/invoice-maker?edit=${inv._id}`))}>Edit</button>
                         <button onClick={act(() => navigate(`/tools/invoice-maker?copy=${inv._id}`))}>Duplicate</button>
                         {canPay && <button onClick={act(() => navigate(`/app/payments?invoice=${inv._id}`))}>Record payment</button>}
-                        <button onClick={act(() => downloadInvoicePdf(inv, { hideBranding: isPro }).catch(() => setError('PDF nahi ban paya. Dobara try karein.')))}>Download PDF</button>
+                        <button onClick={act(() => downloadInvoicePdf(inv, { hideBranding: isPro }).catch(() => setError('Could not create the PDF. Please try again.')))}>Download PDF</button>
                         <hr />
                         {inv.status === 'cancelled'
-                          ? <button onClick={act(() => setStatus(inv, 'sent', `Invoice ${inv.no} dobara active ho gaya.`))}>Restore invoice</button>
+                          ? <button onClick={act(() => setStatus(inv, 'sent', `Invoice ${inv.no} restored.`))}>Restore invoice</button>
                           : <button onClick={act(() => setConfirm({ type: 'cancel', inv }))}>Cancel invoice</button>}
                         <button className={styles.danger} onClick={act(() => setConfirm({ type: 'delete', inv }))}>Delete</button>
                       </div>
@@ -288,8 +288,8 @@ export default function InvoicesPage() {
         <ConfirmDialog
           danger
           busy={working}
-          title={`Invoice ${confirm.inv.no} delete karein?`}
-          message="Ye invoice aur iske payment records hamesha ke liye hat jayenge. Ye wapas nahi aa sakta."
+          title={`Delete invoice ${confirm.inv.no}?`}
+          message="This invoice and its payment records will be deleted permanently. This cannot be undone."
           confirmLabel="Delete"
           onConfirm={() => doDelete(confirm.inv)}
           onCancel={() => setConfirm(null)}
@@ -298,10 +298,10 @@ export default function InvoicesPage() {
       {confirm?.type === 'cancel' && (
         <ConfirmDialog
           busy={working}
-          title={`Invoice ${confirm.inv.no} cancel karein?`}
-          message="Cancelled invoice totals aur reports mein nahi gina jata. Aap ise baad mein restore kar sakte hain."
+          title={`Cancel invoice ${confirm.inv.no}?`}
+          message="A cancelled invoice is left out of totals and reports. You can restore it later."
           confirmLabel="Cancel invoice"
-          onConfirm={() => setStatus(confirm.inv, 'cancelled', `Invoice ${confirm.inv.no} cancel ho gaya.`)}
+          onConfirm={() => setStatus(confirm.inv, 'cancelled', `Invoice ${confirm.inv.no} cancelled.`)}
           onCancel={() => setConfirm(null)}
         />
       )}

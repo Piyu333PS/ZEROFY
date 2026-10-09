@@ -69,17 +69,17 @@ export default function PaymentsPage() {
 
   const handleAdd = async (e) => {
     e.preventDefault()
-    if (!form.invoiceId) { setError('Pehle invoice chunein.'); return }
-    if (!(amountNum > 0)) { setError('Amount 0 se zyada hona chahiye.'); return }
-    if (amountTooHigh) { setError(`Amount balance (${fmtMoney(selectedBalance, selected.currency || '₹')}) se zyada nahi ho sakta.`); return }
+    if (!form.invoiceId) { setError('Select an invoice first.'); return }
+    if (!(amountNum > 0)) { setError('Amount must be more than 0.'); return }
+    if (amountTooHigh) { setError(`Amount cannot be more than the balance (${fmtMoney(selectedBalance, selected.currency || '₹')}).`); return }
     setSaving(true)
     setError(null)
     const res = await api('/api/payments', token, { method: 'POST', body: { ...form, amount: amountNum } })
     setSaving(false)
-    if (!res.ok || !res.data.success) { setError(res.data.error || 'Payment record nahi hua. Dobara try karein.'); return }
+    if (!res.ok || !res.data.success) { setError(res.data.error || 'Could not record the payment. Please try again.'); return }
     setNotice(res.data.invoiceStatus === 'paid'
-      ? `Payment record ho gaya — invoice ${selected?.no || ''} ab poora paid hai.`
-      : `Payment record ho gaya. Balance baaki: ${fmtMoney(res.data.balance, selected?.currency || '₹')}`)
+      ? `Payment recorded. Invoice ${selected?.no || ''} is now fully paid.`
+      : `Payment recorded. Balance left: ${fmtMoney(res.data.balance, selected?.currency || '₹')}`)
     setTimeout(() => setNotice(null), 5000)
     closeForm()
     load(true)
@@ -90,7 +90,7 @@ export default function PaymentsPage() {
     const res = await api(`/api/payments/${toDelete._id}`, token, { method: 'DELETE' })
     setDeleting(false)
     setToDelete(null)
-    if (!res.ok) { setError(res.data.error || 'Delete nahi ho paya.'); return }
+    if (!res.ok) { setError(res.data.error || 'Could not delete. Please try again.'); return }
     load(true)
   }
 
@@ -114,7 +114,7 @@ export default function PaymentsPage() {
       {showForm && (
         <form className={styles.form} onSubmit={handleAdd} noValidate>
           {payable.length === 0 && !loading ? (
-            <p className={styles.balanceHint}>Abhi koi unpaid invoice nahi hai jis par payment record ho sake. (Draft aur cancelled invoices yahan nahi aate.)</p>
+            <p className={styles.balanceHint}>There are no unpaid invoices to record a payment against. (Draft and cancelled invoices are not listed.)</p>
           ) : (
             <>
               <div className={styles.formGrid}>
@@ -139,7 +139,7 @@ export default function PaymentsPage() {
                 <p className={styles.balanceHint}>
                   Invoice total <strong>{fmtMoney(invoiceTotal(selected), selected.currency || '₹')}</strong> · Balance <strong>{fmtMoney(selectedBalance, selected.currency || '₹')}</strong>
                   {amountNum !== selectedBalance && (
-                    <button type="button" onClick={() => setForm(f => ({ ...f, amount: String(selectedBalance) }))}>Poora balance bharein</button>
+                    <button type="button" onClick={() => setForm(f => ({ ...f, amount: String(selectedBalance) }))}>Use full balance</button>
                   )}
                 </p>
               )}
@@ -162,7 +162,7 @@ export default function PaymentsPage() {
         {loading ? (
           <p className={styles.empty}>Loading...</p>
         ) : payments.length === 0 ? (
-          <p className={styles.empty}>Abhi tak koi payment record nahi hua.</p>
+          <p className={styles.empty}>No payments recorded yet.</p>
         ) : (
           payments.map(p => {
             const inv = invoiceMap[p.invoiceId]
@@ -187,8 +187,8 @@ export default function PaymentsPage() {
         <ConfirmDialog
           danger
           busy={deleting}
-          title="Ye payment record delete karein?"
-          message={`${fmtMoney(toDelete.amount)} ka payment hat jayega aur invoice ka balance wapas badh jayega.`}
+          title="Delete this payment?"
+          message={`The payment of ${fmtMoney(toDelete.amount)} will be removed and the invoice balance will go back up.`}
           confirmLabel="Delete"
           onConfirm={handleDelete}
           onCancel={() => setToDelete(null)}

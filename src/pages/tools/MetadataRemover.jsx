@@ -69,7 +69,7 @@ export default function MetadataRemover() {
           background: 'rgba(255,193,7,0.1)', border: '1px solid rgba(255,193,7,0.3)',
           borderRadius: 'var(--radius)', padding: '12px 16px', marginBottom: 24, fontSize: 13, color: 'var(--text2)'
         }}>
-          ⚠️ Images mein GPS location, camera model, date/time, aur personal info hoti hai — ye tool sab hata deta hai.
+          ⚠️ Images can contain GPS location, camera model, date and time, and personal details. This tool removes all of it.
         </div>
 
         <label style={{
@@ -80,7 +80,7 @@ export default function MetadataRemover() {
           <span style={{ fontSize: 40 }}>🧹</span>
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>Choose images</div>
-            <div style={{ fontSize: 13, color: 'var(--text3)' }}>JPG, PNG, WebP — multiple select kar sakte ho</div>
+            <div style={{ fontSize: 13, color: 'var(--text3)' }}>JPG, PNG, WebP — you can select several</div>
           </div>
           <input type="file" accept="image/*" multiple onChange={onFiles} style={{ display: 'none' }} />
         </label>
