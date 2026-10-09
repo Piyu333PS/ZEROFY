@@ -127,7 +127,7 @@ export default function ProtectPdf() {
     if (password.length < 7) return { label: "Weak", color: "#f97316", width: "40%" };
     if (password.length < 10) return { label: "Medium", color: "#eab308", width: "65%" };
     if (/[A-Z]/.test(password) && /[0-9]/.test(password)) return { label: "Strong", color: "#22c55e", width: "100%" };
-    return { label: "Good", color: "#3b82f6", width: "80%" };
+    return { label: "Good", color: "#E08A1E", width: "80%" };
   };
 
   const strength = passwordStrength();
@@ -173,7 +173,7 @@ export default function ProtectPdf() {
           onDragLeave={() => setIsDragging(false)}
           onDrop={onDrop}
           style={{
-            border: `2px dashed ${isDragging ? "#3b82f6" : "#d1d5db"}`,
+            border: `2px dashed ${isDragging ? "#E08A1E" : "#d1d5db"}`,
             borderRadius: 12,
             padding: "2.5rem 1.5rem",
             textAlign: "center",
@@ -292,7 +292,7 @@ export default function ProtectPdf() {
               cursor: password && password === confirmPassword ? "pointer" : "not-allowed",
               borderRadius: 8,
               border: "none",
-              background: password && password === confirmPassword ? "#1d4ed8" : "#93c5fd",
+              background: password && password === confirmPassword ? "#1d4ed8" : "#F6B24E",
               color: "#fff",
               transition: "background 0.2s",
             }}
@@ -311,7 +311,7 @@ export default function ProtectPdf() {
               style={{
                 height: "100%",
                 width: `${progress}%`,
-                background: "#3b82f6",
+                background: "#E08A1E",
                 borderRadius: 999,
                 transition: "width 0.4s",
               }}

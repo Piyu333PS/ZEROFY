@@ -16,8 +16,8 @@ export default function ForgotPassword({ styles, initialEmail = '', onDone, onBa
   const [info, setInfo] = useState('')
 
   const infoBox = {
-    background: '#E4F0EA', border: '1px solid #BFDCCD', borderRadius: 9,
-    padding: '10px 13px', fontSize: 12.5, color: '#154F3C', lineHeight: 1.5,
+    background: '#E3F1EB', border: '1px solid #BCDCCB', borderRadius: 9,
+    padding: '10px 13px', fontSize: 12.5, color: '#085239', lineHeight: 1.5,
   }
 
   const sendCode = async (e) => {

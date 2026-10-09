@@ -71,13 +71,13 @@ export default function BillingPage() {
   const isHalted = info?.subscriptionStatus === 'halted'
 
   const cardStyle = {
-    background: 'var(--bg2, #1a1a2e)',
+    background: 'var(--bg2, #12263F)',
     border: '1px solid var(--border2, rgba(255,255,255,0.08))',
     borderRadius: 16, padding: '28px 24px', marginBottom: 20
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg, #0f1117)', padding: '48px 24px 80px' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--bg, #0D1B2E)', padding: '48px 24px 80px' }}>
       <div style={{ maxWidth: 560, margin: '0 auto' }}>
 
         {/* Header */}
@@ -85,7 +85,7 @@ export default function BillingPage() {
           <button onClick={() => navigate(-1)} style={{ background: 'none', border: 'none', color: 'var(--text2)', cursor: 'pointer', fontSize: 14, marginBottom: 16, padding: 0 }}>
             ← Back
           </button>
-          <h1 style={{ fontSize: 28, fontWeight: 800, color: 'var(--text)', fontFamily: 'var(--font-display)', margin: 0 }}>💳 Billing & Plan</h1>
+          <h1 style={{ fontSize: 28, fontWeight: 800, color: 'var(--text)', fontFamily: 'var(--font-display)', margin: 0 }}>Billing & Plan</h1>
         </div>
 
         {loading ? (
@@ -96,10 +96,10 @@ export default function BillingPage() {
             <div style={{
               ...cardStyle,
               border: info?.isPro
-                ? `1px solid ${planInfo?.color || 'rgba(167,139,250,0.4)'}44`
+                ? `1px solid ${planInfo?.color || 'rgba(239,160,47,0.4)'}44`
                 : '1px solid var(--border2)',
               background: info?.isPro
-                ? 'linear-gradient(135deg, rgba(96,165,250,0.06), rgba(167,139,250,0.08))'
+                ? 'linear-gradient(135deg, rgba(239,160,47,0.06), rgba(239,160,47,0.08))'
                 : 'var(--bg2)'
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -123,7 +123,7 @@ export default function BillingPage() {
                     color: info?.isPro ? '#fbbf24' : 'var(--text3)',
                     border: `1px solid ${info?.isPro ? 'rgba(251,191,36,0.3)' : 'rgba(148,163,184,0.2)'}`,
                   }}>
-                    {info?.isPro ? '✦ Active' : 'Free'}
+                    {info?.isPro ? 'Active' : 'Free'}
                   </div>
                   {/* 🆕 Auto Pay badge */}
                   {isAutoActive && (
@@ -132,7 +132,7 @@ export default function BillingPage() {
                       background: 'rgba(52,211,153,0.12)', color: '#34D399',
                       border: '1px solid rgba(52,211,153,0.3)',
                     }}>
-                      🔄 Auto Pay On
+                      Auto Pay On
                     </div>
                   )}
                   {isHalted && (
@@ -141,7 +141,7 @@ export default function BillingPage() {
                       background: 'rgba(248,113,113,0.12)', color: '#F87171',
                       border: '1px solid rgba(248,113,113,0.3)',
                     }}>
-                      ⚠️ Payment Failed
+                      Payment Failed
                     </div>
                   )}
                 </div>
@@ -177,11 +177,11 @@ export default function BillingPage() {
                       opacity: cancelLoading ? 0.6 : 1,
                     }}
                   >
-                    {cancelLoading ? '⏳ Cancelling...' : '✕ Cancel Auto Pay'}
+                    {cancelLoading ? '⏳ Cancelling...' : 'Cancel Auto Pay'}
                   </button>
                   {cancelMsg && (
                     <div style={{ marginTop: 10, fontSize: 13, color: '#34D399', lineHeight: 1.5 }}>
-                      ✓ {cancelMsg}
+                      {cancelMsg}
                     </div>
                   )}
                 </div>
@@ -190,19 +190,19 @@ export default function BillingPage() {
               {/* 🆕 Halted state — payment update karo */}
               {isHalted && (
                 <div style={{ marginTop: 16, padding: '12px 16px', background: 'rgba(248,113,113,0.08)', borderRadius: 10, fontSize: 13, color: '#F87171' }}>
-                  ⚠️ Last payment fail hua. UPI/Card update karo:
-                  <Link to="/pricing" style={{ color: '#60A5FA', marginLeft: 6 }}>Reactivate →</Link>
+                  Last payment fail hua. UPI/Card update karo:
+                  <Link to="/pricing" style={{ color: '#EFA02F', marginLeft: 6 }}>Reactivate →</Link>
                 </div>
               )}
             </div>
 
             {/* Usage Stats */}
             <div style={cardStyle}>
-              <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 16, marginTop: 0 }}>📊 Usage</h2>
+              <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 16, marginTop: 0 }}>Usage</h2>
               <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
                 {[
-                  { label: 'Invoices Generated', value: info?.invoiceCount || 0, limit: info?.isPro ? '∞' : '3', icon: '🧾' },
-                  { label: 'Member Since', value: formatDate(info?.createdAt), icon: '📅', full: true },
+                  { label: 'Invoices Generated', value: info?.invoiceCount || 0, limit: info?.isPro ? '∞' : '3', icon: '' },
+                  { label: 'Member Since', value: formatDate(info?.createdAt), icon: '', full: true },
                 ].map((stat, i) => (
                   <div key={i} style={{
                     background: 'rgba(255,255,255,0.03)', borderRadius: 10,
@@ -221,7 +221,7 @@ export default function BillingPage() {
             {/* Pro Features */}
             {info?.isPro ? (
               <div style={{ ...cardStyle, borderColor: 'rgba(52,211,153,0.2)' }}>
-                <h2 style={{ fontSize: 16, fontWeight: 700, color: '#34D399', marginBottom: 14, marginTop: 0 }}>✅ Pro Benefits Active</h2>
+                <h2 style={{ fontSize: 16, fontWeight: 700, color: '#34D399', marginBottom: 14, marginTop: 0 }}>Pro Benefits Active</h2>
                 {PRO_FEATURES.map((f, i) => (
                   <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 10 }}>
                     <span style={{ fontSize: 14 }}>{f.icon}</span>
@@ -230,27 +230,27 @@ export default function BillingPage() {
                 ))}
                 <div style={{ marginTop: 20, padding: '12px 16px', background: 'rgba(52,211,153,0.06)', borderRadius: 10, fontSize: 13, color: 'var(--text3)' }}>
                   {daysLeft(info?.proExpiry) <= 7 && daysLeft(info?.proExpiry) > 0 ? (
-                    <span style={{ color: '#F87171' }}>⚠️ Plan {daysLeft(info?.proExpiry)} days left until expiry! <Link to="/pricing" style={{ color: '#60A5FA' }}>Renew Now →</Link></span>
+                    <span style={{ color: '#F87171' }}>Plan {daysLeft(info?.proExpiry)} days left until expiry! <Link to="/pricing" style={{ color: '#EFA02F' }}>Renew Now →</Link></span>
                   ) : isAutoActive ? (
-                    <span>🔄 Auto renew active — koi action nahi chahiye</span>
+                    <span>Auto renew active — koi action nahi chahiye</span>
                   ) : (
-                    <span>Plan renew karne ke liye <Link to="/pricing" style={{ color: '#60A5FA' }}>Pricing page pe jao →</Link></span>
+                    <span>Plan renew karne ke liye <Link to="/pricing" style={{ color: '#EFA02F' }}>Pricing page pe jao →</Link></span>
                   )}
                 </div>
               </div>
             ) : (
-              <div style={{ ...cardStyle, borderColor: 'rgba(167,139,250,0.25)', background: 'linear-gradient(135deg, rgba(96,165,250,0.04), rgba(167,139,250,0.06))' }}>
-                <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 8, marginTop: 0 }}>⚡ Upgrade to Pro</h2>
+              <div style={{ ...cardStyle, borderColor: 'rgba(239,160,47,0.25)', background: 'linear-gradient(135deg, rgba(239,160,47,0.04), rgba(239,160,47,0.06))' }}>
+                <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 8, marginTop: 0 }}>Upgrade to Pro</h2>
                 <p style={{ fontSize: 13, color: 'var(--text2)', marginBottom: 20, lineHeight: 1.6 }}>
                   Unlimited invoices, every tool unlocked, no limits — starting at just ₹49/month.
                 </p>
                 <Link to="/pricing" style={{
                   display: 'inline-block', padding: '11px 28px', borderRadius: 12,
-                  background: 'linear-gradient(135deg, #60A5FA, #A78BFA)',
-                  color: '#fff', fontWeight: 700, fontSize: 14, textDecoration: 'none',
+                  background: 'linear-gradient(135deg, #EFA02F, #F6B24E)',
+                  color: '#12263F', fontWeight: 700, fontSize: 14, textDecoration: 'none',
                   boxShadow: '0 4px 18px rgba(139,127,255,0.3)'
                 }}>
-                  ⚡ View Plans →
+                  View Plans →
                 </Link>
               </div>
             )}

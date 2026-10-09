@@ -117,7 +117,7 @@ function explainJSON(data, stats) {
     desc: rootType === 'list'
       ? `Is file mein ${data.length} item${data.length !== 1 ? 's' : ''} hain ek list mein. Sochiye jaise ek register jisme ${data.length} entries hain.`
       : `Is file mein ek single record hai jisme multiple fields hain. Jaise ek form ka filled data.`,
-    color: '#6C63FF'
+    color: '#EFA02F'
   })
 
   // Size insight
@@ -168,7 +168,7 @@ function explainXML(stats) {
     icon: '🌳',
     title: 'XML Tree Structure',
     desc: `Is file ka root element "<${stats.root}>" hai. Andar ${stats.elements} total elements hain jo ek tree ki tarah nested hain — ${stats.maxDepth} levels gehre.`,
-    color: '#6C63FF'
+    color: '#EFA02F'
   })
   cards.push({
     icon: '🏷️',
@@ -211,7 +211,7 @@ function explainTXT(stats) {
       : stats.isCode
       ? `Ye ek code file lagti hai. ${stats.lines} lines ka code hai.`
       : `Ye ek normal text file hai ${stats.lines} lines ke saath.`,
-    color: '#6C63FF'
+    color: '#EFA02F'
   })
 
   cards.push({
@@ -269,7 +269,7 @@ function JSONTree({ data, depth = 0 }) {
     <div style={{ marginLeft: depth > 0 ? indent : 0 }}>
       <span
         onClick={() => setCollapsed(!collapsed)}
-        style={{ cursor: 'pointer', color: '#6C63FF', fontFamily: 'JetBrains Mono, monospace', fontSize: 12, userSelect: 'none' }}
+        style={{ cursor: 'pointer', color: '#EFA02F', fontFamily: 'JetBrains Mono, monospace', fontSize: 12, userSelect: 'none' }}
       >
         {collapsed ? '▶' : '▼'} {isArr ? `[${entries.length} items]` : `{${entries.length} fields}`}
         {collapsed && <span style={{ color: 'rgba(255,255,255,0.3)', marginLeft: 8 }}>{preview}</span>}
@@ -336,13 +336,13 @@ export default function FileAnalyzer() {
         .fa-wrap::before {
           content:''; position:fixed; inset:0; pointer-events:none;
           background: radial-gradient(ellipse 50% 60% at 80% 10%, rgba(0,212,170,0.1) 0%, transparent 60%),
-                      radial-gradient(ellipse 60% 40% at 10% 80%, rgba(108,99,255,0.1) 0%, transparent 60%);
+                      radial-gradient(ellipse 60% 40% at 10% 80%, rgba(239,160,47,0.1) 0%, transparent 60%);
         }
         .fa-inner { position:relative; z-index:1; max-width:820px; margin:0 auto; padding:48px 24px 80px; }
         .fa-head { text-align:center; margin-bottom:44px; animation:fadeUp 0.5s ease both; }
         .fa-eyebrow { display:inline-flex; align-items:center; gap:6px; background:rgba(0,212,170,0.1); border:1px solid rgba(0,212,170,0.25); color:#00D4AA; font-size:11px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; padding:5px 14px; border-radius:100px; margin-bottom:18px; }
         .fa-title { font-size:clamp(28px,5vw,46px); font-weight:800; color:#fff; margin:0 0 10px; letter-spacing:-0.02em; }
-        .fa-title em { font-style:normal; background:linear-gradient(135deg,#00D4AA,#6C63FF); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+        .fa-title em { font-style:normal; background:linear-gradient(135deg,#00D4AA,#EFA02F); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
         .fa-sub { color:rgba(255,255,255,0.35); font-size:14px; font-weight:300; }
 
         .fa-drop { border-radius:20px; padding:48px 24px; text-align:center; transition:all 0.2s; cursor:pointer; margin-bottom:28px; }
@@ -352,7 +352,7 @@ export default function FileAnalyzer() {
 
         .fa-tabs { display:flex; gap:6px; margin-bottom:24px; }
         .fa-tab { padding:8px 20px; border-radius:100px; font-size:13px; font-weight:600; cursor:pointer; border:none; font-family:'Plus Jakarta Sans',sans-serif; transition:all 0.2s; }
-        .fa-tab.active { background:linear-gradient(135deg,#00D4AA,#6C63FF); color:#fff; }
+        .fa-tab.active { background:linear-gradient(135deg,#00D4AA,#EFA02F); color:#fff; }
         .fa-tab.idle { background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.4); }
         .fa-tab.idle:hover { background:rgba(255,255,255,0.08); color:rgba(255,255,255,0.7); }
 
@@ -408,7 +408,7 @@ export default function FileAnalyzer() {
                 <div style={{ fontSize: 44, marginBottom: 12 }}>📂</div>
                 <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: 15, fontWeight: 600, marginBottom: 6 }}>Drop file here</div>
                 <div style={{ color: 'rgba(255,255,255,0.25)', fontSize: 13, marginBottom: 16 }}>JSON · XML · TXT supported</div>
-                <label style={{ background: 'linear-gradient(135deg,#00D4AA,#6C63FF)', color: '#fff', padding: '10px 24px', borderRadius: 100, fontSize: 13, fontWeight: 700, cursor: 'pointer', display: 'inline-block' }}>
+                <label style={{ background: 'linear-gradient(135deg,#00D4AA,#EFA02F)', color: '#fff', padding: '10px 24px', borderRadius: 100, fontSize: 13, fontWeight: 700, cursor: 'pointer', display: 'inline-block' }}>
                   📁 Browse File
                   <input type="file" accept=".json,.xml,.txt" style={{ display: 'none' }} onChange={e => e.target.files[0] && handleFile(e.target.files[0])} />
                 </label>
@@ -423,20 +423,20 @@ export default function FileAnalyzer() {
               {/* Stats Row */}
               <div className="fa-stat-grid">
                 {file.type === 'json' && <>
-                  <div className="fa-stat"><div className="fa-stat-n" style={{ color: '#6C63FF' }}>{analysis.stats.totalKeys}</div><div className="fa-stat-l">Total Fields</div></div>
+                  <div className="fa-stat"><div className="fa-stat-n" style={{ color: '#EFA02F' }}>{analysis.stats.totalKeys}</div><div className="fa-stat-l">Total Fields</div></div>
                   <div className="fa-stat"><div className="fa-stat-n" style={{ color: '#00D4AA' }}>{analysis.stats.totalArrays}</div><div className="fa-stat-l">Lists</div></div>
                   <div className="fa-stat"><div className="fa-stat-n" style={{ color: '#FFB347' }}>{analysis.stats.totalObjects}</div><div className="fa-stat-l">Objects</div></div>
                   <div className="fa-stat"><div className="fa-stat-n" style={{ color: '#FF6B9D' }}>{analysis.stats.maxDepth}</div><div className="fa-stat-l">Max Depth</div></div>
                   {analysis.stats.nulls > 0 && <div className="fa-stat"><div className="fa-stat-n" style={{ color: '#FF8C42' }}>{analysis.stats.nulls}</div><div className="fa-stat-l">Null Values</div></div>}
                 </>}
                 {file.type === 'xml' && <>
-                  <div className="fa-stat"><div className="fa-stat-n" style={{ color: '#6C63FF' }}>{analysis.stats.elements}</div><div className="fa-stat-l">Elements</div></div>
+                  <div className="fa-stat"><div className="fa-stat-n" style={{ color: '#EFA02F' }}>{analysis.stats.elements}</div><div className="fa-stat-l">Elements</div></div>
                   <div className="fa-stat"><div className="fa-stat-n" style={{ color: '#00D4AA' }}>{analysis.stats.attributes}</div><div className="fa-stat-l">Attributes</div></div>
                   <div className="fa-stat"><div className="fa-stat-n" style={{ color: '#FFB347' }}>{Object.keys(analysis.stats.tagNames).length}</div><div className="fa-stat-l">Unique Tags</div></div>
                   <div className="fa-stat"><div className="fa-stat-n" style={{ color: '#FF6B9D' }}>{analysis.stats.maxDepth}</div><div className="fa-stat-l">Max Depth</div></div>
                 </>}
                 {file.type === 'txt' && <>
-                  <div className="fa-stat"><div className="fa-stat-n" style={{ color: '#6C63FF' }}>{analysis.stats.lines}</div><div className="fa-stat-l">Lines</div></div>
+                  <div className="fa-stat"><div className="fa-stat-n" style={{ color: '#EFA02F' }}>{analysis.stats.lines}</div><div className="fa-stat-l">Lines</div></div>
                   <div className="fa-stat"><div className="fa-stat-n" style={{ color: '#00D4AA' }}>{analysis.stats.words}</div><div className="fa-stat-l">Words</div></div>
                   <div className="fa-stat"><div className="fa-stat-n" style={{ color: '#FFB347' }}>{analysis.stats.chars}</div><div className="fa-stat-l">Characters</div></div>
                   <div className="fa-stat"><div className="fa-stat-n" style={{ color: '#FF6B9D' }}>{analysis.stats.emptyLines}</div><div className="fa-stat-l">Empty Lines</div></div>

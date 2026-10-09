@@ -192,7 +192,7 @@
 
 .logoText {
   font-size: 11px; font-weight: 600; letter-spacing: 4px; text-transform: uppercase;
-  background: linear-gradient(90deg,#00d2c8,#a78bfa);
+  background: linear-gradient(90deg,#00d2c8,#F6B24E);
   -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
 }
 

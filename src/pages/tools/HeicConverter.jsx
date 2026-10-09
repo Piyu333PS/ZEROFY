@@ -65,7 +65,7 @@ export default function HeicConverter() {
     <ToolLayout icon="📷" name="HEIC Converter" desc="Convert iPhone HEIC/HEIF photos to JPG or PNG">
       <div>
         <div style={{
-          background: 'rgba(108,99,255,0.1)', border: '1px solid rgba(108,99,255,0.3)',
+          background: 'rgba(239,160,47,0.1)', border: '1px solid rgba(239,160,47,0.3)',
           borderRadius: 'var(--radius)', padding: '12px 16px', marginBottom: 24, fontSize: 13, color: 'var(--text2)'
         }}>
           📱 Convert HEIC photos from iPhone to JPG/PNG — compatible with Windows and Android.

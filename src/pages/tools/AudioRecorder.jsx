@@ -31,7 +31,7 @@ export default function AudioRecorder() {
     analyserRef.current.getByteTimeDomainData(data)
 
     ctx.clearRect(0, 0, canvas.width, canvas.height)
-    ctx.strokeStyle = '#6c63ff'
+    ctx.strokeStyle = '#EFA02F'
     ctx.lineWidth = 2
     ctx.beginPath()
     const slice = canvas.width / bufLen

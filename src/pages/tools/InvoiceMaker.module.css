@@ -82,7 +82,7 @@
 .btnPrimary:hover {
   opacity: 0.9;
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(59,130,246,0.3);
+  box-shadow: 0 6px 20px rgba(239,160,47,0.3);
 }
 
 .btnGhost {
@@ -624,7 +624,7 @@
   transition: all 0.2s;
 }
 
-.addItemBtn:hover { background: rgba(59,130,246,0.2); }
+.addItemBtn:hover { background: rgba(239,160,47,0.2); }
 
 .addItemFull {
   width: 100%;

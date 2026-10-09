@@ -39,7 +39,7 @@ const TermsConditions = () => {
             { name: 'Yearly', price: '₹399', desc: 'per year · best value' },
           ].map(plan => (
             <div key={plan.name} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '16px 18px' }}>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: 14, fontWeight: 600, color: '#7b6ef6', marginBottom: 4 }}>{plan.name}</div>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: 14, fontWeight: 600, color: '#EFA02F', marginBottom: 4 }}>{plan.name}</div>
               <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--text)', marginBottom: 2 }}>{plan.price}</div>
               <div style={{ fontSize: 12, color: 'var(--text2)' }}>{plan.desc}</div>
             </div>
@@ -56,7 +56,7 @@ const TermsConditions = () => {
           <li>Be at least 18 years of age or have parental consent</li>
         </ul>
         <div style={{ background: 'rgba(123,110,246,0.06)', border: '1px solid rgba(123,110,246,0.18)', borderRadius: 10, padding: '18px 22px', margin: '16px 0', fontSize: 14, color: '#b0b0c8' }}>
-          <strong style={{ color: '#7b6ef6' }}>Account Security:</strong> You are responsible for all activity that occurs under your account. If you suspect unauthorized access, notify us immediately at <a href="mailto:support@zerofy.co.in" style={{ color: '#7b6ef6' }}>support@zerofy.co.in</a>.
+          <strong style={{ color: '#EFA02F' }}>Account Security:</strong> You are responsible for all activity that occurs under your account. If you suspect unauthorized access, notify us immediately at <a href="mailto:support@zerofy.co.in" style={{ color: '#EFA02F' }}>support@zerofy.co.in</a>.
         </div>
       </Section>
 
@@ -68,7 +68,7 @@ const TermsConditions = () => {
       <Section title="6. Refund Policy">
         <div style={{ background: 'rgba(245,166,35,0.06)', border: '1px solid rgba(245,166,35,0.2)', borderRadius: 10, padding: '18px 22px', margin: '16px 0', fontSize: 14, color: '#c8b890' }}>
           <strong style={{ color: '#f5a623' }}>Refund Window: 7 Days</strong><br />
-          You may request a full refund within <strong>7 days</strong> of your initial purchase if you are unsatisfied with our service. Refund requests after 7 days will not be entertained. Renewals are non-refundable. To request a refund, email <a href="mailto:support@zerofy.co.in" style={{ color: '#7b6ef6' }}>support@zerofy.co.in</a> with your payment details.
+          You may request a full refund within <strong>7 days</strong> of your initial purchase if you are unsatisfied with our service. Refund requests after 7 days will not be entertained. Renewals are non-refundable. To request a refund, email <a href="mailto:support@zerofy.co.in" style={{ color: '#EFA02F' }}>support@zerofy.co.in</a> with your payment details.
         </div>
       </Section>
 
@@ -112,8 +112,8 @@ const TermsConditions = () => {
         <p>
           <strong>KumKum Sharma</strong><br />
           Zerofy, Jaipur, Rajasthan, India<br />
-          Email: <a href="mailto:support@zerofy.co.in" style={{ color: '#7b6ef6' }}>support@zerofy.co.in</a><br />
-          Website: <a href="https://www.zerofy.co.in" style={{ color: '#7b6ef6' }}>www.zerofy.co.in</a>
+          Email: <a href="mailto:support@zerofy.co.in" style={{ color: '#EFA02F' }}>support@zerofy.co.in</a><br />
+          Website: <a href="https://www.zerofy.co.in" style={{ color: '#EFA02F' }}>www.zerofy.co.in</a>
         </p>
       </Section>
     </div>

@@ -4,7 +4,7 @@ const PrivacyPolicy = () => {
       <div style={{
         display: 'inline-block',
         background: 'rgba(123,110,246,0.12)',
-        color: '#7b6ef6',
+        color: '#EFA02F',
         border: '1px solid rgba(123,110,246,0.25)',
         borderRadius: 20,
         fontSize: 12,
@@ -23,7 +23,7 @@ const PrivacyPolicy = () => {
       </p>
 
       <Section title="1. Introduction">
-        <p>Welcome to Zerofy ("we", "our", or "us"), a product owned and operated by <strong>KumKum Sharma</strong>, based in Jaipur, Rajasthan, India. This Privacy Policy explains how we collect, use, disclose, and protect your information when you use our platform at <a href="https://www.zerofy.co.in" style={{ color: '#7b6ef6' }}>www.zerofy.co.in</a>.</p>
+        <p>Welcome to Zerofy ("we", "our", or "us"), a product owned and operated by <strong>KumKum Sharma</strong>, based in Jaipur, Rajasthan, India. This Privacy Policy explains how we collect, use, disclose, and protect your information when you use our platform at <a href="https://www.zerofy.co.in" style={{ color: '#EFA02F' }}>www.zerofy.co.in</a>.</p>
         <p>By using Zerofy, you agree to the collection and use of information in accordance with this policy.</p>
       </Section>
 
@@ -58,7 +58,7 @@ const PrivacyPolicy = () => {
 
       <Section title="5. File Processing & Storage">
         <div style={{ background: 'rgba(123,110,246,0.06)', border: '1px solid rgba(123,110,246,0.18)', borderRadius: 10, padding: '18px 22px', margin: '16px 0', fontSize: 14, color: '#b0b0c8' }}>
-          <strong style={{ color: '#7b6ef6' }}>Important:</strong> Files you upload are used solely to provide the requested tool output. We do not read, share, or permanently store your files. Uploaded files are deleted automatically after processing.
+          <strong style={{ color: '#EFA02F' }}>Important:</strong> Files you upload are used solely to provide the requested tool output. We do not read, share, or permanently store your files. Uploaded files are deleted automatically after processing.
         </div>
       </Section>
 
@@ -78,7 +78,7 @@ const PrivacyPolicy = () => {
           <li>Cancel your subscription at any time</li>
           <li>Request a data export</li>
         </ul>
-        <p>To exercise these rights, email us at <a href="mailto:support@zerofy.co.in" style={{ color: '#7b6ef6' }}>support@zerofy.co.in</a>.</p>
+        <p>To exercise these rights, email us at <a href="mailto:support@zerofy.co.in" style={{ color: '#EFA02F' }}>support@zerofy.co.in</a>.</p>
       </Section>
 
       <Section title="9. Children's Privacy">
@@ -93,8 +93,8 @@ const PrivacyPolicy = () => {
         <p>
           <strong>KumKum Sharma</strong><br />
           Zerofy, Jaipur, Rajasthan, India<br />
-          Email: <a href="mailto:support@zerofy.co.in" style={{ color: '#7b6ef6' }}>support@zerofy.co.in</a><br />
-          Website: <a href="https://www.zerofy.co.in" style={{ color: '#7b6ef6' }}>www.zerofy.co.in</a>
+          Email: <a href="mailto:support@zerofy.co.in" style={{ color: '#EFA02F' }}>support@zerofy.co.in</a><br />
+          Website: <a href="https://www.zerofy.co.in" style={{ color: '#EFA02F' }}>www.zerofy.co.in</a>
         </p>
       </Section>
     </div>
@@ -110,7 +110,7 @@ const Section = ({ title, children }) => (
       color: 'var(--text)',
       margin: '40px 0 10px',
       paddingLeft: 14,
-      borderLeft: '3px solid #7b6ef6'
+      borderLeft: '3px solid #EFA02F'
     }}>{title}</h2>
     <div style={{ color: '#c0c0d0', lineHeight: 1.8 }}>{children}</div>
   </div>

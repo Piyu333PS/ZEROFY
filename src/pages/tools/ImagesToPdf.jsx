@@ -15,8 +15,8 @@ const CSS = `
   --text: #F0EEFF;
   --text2: #A09CC8;
   --text3: #5C5880;
-  --accent: #7C6FFF;
-  --accent2: #A78BFA;
+  --accent: #EFA02F;
+  --accent2: #F6B24E;
   --green: #34D399;
   --red: #F87171;
   --yellow: #FBBF24;
@@ -37,20 +37,20 @@ const CSS = `
   text-align: center;
   cursor: pointer;
   transition: all 0.25s ease;
-  background: radial-gradient(ellipse at center, rgba(124,111,255,0.06) 0%, transparent 70%);
+  background: radial-gradient(ellipse at center, rgba(239,160,47,0.06) 0%, transparent 70%);
   overflow: hidden;
 }
 .ip-dropzone::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse at center, rgba(124,111,255,0.12) 0%, transparent 70%);
+  background: radial-gradient(ellipse at center, rgba(239,160,47,0.12) 0%, transparent 70%);
   opacity: 0;
   transition: opacity 0.25s;
 }
 .ip-dropzone.dragging {
   border-color: var(--accent);
-  background: radial-gradient(ellipse at center, rgba(124,111,255,0.15) 0%, transparent 70%);
+  background: radial-gradient(ellipse at center, rgba(239,160,47,0.15) 0%, transparent 70%);
   transform: scale(1.01);
 }
 .ip-dropzone.dragging::before { opacity: 1; }
@@ -59,14 +59,14 @@ const CSS = `
 }
 .ip-drop-icon {
   width: 72px; height: 72px;
-  background: linear-gradient(135deg, rgba(124,111,255,0.2), rgba(167,139,250,0.2));
+  background: linear-gradient(135deg, rgba(239,160,47,0.2), rgba(239,160,47,0.2));
   border: 1px solid rgba(139,127,255,0.3);
   border-radius: 20px;
   display: flex; align-items: center; justify-content: center;
   font-size: 32px;
   margin: 0 auto 18px;
   position: relative; z-index: 1;
-  box-shadow: 0 0 40px rgba(124,111,255,0.2);
+  box-shadow: 0 0 40px rgba(239,160,47,0.2);
 }
 .ip-drop-title {
   font-family: 'Syne', sans-serif;
@@ -83,16 +83,16 @@ const CSS = `
 .ip-browse-btn {
   display: inline-flex; align-items: center; gap: 8px;
   padding: 10px 22px;
-  background: linear-gradient(135deg, #7C6FFF, #A78BFA);
+  background: linear-gradient(135deg, #EFA02F, #F6B24E);
   border: none; border-radius: 12px;
   color: #fff; font-size: 13px; font-weight: 600;
   font-family: 'DM Sans', sans-serif;
   cursor: pointer;
-  box-shadow: 0 4px 20px rgba(124,111,255,0.4);
+  box-shadow: 0 4px 20px rgba(239,160,47,0.4);
   position: relative; z-index: 1;
   transition: all 0.2s;
 }
-.ip-browse-btn:hover { opacity: 0.88; transform: translateY(-1px); box-shadow: 0 6px 28px rgba(124,111,255,0.5); }
+.ip-browse-btn:hover { opacity: 0.88; transform: translateY(-1px); box-shadow: 0 6px 28px rgba(239,160,47,0.5); }
 .ip-file-types {
   display: flex; align-items: center; justify-content: center; gap: 6px;
   margin-top: 16px;
@@ -229,20 +229,20 @@ const CSS = `
 .ip-gen-btn {
   display: inline-flex; align-items: center; gap: 10px;
   padding: 16px 36px;
-  background: linear-gradient(135deg, #7C6FFF 0%, #A78BFA 50%, #7C6FFF 100%);
+  background: linear-gradient(135deg, #EFA02F 0%, #F6B24E 50%, #EFA02F 100%);
   background-size: 200% 100%;
   border: none; border-radius: 16px;
   color: #fff; font-size: 16px; font-weight: 700;
   font-family: 'Syne', sans-serif;
   cursor: pointer;
-  box-shadow: 0 8px 32px rgba(124,111,255,0.5), 0 0 0 1px rgba(255,255,255,0.1);
+  box-shadow: 0 8px 32px rgba(239,160,47,0.5), 0 0 0 1px rgba(255,255,255,0.1);
   transition: all 0.25s;
   letter-spacing: -0.02em;
 }
 .ip-gen-btn:hover:not(:disabled) {
   background-position: 100% 0;
   transform: translateY(-2px);
-  box-shadow: 0 12px 40px rgba(124,111,255,0.65), 0 0 0 1px rgba(255,255,255,0.15);
+  box-shadow: 0 12px 40px rgba(239,160,47,0.65), 0 0 0 1px rgba(255,255,255,0.15);
 }
 .ip-gen-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
@@ -264,9 +264,9 @@ const CSS = `
 }
 .ip-progress-fill {
   height: 100%; border-radius: 3px;
-  background: linear-gradient(90deg, #7C6FFF, #A78BFA);
+  background: linear-gradient(90deg, #EFA02F, #F6B24E);
   transition: width 0.3s ease;
-  box-shadow: 0 0 10px rgba(124,111,255,0.5);
+  box-shadow: 0 0 10px rgba(239,160,47,0.5);
 }
 
 /* ── Success ── */
@@ -450,7 +450,7 @@ export default function ImagesToPdf() {
               {/* Add more card */}
               <div
                 className="ip-img-card"
-                style={{ border: '2px dashed rgba(139,127,255,0.25)', background: 'rgba(124,111,255,0.04)', cursor: 'pointer', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', minHeight:140, gap:8 }}
+                style={{ border: '2px dashed rgba(139,127,255,0.25)', background: 'rgba(239,160,47,0.04)', cursor: 'pointer', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', minHeight:140, gap:8 }}
                 onClick={() => fileRef.current?.click()}
               >
                 <div style={{ fontSize: 28 }}>＋</div>

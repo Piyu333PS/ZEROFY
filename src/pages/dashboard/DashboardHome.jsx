@@ -40,15 +40,14 @@ export default function DashboardHome() {
   // Naam: business ka naam ho to wahi, warna email ka pehla hissa
   const bizName = invoices.find(i => i.bizName)?.bizName
   const greetName = bizName || (user?.email ? user.email.split('@')[0] : 'there')
-  const today = new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'short' })
+  const today = new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
 
   // Time-based greeting — system time ke hisaab se badalta hai
   const greeting = useMemo(() => {
     const hour = new Date().getHours()
-    if (hour >= 5 && hour < 12) return 'Good Morning'
-    if (hour >= 12 && hour < 17) return 'Good Afternoon'
-    if (hour >= 17 && hour < 21) return 'Good Evening'
-    return 'Good Night'
+    if (hour >= 5 && hour < 12) return 'Good morning'
+    if (hour >= 12 && hour < 17) return 'Good afternoon'
+    return 'Good evening'
   }, [])
 
   // Business name available ho to wahi dikhao, warna generic simple heading
@@ -61,47 +60,63 @@ export default function DashboardHome() {
     { label: 'Clients', value: stats.customerCount, icon: icons.customers },
   ] : []
 
+  const overdue = invoices.filter(i => displayStatus(i) === 'overdue')
+  const overdueAmount = overdue.reduce((sum, i) => sum + (Number(i.balance) || 0), 0)
+  const drafts = invoices.filter(i => i.status === 'draft').length
+  const collected = stats && stats.totalInvoiced > 0 ? Math.round((stats.received / stats.totalInvoiced) * 100) : 0
+
   return (
     <div className={styles.wrap}>
-      <div className={styles.topbar}>
-        <div />
-        <div className={styles.topActions}>
-          <button className={styles.primaryBtn} onClick={() => navigate('/tools/invoice-maker')}>
-            {icons.plus} New Invoice
-          </button>
-        </div>
-      </div>
-
       <div className={styles.pageHead}>
-        <div className={styles.eyebrow}>{greeting}, {greetName} · {today}</div>
-        <h1>{headline}</h1>
+        <div>
+          <h1>{greeting}, {greetName}</h1>
+          <p className={styles.dateLine}>{today}</p>
+        </div>
       </div>
 
       {error && <p className={styles.error}>{error}</p>}
 
-      <div className={styles.statsGrid}>
-        {loading && !stats ? (
-          Array.from({ length: 4 }).map((_, i) => <div key={i} className={styles.statCardSkeleton} />)
-        ) : (
-          statCards.map(card => (
-            <div key={card.label} className={styles.statCard}>
-              <div className={styles.statTop}>
-                <div className={styles.statIcon}>{card.icon}</div>
-              </div>
-              <p className={styles.statLabel}>{card.label}</p>
-              <p className={`${styles.statValue} ${card.tone ? styles[card.tone] : ''}`}>{card.value}</p>
-            </div>
-          ))
-        )}
-      </div>
+      {loading && !stats ? (
+        <div className={styles.summary}><div className={styles.skeleton} /></div>
+      ) : stats && (
+        <div className={styles.summary}>
+          {/* Sabse zaroori number: kitna paisa aana baaki hai */}
+          <div className={styles.hero}>
+            <p className={styles.heroLabel}>To collect</p>
+            <p className={styles.heroValue}>{fmt(stats.pending)}</p>
+            <div className={styles.meter} aria-hidden="true"><span style={{ width: `${collected}%` }} /></div>
+            <p className={styles.heroNote}>
+              {stats.totalInvoiced > 0
+                ? `${collected}% collected — ${fmt(stats.received)} of ${fmt(stats.totalInvoiced)} billed`
+                : 'Pehla invoice banate hi yahan hisaab dikhne lagega'}
+            </p>
+          </div>
+          <div className={styles.side}>
+            <button className={`${styles.tile} ${overdue.length ? styles.tileAlert : ''}`} onClick={() => navigate('/app/invoices')}>
+              <span className={styles.tileLabel}>Overdue</span>
+              <span className={styles.tileValue}>{fmt(overdueAmount)}</span>
+              <span className={styles.tileNote}>{overdue.length ? `${overdue.length} invoice${overdue.length === 1 ? '' : 's'} past due date` : 'Nothing overdue'}</span>
+            </button>
+            <button className={styles.tile} onClick={() => navigate('/app/payments')}>
+              <span className={styles.tileLabel}>Received</span>
+              <span className={`${styles.tileValue} ${styles.green}`}>{fmt(stats.received)}</span>
+              <span className={styles.tileNote}>Payments recorded so far</span>
+            </button>
+            <button className={styles.tile} onClick={() => navigate('/app/customers')}>
+              <span className={styles.tileLabel}>Clients</span>
+              <span className={styles.tileValue}>{stats.customerCount}</span>
+              <span className={styles.tileNote}>{stats.invoiceCount} invoice{stats.invoiceCount === 1 ? '' : 's'}{drafts ? `, ${drafts} draft${drafts === 1 ? '' : 's'}` : ''}</span>
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className={styles.sectionHead}>
         <div>
-          <p className={styles.sectionLabel}>Recent Invoices</p>
-          <p className={styles.sectionSub}>Latest {RECENT_COUNT} invoices across all clients</p>
+          <p className={styles.sectionLabel}>Recent invoices</p>
         </div>
         <a className={styles.viewAllLink} href="/app/invoices" onClick={(e) => { e.preventDefault(); navigate('/app/invoices') }}>
-          View all →
+          View all
         </a>
       </div>
 

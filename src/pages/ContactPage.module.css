@@ -12,7 +12,7 @@
 .badge {
   display: inline-block;
   background: rgba(123, 110, 246, 0.12);
-  color: #7b6ef6;
+  color: #EFA02F;
   border: 1px solid rgba(123, 110, 246, 0.25);
   border-radius: 20px;
   font-size: 12px;
@@ -84,7 +84,7 @@
 }
 
 a.infoValue:hover {
-  color: #7b6ef6;
+  color: #EFA02F;
 }
 
 .infoNote {
@@ -124,7 +124,7 @@ a.infoValue:hover {
 }
 
 .quickLink:hover {
-  color: #7b6ef6;
+  color: #EFA02F;
   border-color: rgba(123, 110, 246, 0.3);
 }
 
@@ -174,7 +174,7 @@ a.infoValue:hover {
 }
 
 .input:focus {
-  border-color: #7b6ef6;
+  border-color: #EFA02F;
 }
 
 .input::placeholder {
@@ -196,7 +196,7 @@ a.infoValue:hover {
 }
 
 .textarea:focus {
-  border-color: #7b6ef6;
+  border-color: #EFA02F;
 }
 
 .textarea::placeholder {
@@ -204,7 +204,7 @@ a.infoValue:hover {
 }
 
 .submitBtn {
-  background: #7b6ef6;
+  background: #EFA02F;
   color: #fff;
   border: none;
   border-radius: 100px;
@@ -258,7 +258,7 @@ a.infoValue:hover {
 }
 
 .link {
-  color: #7b6ef6;
+  color: #EFA02F;
   text-decoration: none;
 }
 

@@ -85,7 +85,7 @@ export default function PricingPage() {
         name: 'Zerofy Pro',
         description: orderData.planName,
         order_id: orderData.orderId,
-        theme: { color: '#8B7FFF' },
+        theme: { color: '#EFA02F' },
         handler: async (response) => {
           const verifyRes = await fetch(`${API}/api/payment/verify`, {
             method: 'POST',
@@ -99,7 +99,7 @@ export default function PricingPage() {
           })
           const verifyData = await verifyRes.json()
           if (verifyRes.ok && verifyData.success) {
-            alert('🎉 ' + verifyData.message)
+            alert('' + verifyData.message)
             navigate('/')
           } else {
             setPayError('Payment verification failed. Please contact support.')
@@ -141,7 +141,7 @@ export default function PricingPage() {
         subscription_id: subData.subscriptionId,  // order_id ki jagah subscription_id
         name: 'Zerofy Pro',
         description: `${subData.planName} — Auto Pay`,
-        theme: { color: '#8B7FFF' },
+        theme: { color: '#EFA02F' },
         handler: async (response) => {
           // 3. Pehli payment verify karo
           const verifyRes = await fetch(`${API}/api/payment/verify-subscription`, {
@@ -155,7 +155,7 @@ export default function PricingPage() {
           })
           const verifyData = await verifyRes.json()
           if (verifyRes.ok && verifyData.success) {
-            alert('🎉 ' + verifyData.message)
+            alert('' + verifyData.message)
             navigate('/')
           } else {
             setPayError('Subscription verification failed. Please contact support.')
@@ -178,7 +178,7 @@ export default function PricingPage() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'var(--bg, #0f1117)',
+      background: 'var(--bg, #0D1B2E)',
       color: 'var(--text, #f1f5f9)',
       fontFamily: 'var(--font-body, "DM Sans", sans-serif)',
       paddingBottom: 80,
@@ -211,23 +211,23 @@ export default function PricingPage() {
         <div style={{
           position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)',
           width: 600, height: 320,
-          background: 'radial-gradient(ellipse at center, rgba(167,139,250,0.1) 0%, transparent 70%)',
+          background: 'radial-gradient(ellipse at center, rgba(239,160,47,0.1) 0%, transparent 70%)',
           pointerEvents: 'none',
         }} />
 
         <div style={{
           display: 'inline-block',
-          background: 'rgba(167,139,250,0.1)',
-          border: '1px solid rgba(167,139,250,0.25)',
+          background: 'rgba(239,160,47,0.1)',
+          border: '1px solid rgba(239,160,47,0.25)',
           borderRadius: 100,
           padding: '6px 18px',
           fontSize: 13,
-          color: '#A78BFA',
+          color: '#F6B24E',
           fontWeight: 600,
           marginBottom: 20,
           letterSpacing: '0.04em',
         }}>
-          ⚡ Zerofy Pro
+          Zerofy Pro
         </div>
 
         <h1 style={{
@@ -236,12 +236,12 @@ export default function PricingPage() {
           fontWeight: 800,
           lineHeight: 1.1,
           marginBottom: 16,
-          background: 'linear-gradient(135deg, #f1f5f9 0%, #A78BFA 60%, #60A5FA 100%)',
+          background: 'linear-gradient(135deg, #f1f5f9 0%, #F6B24E 60%, #EFA02F 100%)',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
           backgroundClip: 'text',
         }}>
-          Simple, Honest Pricing
+          One plan, three ways to pay
         </h1>
 
         <p style={{
@@ -270,7 +270,7 @@ export default function PricingPage() {
             onClick={() => setAutoPayEnabled(!autoPayEnabled)}
             style={{
               width: 44, height: 24, borderRadius: 12, cursor: 'pointer',
-              background: autoPayEnabled ? '#8B7FFF' : 'rgba(255,255,255,0.15)',
+              background: autoPayEnabled ? '#EFA02F' : 'rgba(255,255,255,0.15)',
               position: 'relative', transition: 'background 0.2s', flexShrink: 0,
             }}
           >
@@ -301,7 +301,7 @@ export default function PricingPage() {
         {/* Auto Pay info */}
         {autoPayEnabled && (
           <div style={{ marginTop: 12, fontSize: 12, color: '#64748b' }}>
-            🔄 Automatically renews — cancel anytime from billing page
+            Automatically renews — cancel anytime from billing page
           </div>
         )}
       </div>
@@ -326,19 +326,19 @@ export default function PricingPage() {
               position: 'relative',
               transition: 'transform 0.2s, box-shadow 0.2s',
               boxShadow: plan.id === 'quarterly'
-                ? '0 0 40px rgba(167,139,250,0.12)'
+                ? '0 0 40px rgba(239,160,47,0.12)'
                 : 'none',
             }}
             onMouseEnter={e => {
               e.currentTarget.style.transform = 'translateY(-4px)'
               e.currentTarget.style.boxShadow = plan.id === 'quarterly'
-                ? '0 12px 50px rgba(167,139,250,0.22)'
+                ? '0 12px 50px rgba(239,160,47,0.22)'
                 : '0 8px 32px rgba(0,0,0,0.3)'
             }}
             onMouseLeave={e => {
               e.currentTarget.style.transform = 'translateY(0)'
               e.currentTarget.style.boxShadow = plan.id === 'quarterly'
-                ? '0 0 40px rgba(167,139,250,0.12)'
+                ? '0 0 40px rgba(239,160,47,0.12)'
                 : 'none'
             }}
           >
@@ -348,9 +348,9 @@ export default function PricingPage() {
                 top: -13, left: '50%',
                 transform: 'translateX(-50%)',
                 background: plan.id === 'quarterly'
-                  ? 'linear-gradient(135deg, #60A5FA, #A78BFA)'
+                  ? 'linear-gradient(135deg, #EFA02F, #F6B24E)'
                   : 'linear-gradient(135deg, #f59e0b, #fbbf24)',
-                color: '#fff',
+                color: '#12263F',
                 fontSize: 12, fontWeight: 700,
                 padding: '4px 16px',
                 borderRadius: 100,
@@ -362,7 +362,6 @@ export default function PricingPage() {
             )}
 
             <div style={{ marginBottom: 24 }}>
-              <div style={{ fontSize: 34, marginBottom: 10 }}>{plan.emoji}</div>
               <div style={{
                 fontFamily: 'var(--font-display, "Syne", sans-serif)',
                 fontSize: 22, fontWeight: 800, marginBottom: 6,
@@ -411,8 +410,8 @@ export default function PricingPage() {
                 fontSize: 15,
                 marginBottom: 26,
                 transition: 'opacity 0.2s, transform 0.15s',
-                background: plan.ctaStyle === 'blue' ? 'rgba(96,165,250,0.15)' : plan.gradient,
-                color: plan.ctaStyle === 'blue' ? '#60A5FA' : '#fff',
+                background: plan.ctaStyle === 'blue' ? 'rgba(239,160,47,0.15)' : plan.gradient,
+                color: plan.ctaStyle === 'blue' ? '#EFA02F' : '#12263F',
                 boxShadow: plan.ctaStyle === 'gradient'
                   ? '0 4px 18px rgba(139,127,255,0.35)'
                   : 'none',
@@ -422,14 +421,14 @@ export default function PricingPage() {
             >
               {payLoading === plan.id
                 ? '⏳ Processing...'
-                : autoPayEnabled ? `🔄 Start Auto Pay` : plan.cta}
+                : autoPayEnabled ? `Start Auto Pay` : plan.cta}
             </button>
 
             <div style={{
               fontSize: 13, color: plan.accent, fontWeight: 600,
               display: 'flex', alignItems: 'center', gap: 6,
             }}>
-              <span>✓</span> Full Zerofy Pro access — see below
+              <span></span> Full Zerofy Pro access — see below
             </div>
           </div>
         ))}
@@ -448,7 +447,7 @@ export default function PricingPage() {
             fontSize: 15, fontWeight: 700, color: '#34D399',
             margin: '0 0 18px', display: 'flex', alignItems: 'center', gap: 8,
           }}>
-            ✅ Every plan unlocks the same full Pro access
+            Every plan unlocks the same full Pro access
           </h3>
           <div style={{
             display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
@@ -470,8 +469,8 @@ export default function PricingPage() {
         margin: '48px auto 0', padding: '0 24px', maxWidth: 700,
       }}>
         {[
-          { icon: '🔒', text: 'Secure payments via Razorpay' },
-          { icon: '↩️', text: 'Cancel anytime' },
+          { icon: '', text: 'Secure payments via Razorpay' },
+          { icon: '↩', text: 'Cancel anytime' },
           { icon: '🇮🇳', text: 'UPI, Cards & Net Banking accepted' },
         ].map((item, i) => (
           <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#64748b', fontSize: 13 }}>
@@ -497,7 +496,7 @@ export default function PricingPage() {
               key={i}
               style={{
                 background: 'rgba(255,255,255,0.03)',
-                border: `1px solid ${openFaq === i ? 'rgba(167,139,250,0.3)' : 'rgba(255,255,255,0.07)'}`,
+                border: `1px solid ${openFaq === i ? 'rgba(239,160,47,0.3)' : 'rgba(255,255,255,0.07)'}`,
                 borderRadius: 14,
                 overflow: 'hidden',
                 transition: 'border-color 0.2s',
@@ -516,7 +515,7 @@ export default function PricingPage() {
               >
                 <span>{faq.q}</span>
                 <span style={{
-                  fontSize: 18, color: '#A78BFA', flexShrink: 0,
+                  fontSize: 18, color: '#F6B24E', flexShrink: 0,
                   transform: openFaq === i ? 'rotate(45deg)' : 'rotate(0)',
                   transition: 'transform 0.2s',
                 }}>+</span>
@@ -542,7 +541,7 @@ export default function PricingPage() {
             padding: '12px 16px', borderRadius: 10, fontSize: 13,
             background: 'rgba(248,113,113,0.1)', border: '1px solid rgba(248,113,113,0.3)', color: '#F87171',
           }}>
-            ⚠️ {payError}
+            {payError}
           </div>
         </div>
       )}
@@ -560,16 +559,16 @@ export default function PricingPage() {
           }}>
             <div style={{
               background: '#1A1830',
-              border: '1px solid rgba(167,139,250,0.4)',
+              border: '1px solid rgba(239,160,47,0.4)',
               borderRadius: 20, padding: '36px 28px',
               maxWidth: 380, width: '100%',
               textAlign: 'center',
               boxShadow: '0 24px 80px rgba(0,0,0,0.6)',
             }}>
-              <div style={{ fontSize: 44, marginBottom: 10 }}>👤</div>
+              <div style={{ fontSize: 44, marginBottom: 10 }}></div>
               <h2 style={{
                 fontSize: 20, fontWeight: 800, marginBottom: 8,
-                background: 'linear-gradient(135deg, #60A5FA, #A78BFA)',
+                background: 'linear-gradient(135deg, #EFA02F, #F6B24E)',
                 WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'
               }}>Login to Continue</h2>
               <p style={{ color: '#9A96C0', fontSize: 13, marginBottom: 24, lineHeight: 1.6 }}>
@@ -580,8 +579,8 @@ export default function PricingPage() {
                 style={{
                   width: '100%', padding: '13px',
                   borderRadius: 12, border: 'none',
-                  background: 'linear-gradient(135deg, #60A5FA, #A78BFA)',
-                  color: '#fff', fontSize: 15, fontWeight: 700,
+                  background: 'linear-gradient(135deg, #EFA02F, #F6B24E)',
+                  color: '#12263F', fontSize: 15, fontWeight: 700,
                   cursor: 'pointer', marginBottom: 10
                 }}
               >
@@ -608,13 +607,13 @@ export default function PricingPage() {
         </p>
         <Link to="/" style={{
           display: 'inline-flex', alignItems: 'center', gap: 8,
-          color: '#A78BFA', textDecoration: 'none',
+          color: '#F6B24E', textDecoration: 'none',
           fontSize: 14, fontWeight: 600,
-          border: '1px solid rgba(167,139,250,0.3)',
+          border: '1px solid rgba(239,160,47,0.3)',
           borderRadius: 100, padding: '10px 22px',
           transition: 'background 0.2s',
         }}
-          onMouseEnter={e => e.currentTarget.style.background = 'rgba(167,139,250,0.08)'}
+          onMouseEnter={e => e.currentTarget.style.background = 'rgba(239,160,47,0.08)'}
           onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
         >
           ← Back to Home

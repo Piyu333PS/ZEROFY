@@ -133,9 +133,6 @@ export default function InvoicesPage() {
             {loading ? 'Loading…' : `${filtered.length} invoice${filtered.length === 1 ? '' : 's'}${statusFilter !== 'all' || query ? ' (filtered)' : ''}`}
           </p>
         </div>
-        <button className={styles.primaryBtn} onClick={() => navigate('/tools/invoice-maker')}>
-          {icons.plus} New Invoice
-        </button>
       </div>
 
       <div className={styles.toolbar}>

@@ -29,21 +29,21 @@ export default function ContactPage() {
           {/* Contact Info */}
           <div className={styles.infoCol}>
             <div className={styles.infoCard}>
-              <div className={styles.infoIcon}>✉️</div>
+              <div className={styles.infoIcon}></div>
               <div className={styles.infoTitle}>Email Support</div>
               <a href="mailto:support@zerofy.co.in" className={styles.infoValue}>support@zerofy.co.in</a>
               <div className={styles.infoNote}>24–48 hours mein reply</div>
             </div>
 
             <div className={styles.infoCard}>
-              <div className={styles.infoIcon}>📍</div>
+              <div className={styles.infoIcon}></div>
               <div className={styles.infoTitle}>Location</div>
               <div className={styles.infoValue}>Jaipur, Rajasthan</div>
               <div className={styles.infoNote}>India 🇮🇳</div>
             </div>
 
             <div className={styles.infoCard}>
-              <div className={styles.infoIcon}>👤</div>
+              <div className={styles.infoIcon}></div>
               <div className={styles.infoTitle}>Founder</div>
               <div className={styles.infoValue}>KumKum Sharma</div>
               <div className={styles.infoNote}>Zerofy</div>
@@ -51,10 +51,10 @@ export default function ContactPage() {
 
             <div className={styles.quickLinks}>
               <div className={styles.quickTitle}>Quick Links</div>
-              <a href="/refund" className={styles.quickLink}>💰 Refund Policy</a>
-              <a href="/privacy-policy.html" className={styles.quickLink}>🔒 Privacy Policy</a>
-              <a href="/terms-conditions.html" className={styles.quickLink}>📄 Terms & Conditions</a>
-              <a href="/pricing" className={styles.quickLink}>⚡ Pricing Plans</a>
+              <a href="/refund" className={styles.quickLink}>Refund Policy</a>
+              <a href="/privacy-policy.html" className={styles.quickLink}>Privacy Policy</a>
+              <a href="/terms-conditions.html" className={styles.quickLink}>Terms & Conditions</a>
+              <a href="/pricing" className={styles.quickLink}>Pricing Plans</a>
             </div>
           </div>
 
@@ -62,7 +62,7 @@ export default function ContactPage() {
           <div className={styles.formCol}>
             {sent ? (
               <div className={styles.successBox}>
-                <div className={styles.successIcon}>✅</div>
+                <div className={styles.successIcon}></div>
                 <div className={styles.successTitle}>Message Ready!</div>
                 <p className={styles.successText}>Your email client should have opened. If not, email us directly at <a href="mailto:support@zerofy.co.in" className={styles.link}>support@zerofy.co.in</a></p>
                 <button className={styles.resetBtn} onClick={() => setSent(false)}>← Go Back</button>

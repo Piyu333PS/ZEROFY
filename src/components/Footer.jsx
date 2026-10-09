@@ -8,10 +8,10 @@ const Footer = () => {
         {/* Brand Column */}
         <div className={styles.brand}>
           <span className={styles.logo}>Zero<span className={styles.accent}>fy</span></span>
-          <p>Simple, powerful tools for invoicing, file processing, and more. One plan. Everything unlocked. No hidden fees.</p>
+          <p>GST billing for Indian small businesses — invoices, clients and payments in one place.</p>
           <div className={styles.badges}>
-            <span className={styles.badge}><span className={styles.dot}></span> All Systems Operational</span>
-            <span className={styles.badge}>🔒 Secure Payments</span>
+            <span className={styles.badge}><span className={styles.dot}></span> All systems operational</span>
+            <span className={styles.badge}>Secure payments</span>
           </div>
           <div className={styles.paymentIcons}>
             <span className={styles.payBadge}>UPI</span>

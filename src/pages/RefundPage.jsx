@@ -10,7 +10,7 @@ export default function RefundPage() {
         <p className={styles.meta}>Last updated: May 2025 · Effective immediately upon purchase.</p>
 
         <div className={styles.highlight}>
-          <div className={styles.highlightIcon}>💰</div>
+          <div className={styles.highlightIcon}></div>
           <div>
             <div className={styles.highlightTitle}>7-Day Money Back Guarantee</div>
             <div className={styles.highlightText}>

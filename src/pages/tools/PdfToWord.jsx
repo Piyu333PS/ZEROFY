@@ -272,7 +272,7 @@ export default function PdfToWord() {
           onDragLeave={() => setIsDragging(false)}
           onDrop={onDrop}
           style={{
-            border: `2px dashed ${isDragging ? "#3b82f6" : "#d1d5db"}`,
+            border: `2px dashed ${isDragging ? "#E08A1E" : "#d1d5db"}`,
             borderRadius: 12, padding: "2.5rem 1.5rem",
             textAlign: "center", cursor: "pointer",
             background: isDragging ? "#eff6ff" : "#f9fafb",
@@ -303,7 +303,7 @@ export default function PdfToWord() {
             </span>
           </div>
           <div style={{ height: 4, background: "#e5e7eb", borderRadius: 999 }}>
-            <div style={{ height: "100%", width: `${progress}%`, background: "#3b82f6", borderRadius: 999, transition: "width 0.3s" }} />
+            <div style={{ height: "100%", width: `${progress}%`, background: "#E08A1E", borderRadius: 999, transition: "width 0.3s" }} />
           </div>
           <p style={{ fontSize: 12, color: "#6b7280", marginTop: 6 }}>{progressLabel}</p>
         </div>

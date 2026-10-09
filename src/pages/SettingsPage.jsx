@@ -85,7 +85,7 @@ export default function SettingsPage({ embedded = false }) {
   }
 
   const cardStyle = {
-    background: 'var(--bg2, #1a1a2e)',
+    background: 'var(--bg2, #12263F)',
     border: '1px solid var(--border2, rgba(255,255,255,0.08))',
     borderRadius: 16, padding: '28px 24px', marginBottom: 20
   }
@@ -110,10 +110,10 @@ export default function SettingsPage({ embedded = false }) {
   return (
     <div style={embedded ? {
       // Dashboard ke andar light palette
-      '--bg2': '#FFFFFF', '--border2': '#E1D9C4', '--surface': '#F7F3EA',
-      '--text': '#1B2340', '--text2': '#69708A', '--text3': '#8890A6',
+      '--bg2': '#FFFFFF', '--border2': '#DDE1D9', '--surface': '#F4F5F1',
+      '--text': '#12263F', '--text2': '#5C7189', '--text3': '#8494A6',
       padding: '26px 34px 60px',
-    } : { minHeight: '100vh', background: 'var(--bg, #0f1117)', padding: '48px 24px 80px' }}>
+    } : { minHeight: '100vh', background: 'var(--bg, #0D1B2E)', padding: '48px 24px 80px' }}>
       <div style={{ maxWidth: 560, margin: embedded ? 0 : '0 auto' }}>
 
         {/* Header */}
@@ -123,7 +123,7 @@ export default function SettingsPage({ embedded = false }) {
               ← Back
             </button>
           )}
-          <h1 style={{ fontSize: embedded ? 26 : 28, fontWeight: embedded ? 600 : 800, color: 'var(--text)', fontFamily: embedded ? "'Space Grotesk', sans-serif" : 'var(--font-display)', margin: 0 }}>{embedded ? 'Settings' : '⚙️ Settings'}</h1>
+          <h1 style={{ fontSize: embedded ? 26 : 28, fontWeight: embedded ? 600 : 800, color: 'var(--text)', fontFamily: embedded ? "'Space Grotesk', sans-serif" : 'var(--font-display)', margin: 0 }}>{embedded ? 'Settings' : 'Settings'}</h1>
           <p style={{ color: 'var(--text2)', fontSize: 14, marginTop: 6 }}>{user.email}</p>
         </div>
 
@@ -157,7 +157,7 @@ export default function SettingsPage({ embedded = false }) {
         {!passwordless && (<>
         {/* Change Email */}
         <div style={cardStyle}>
-          <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 20, marginTop: 0 }}>📧 Change Email</h2>
+          <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 20, marginTop: 0 }}>Change Email</h2>
           <form onSubmit={handleEmailChange}>
             <div style={{ marginBottom: 14 }}>
               <label style={labelStyle}>New Email</label>
@@ -181,14 +181,14 @@ export default function SettingsPage({ embedded = false }) {
               type="submit" disabled={emailLoading}
               style={{
                 padding: '10px 24px', borderRadius: 10, border: 'none',
-                background: 'linear-gradient(135deg, #60A5FA, #A78BFA)',
-                color: '#fff', fontWeight: 700, fontSize: 14, cursor: 'pointer',
+                background: 'linear-gradient(135deg, #EFA02F, #F6B24E)',
+                color: '#12263F', fontWeight: 700, fontSize: 14, cursor: 'pointer',
                 opacity: emailLoading ? 0.7 : 1
               }}
             >
               {emailLoading ? '⏳ Updating...' : 'Update Email'}
             </button>
-            {emailMsg && <div style={msgStyle(emailMsg.type)}>{emailMsg.type === 'success' ? '✅' : '⚠️'} {emailMsg.text}</div>}
+            {emailMsg && <div style={msgStyle(emailMsg.type)}>{emailMsg.type === 'success' ? '' : ''} {emailMsg.text}</div>}
             {emailMsg?.type === 'success' && (
               <div style={{ fontSize: 12, color: 'var(--text3)', marginTop: 8 }}>
                 Email updated! Please log in again with your new email.
@@ -199,7 +199,7 @@ export default function SettingsPage({ embedded = false }) {
 
         {/* Change Password */}
         <div style={cardStyle}>
-          <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 20, marginTop: 0 }}>🔒 Change Password</h2>
+          <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 20, marginTop: 0 }}>Change Password</h2>
           <form onSubmit={handlePwdChange}>
             <div style={{ marginBottom: 14 }}>
               <label style={labelStyle}>Current Password</label>
@@ -232,14 +232,14 @@ export default function SettingsPage({ embedded = false }) {
               type="submit" disabled={pwdLoading}
               style={{
                 padding: '10px 24px', borderRadius: 10, border: 'none',
-                background: 'linear-gradient(135deg, #60A5FA, #A78BFA)',
-                color: '#fff', fontWeight: 700, fontSize: 14, cursor: 'pointer',
+                background: 'linear-gradient(135deg, #EFA02F, #F6B24E)',
+                color: '#12263F', fontWeight: 700, fontSize: 14, cursor: 'pointer',
                 opacity: pwdLoading ? 0.7 : 1
               }}
             >
               {pwdLoading ? '⏳ Updating...' : 'Change Password'}
             </button>
-            {pwdMsg && <div style={msgStyle(pwdMsg.type)}>{pwdMsg.type === 'success' ? '✅' : '⚠️'} {pwdMsg.text}</div>}
+            {pwdMsg && <div style={msgStyle(pwdMsg.type)}>{pwdMsg.type === 'success' ? '' : ''} {pwdMsg.text}</div>}
           </form>
         </div>
 
@@ -247,8 +247,8 @@ export default function SettingsPage({ embedded = false }) {
 
         {/* Danger Zone */}
         <div style={{ ...cardStyle, borderColor: 'rgba(248,113,113,0.2)' }}>
-          <h2 style={{ fontSize: 16, fontWeight: 700, color: '#F87171', marginBottom: 8, marginTop: 0 }}>🚪 Account</h2>
-          <p style={{ fontSize: 13, color: 'var(--text3)', marginBottom: 16 }}>Sign out of your account</p>
+          <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 8, marginTop: 0 }}>Log out</h2>
+          <p style={{ fontSize: 13, color: 'var(--text3)', marginBottom: 16 }}>Is device par Zerofy se sign out karein</p>
           <button
             onClick={() => { logout() }}
             style={{
@@ -258,7 +258,7 @@ export default function SettingsPage({ embedded = false }) {
               color: '#F87171', fontWeight: 600, fontSize: 14, cursor: 'pointer'
             }}
           >
-            🚪 Logout
+            Logout
           </button>
         </div>
 

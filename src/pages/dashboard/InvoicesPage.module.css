@@ -9,7 +9,7 @@
   background: var(--saffron); color: #fff;
   font-weight: 600; font-size: 13.5px;
   border: none; padding: 11px 18px; border-radius: 10px;
-  cursor: pointer; box-shadow: 0 6px 16px -6px rgba(232,147,60,0.6);
+  cursor: pointer; 
   font-family: var(--body); white-space: nowrap;
 }
 .primaryBtn svg { width: 15px; height: 15px; }
@@ -54,7 +54,7 @@
 }
 
 .tableRow { border-top: 1px solid var(--paper-line); position: relative; }
-.tableRow:nth-child(even) { background: #FCFAF4; }
+.tableRow:nth-child(even) { background: #FAFBF8; }
 
 .invId { font-family: var(--mono); font-weight: 600; color: var(--ink); }
 .dateCell { color: var(--slate); font-size: 12.5px; }
@@ -138,7 +138,7 @@
 .rowMenu {
   position: absolute; top: 100%; right: 0; margin-top: 4px; z-index: 11;
   background: #fff; border: 1px solid var(--paper-line); border-radius: 10px;
-  box-shadow: 0 10px 28px rgba(27,35,64,0.16); overflow: hidden; min-width: 178px; padding: 4px;
+  box-shadow: 0 10px 28px rgba(18,38,63,0.16); overflow: hidden; min-width: 178px; padding: 4px;
 }
 .rowMenu button {
   display: block; width: 100%; text-align: left; padding: 9px 12px; border-radius: 6px;
@@ -149,7 +149,7 @@
 .rowMenu hr { border: none; border-top: 1px solid var(--paper-line); margin: 4px 0; }
 
 .notice {
-  background: var(--green-soft); color: var(--green-deep); border: 1px solid #BFDccd;
+  background: var(--green-soft); color: var(--green-deep); border: 1px solid #BCDCCB;
   border-radius: 10px; padding: 10px 14px; font-size: 13px; margin-bottom: 14px;
 }
 
@@ -172,3 +172,8 @@
   .tableRow .statusCell { grid-area: status; justify-self: end; }
   .tableRow .rowActions { grid-area: actions; }
 }
+
+/* brand: primary action = saffron with ink text (white on saffron was hard to read) */
+.primaryBtn { color: var(--ink); font-weight: 700; transition: background 0.15s ease; }
+.primaryBtn:hover:not(:disabled) { background: #F6B24E; opacity: 1; }
+.title { font-weight: 600; font-size: 28px; letter-spacing: -0.01em; }

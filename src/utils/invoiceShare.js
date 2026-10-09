@@ -24,7 +24,7 @@ const PRINT_DOC_HEAD = `<meta charset="UTF-8">
   html, body {
     width: 210mm;
     font-family: 'Plus Jakarta Sans', sans-serif;
-    background: #fff; color: #1a1a2e;
+    background: #fff; color: #14202E;
     -webkit-print-color-adjust: exact; print-color-adjust: exact; color-adjust: exact;
   }
   .invoice-wrap { width: 210mm; background: #fff; }

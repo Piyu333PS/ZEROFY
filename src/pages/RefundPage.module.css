@@ -12,7 +12,7 @@
 .badge {
   display: inline-block;
   background: rgba(123, 110, 246, 0.12);
-  color: #7b6ef6;
+  color: #EFA02F;
   border: 1px solid rgba(123, 110, 246, 0.25);
   border-radius: 20px;
   font-size: 12px;
@@ -86,7 +86,7 @@
   color: var(--text);
   margin-bottom: 14px;
   padding-left: 14px;
-  border-left: 3px solid #7b6ef6;
+  border-left: 3px solid #EFA02F;
 }
 
 .text {
@@ -133,7 +133,7 @@
   height: 28px;
   border-radius: 50%;
   background: rgba(123, 110, 246, 0.15);
-  color: #7b6ef6;
+  color: #EFA02F;
   font-size: 13px;
   font-weight: 700;
   display: flex;
@@ -156,7 +156,7 @@
 }
 
 .link {
-  color: #7b6ef6;
+  color: #EFA02F;
   text-decoration: none;
 }
 
@@ -191,7 +191,7 @@
 .planName {
   font-size: 13px;
   font-weight: 600;
-  color: #7b6ef6;
+  color: #EFA02F;
   margin-bottom: 8px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -231,7 +231,7 @@
 }
 
 .contactBtn {
-  background: #7b6ef6;
+  background: #EFA02F;
   color: #fff;
   padding: 10px 20px;
   border-radius: 100px;

@@ -52,7 +52,7 @@ html,body{overflow:hidden;height:100%}
 }
 .bar::-webkit-scrollbar{height:0}
 .logo{font-size:15px;font-weight:700;color:#fff;margin-right:6px;white-space:nowrap;letter-spacing:-.3px}
-.logo b{color:#3b82f6}
+.logo b{color:#E08A1E}
 .bsep{width:1px;height:20px;background:#1e293b;flex-shrink:0}
 .btn{
   display:inline-flex;align-items:center;gap:5px;padding:5px 11px;
@@ -62,13 +62,13 @@ html,body{overflow:hidden;height:100%}
 }
 .btn:hover{background:#1e293b;color:#e2e8f0}
 .btn:disabled{opacity:.35;cursor:not-allowed}
-.btn-open{background:#3b82f6;color:#fff;border-color:#3b82f6;font-weight:600}
-.btn-open:hover{background:#2563eb;border-color:#2563eb}
+.btn-open{background:#E08A1E;color:#fff;border-color:#E08A1E;font-weight:600}
+.btn-open:hover{background:#E08A1E;border-color:#E08A1E}
 .btn-add{background:#059669;color:#fff;border-color:#059669;font-weight:600}
 .btn-add:hover{background:#047857;border-color:#047857}
 .btn-add.armed{background:#dc2626;border-color:#dc2626;animation:pulse 1s infinite}
 @keyframes pulse{0%,100%{box-shadow:0 0 0 0 #dc262640}50%{box-shadow:0 0 0 6px #dc262600}}
-.btn-save{background:#7c3aed;color:#fff;border-color:#7c3aed;font-weight:600;margin-left:auto;flex-shrink:0}
+.btn-save{background:#E08A1E;color:#fff;border-color:#E08A1E;font-weight:600;margin-left:auto;flex-shrink:0}
 .btn-save:hover:not(:disabled){background:#6d28d9;border-color:#6d28d9}
 .spin{width:11px;height:11px;border:2px solid #ffffff44;border-top-color:#fff;border-radius:50%;animation:sp .5s linear infinite;display:inline-block}
 @keyframes sp{to{transform:rotate(360deg)}}
@@ -90,8 +90,8 @@ html,body{overflow:hidden;height:100%}
 .panel::-webkit-scrollbar-thumb{background:#1e293b;border-radius:2px}
 .ptitle{font-size:9px;color:#334155;text-transform:uppercase;letter-spacing:1px;padding-bottom:4px;font-weight:700}
 .pthumb{cursor:pointer;border:1.5px solid #1e293b;border-radius:4px;overflow:hidden;background:#1e293b;position:relative;transition:border-color .12s}
-.pthumb:hover{border-color:#3b82f6}
-.pthumb.on{border-color:#3b82f6;box-shadow:0 0 0 2px #3b82f625}
+.pthumb:hover{border-color:#E08A1E}
+.pthumb.on{border-color:#E08A1E;box-shadow:0 0 0 2px #3b82f625}
 .pthumb img{display:block;width:100%}
 .pthumb-n{position:absolute;bottom:2px;right:3px;font-size:8.5px;color:#94a3b8;background:#0f172acc;padding:1px 3px;border-radius:2px}
 .pthumb-ph{height:72px;display:flex;align-items:center;justify-content:center;color:#334155;font-size:9px}
@@ -118,7 +118,7 @@ canvas{display:block}
 }
 .titem:hover{ border-color:#3b82f688; }
 .titem.active{
-  border-color:#3b82f6 !important;
+  border-color:#E08A1E !important;
   box-shadow:0 0 0 2px #3b82f630;
   z-index:20 !important;
 }
@@ -165,7 +165,7 @@ canvas{display:block}
 }
 .fi{width:26px;height:24px;border-radius:4px;border:none;background:transparent;color:#94a3b8;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;font-family:inherit;transition:all .1s;flex-shrink:0}
 .fi:hover{background:#1e293b;color:#e2e8f0}
-.fi.on{background:#1d4ed820;color:#60a5fa}
+.fi.on{background:#1d4ed820;color:#EFA02F}
 .fi.del{color:#f87171}
 .fi.del:hover{background:#7f1d1d30}
 .fsep{width:1px;height:14px;background:#1e293b;margin:0 2px;flex-shrink:0}
@@ -175,21 +175,21 @@ canvas{display:block}
 
 /* ── DROP ZONE ── */
 .dz{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;width:420px;min-height:280px;border:2px dashed #334155;border-radius:12px;background:#1e293b;text-align:center;margin:auto;padding:44px 32px;transition:all .15s;cursor:pointer}
-.dz:hover,.dz.over{border-color:#3b82f6;background:#1e3a5f}
+.dz:hover,.dz.over{border-color:#E08A1E;background:#1e3a5f}
 .dz svg{opacity:.4}
 .dz h2{font-size:16px;font-weight:700;color:#e2e8f0}
 .dz p{font-size:12px;color:#64748b}
-.dz label{display:inline-flex;align-items:center;gap:6px;padding:8px 20px;background:#3b82f6;border:none;border-radius:7px;color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
-.dz label:hover{background:#2563eb}
+.dz label{display:inline-flex;align-items:center;gap:6px;padding:8px 20px;background:#E08A1E;border:none;border-radius:7px;color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
+.dz label:hover{background:#E08A1E}
 
 /* ── LOADER ── */
 .ldwrap{display:flex;flex-direction:column;align-items:center;gap:10px;margin:auto;color:#64748b;font-size:13px}
-.ldring{width:40px;height:40px;border:3px solid #1e293b;border-top-color:#3b82f6;border-radius:50%;animation:sp .7s linear infinite}
+.ldring{width:40px;height:40px;border:3px solid #1e293b;border-top-color:#E08A1E;border-radius:50%;animation:sp .7s linear infinite}
 
 /* ── STATUS BAR ── */
 .sbar{display:flex;align-items:center;justify-content:space-between;padding:0 14px;height:26px;background:#0f172a;border-top:1px solid #1e293b;font-size:10.5px;color:#334155;flex-shrink:0;gap:8px}
 .sdot{display:inline-block;width:5px;height:5px;border-radius:50%;background:#22c55e;margin-right:4px;flex-shrink:0}
-.sbar .hint{color:#3b82f6;font-weight:500}
+.sbar .hint{color:#E08A1E;font-weight:500}
 
 /* ── TOAST ── */
 .toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#dc2626;color:#fff;padding:8px 16px;border-radius:6px;font-size:12px;z-index:99999;box-shadow:0 4px 12px rgba(0,0,0,.3);white-space:nowrap}
@@ -793,7 +793,7 @@ export default function PdfTextEditor() {
                   <div style={{
                     position:'absolute', bottom:12, left:'50%', transform:'translateX(-50%)',
                     background:'#0f172add', color:'#e2e8f0', fontSize:12, padding:'6px 16px',
-                    borderRadius:20, pointerEvents:'none', border:'1px solid #3b82f6',
+                    borderRadius:20, pointerEvents:'none', border:'1px solid #E08A1E',
                     whiteSpace:'nowrap',
                   }}>
                     🎯 Click anywhere to place text

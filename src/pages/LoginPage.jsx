@@ -151,7 +151,7 @@ export default function LoginPage() {
             )}
 
             {notice && !error && (
-              <div style={{ background: '#E4F0EA', border: '1px solid #BFDCCD', borderRadius: 9, padding: '10px 13px', fontSize: 12.5, color: '#154F3C' }}>{notice}</div>
+              <div style={{ background: '#E3F1EB', border: '1px solid #BCDCCB', borderRadius: 9, padding: '10px 13px', fontSize: 12.5, color: '#085239' }}>{notice}</div>
             )}
             {error && <div className={styles.errorBox}>{error}</div>}
 
@@ -173,7 +173,6 @@ export default function LoginPage() {
       {/* ── Right: Ledger visual ── */}
       <div className={styles.visualSide}>
         <div className={styles.visualInner}>
-          <p className={styles.visualEyebrow}>Billing, simplified</p>
           <h2 className={styles.visualHeading}>Invoices that<br />get paid faster.</h2>
           <p className={styles.visualSub}>
             Create professional invoices, track every payment, and manage clients — one place for your whole business.
@@ -186,7 +185,7 @@ export default function LoginPage() {
                 <div className={styles.invoiceLabel}>Invoice</div>
                 <div className={styles.invoiceNo}>INV-2026-0042</div>
               </div>
-              <div className={styles.invoiceLogo}>ZF</div>
+              <div className={styles.invoiceLogo}>Z</div>
             </div>
             <div className={styles.invoiceRule} />
             <div className={styles.lineItem}><span>Web design retainer</span><span>₹45,000.00</span></div>

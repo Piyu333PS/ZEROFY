@@ -40,15 +40,15 @@ function FileDropZone({ onFile, file }) {
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       style={{
-        border: `2px dashed ${dragging ? '#6C63FF' : file ? 'rgba(108,99,255,0.5)' : 'rgba(255,255,255,0.12)'}`,
+        border: `2px dashed ${dragging ? '#EFA02F' : file ? 'rgba(239,160,47,0.5)' : 'rgba(255,255,255,0.12)'}`,
         borderRadius: 16,
         padding: file ? '24px 28px' : '48px 28px',
         textAlign: 'center',
         cursor: file ? 'default' : 'pointer',
         background: dragging
-          ? 'rgba(108,99,255,0.08)'
+          ? 'rgba(239,160,47,0.08)'
           : file
-          ? 'rgba(108,99,255,0.05)'
+          ? 'rgba(239,160,47,0.05)'
           : 'rgba(255,255,255,0.02)',
         transition: 'all 0.2s',
       }}
@@ -64,7 +64,7 @@ function FileDropZone({ onFile, file }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           <div style={{
             width: 48, height: 48, borderRadius: 12, flexShrink: 0,
-            background: 'rgba(108,99,255,0.15)', border: '1.5px solid rgba(108,99,255,0.3)',
+            background: 'rgba(239,160,47,0.15)', border: '1.5px solid rgba(239,160,47,0.3)',
             display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22
           }}>📄</div>
           <div style={{ textAlign: 'left', flex: 1, minWidth: 0 }}>
@@ -222,17 +222,17 @@ export default function CompressPDF() {
           flex: 1;
         }
         .cp-level-card:hover {
-          border-color: rgba(108,99,255,0.4);
-          background: rgba(108,99,255,0.07);
+          border-color: rgba(239,160,47,0.4);
+          background: rgba(239,160,47,0.07);
         }
         .cp-level-card.selected {
-          border-color: #6C63FF;
-          background: rgba(108,99,255,0.12);
-          box-shadow: 0 0 0 3px rgba(108,99,255,0.15);
+          border-color: #EFA02F;
+          background: rgba(239,160,47,0.12);
+          box-shadow: 0 0 0 3px rgba(239,160,47,0.15);
         }
         .cp-compress-btn {
           width: 100%;
-          background: linear-gradient(135deg, #6C63FF, #8B5CF6);
+          background: linear-gradient(135deg, #EFA02F, #EFA02F);
           border: none; color: #fff;
           font-size: 15px; font-weight: 700;
           padding: 14px 28px; border-radius: 12px;
@@ -242,7 +242,7 @@ export default function CompressPDF() {
         }
         .cp-compress-btn:hover:not(:disabled) {
           transform: translateY(-1px);
-          box-shadow: 0 8px 24px rgba(108,99,255,0.4);
+          box-shadow: 0 8px 24px rgba(239,160,47,0.4);
         }
         .cp-compress-btn:disabled {
           opacity: 0.45; cursor: not-allowed; transform: none;
@@ -282,7 +282,7 @@ export default function CompressPDF() {
         }
         .cp-progress-bar {
           height: 4px; border-radius: 2px;
-          background: linear-gradient(90deg, #6C63FF, #8B5CF6);
+          background: linear-gradient(90deg, #EFA02F, #EFA02F);
           animation: progressBar 2.5s ease forwards;
         }
       `}</style>
@@ -311,7 +311,7 @@ export default function CompressPDF() {
 
         {/* Header */}
         <div style={{ borderBottom: '1px solid rgba(255,255,255,0.07)', padding: '14px 24px', display: 'flex', alignItems: 'center', gap: 12, marginBottom: 32, marginTop: 12 }}>
-          <div style={{ width: 36, height: 36, borderRadius: 10, background: 'linear-gradient(135deg,#6C63FF,#8B5CF6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>🗜️</div>
+          <div style={{ width: 36, height: 36, borderRadius: 10, background: 'linear-gradient(135deg,#EFA02F,#EFA02F)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>🗜️</div>
           <div>
             <div style={{ fontSize: 17, fontWeight: 700, color: '#fff', lineHeight: 1 }}>Compress PDF</div>
             <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', marginTop: 2 }}>Reduce file size · Keep quality · Free</div>
@@ -323,13 +323,13 @@ export default function CompressPDF() {
 
           {/* Step 1: Upload */}
           <div style={{ marginBottom: 24 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: '#6C63FF', textTransform: 'uppercase', marginBottom: 12 }}>Step 1 — Upload PDF</div>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: '#EFA02F', textTransform: 'uppercase', marginBottom: 12 }}>Step 1 — Upload PDF</div>
             <FileDropZone onFile={handleFile} file={file} />
           </div>
 
           {/* Step 2: Compression Level */}
           <div style={{ marginBottom: 24 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: '#6C63FF', textTransform: 'uppercase', marginBottom: 12 }}>Step 2 — Compression Level</div>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: '#EFA02F', textTransform: 'uppercase', marginBottom: 12 }}>Step 2 — Compression Level</div>
             <div style={{ display: 'flex', gap: 10 }}>
               {COMPRESSION_LEVELS.map(lvl => (
                 <div
@@ -342,7 +342,7 @@ export default function CompressPDF() {
                   <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', lineHeight: 1.4, marginBottom: 6 }}>{lvl.desc}</div>
                   <div style={{
                     fontSize: 10, fontWeight: 700, color: level === lvl.id ? '#a89eff' : 'rgba(255,255,255,0.25)',
-                    background: level === lvl.id ? 'rgba(108,99,255,0.15)' : 'transparent',
+                    background: level === lvl.id ? 'rgba(239,160,47,0.15)' : 'transparent',
                     borderRadius: 4, padding: '2px 6px', display: 'inline-block'
                   }}>~{lvl.reduction}</div>
                 </div>
@@ -352,11 +352,11 @@ export default function CompressPDF() {
 
           {/* Step 3: Compress */}
           <div style={{ marginBottom: 24 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: '#6C63FF', textTransform: 'uppercase', marginBottom: 12 }}>Step 3 — Compress</div>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: '#EFA02F', textTransform: 'uppercase', marginBottom: 12 }}>Step 3 — Compress</div>
 
             {status === 'compressing' ? (
               <div style={{
-                background: 'rgba(108,99,255,0.06)', border: '1.5px solid rgba(108,99,255,0.2)',
+                background: 'rgba(239,160,47,0.06)', border: '1.5px solid rgba(239,160,47,0.2)',
                 borderRadius: 12, padding: '20px 24px'
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>

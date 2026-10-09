@@ -59,7 +59,7 @@ export function InvoicePreview({ inv = {}, items, currency, discPct, taxPct, tem
   ].filter(Boolean)
 
   const sumRow = (label, value, color) => (
-    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: 11, color: color || '#5A578A' }}>
+    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: 11, color: color || '#4B5B6E' }}>
       <span>{label}</span>
       <span style={{ fontFamily: 'monospace' }}>{value}</span>
     </div>
@@ -69,7 +69,7 @@ export function InvoicePreview({ inv = {}, items, currency, discPct, taxPct, tem
     <div style={{
       background: '#fff',
       fontFamily: "'Plus Jakarta Sans', sans-serif",
-      color: '#1a1a2e',
+      color: '#14202E',
       position: 'relative',
       minHeight: 700,
       overflow: 'hidden',
@@ -105,14 +105,14 @@ export function InvoicePreview({ inv = {}, items, currency, discPct, taxPct, tem
                 {full.bizName || 'Your Business'}
               </div>
               {full.bizAddr && (
-                <div style={{ fontSize: 10.5, color: '#5A578A', lineHeight: 1.6, whiteSpace: 'pre-line', maxWidth: 260 }}>
+                <div style={{ fontSize: 10.5, color: '#4B5B6E', lineHeight: 1.6, whiteSpace: 'pre-line', maxWidth: 260 }}>
                   {full.bizAddr}
                 </div>
               )}
-              <div style={{ marginTop: 5, display: 'flex', flexDirection: 'column', gap: 2, fontSize: 10.5, color: '#5A578A' }}>
+              <div style={{ marginTop: 5, display: 'flex', flexDirection: 'column', gap: 2, fontSize: 10.5, color: '#4B5B6E' }}>
                 {(full.bizPhone || full.bizAltPhone) && <div>Ph: {[full.bizPhone, full.bizAltPhone].filter(Boolean).join(', ')}</div>}
                 {(full.bizEmail || full.bizAltEmail) && <div>Email: {[full.bizEmail, full.bizAltEmail].filter(Boolean).join(', ')}</div>}
-                {full.bizGst && <div style={{ fontWeight: 700, color: '#3d3b63' }}>GSTIN: {full.bizGst}</div>}
+                {full.bizGst && <div style={{ fontWeight: 700, color: '#263A52' }}>GSTIN: {full.bizGst}</div>}
               </div>
             </div>
           </div>
@@ -122,7 +122,7 @@ export function InvoicePreview({ inv = {}, items, currency, discPct, taxPct, tem
             <div style={{ fontSize: 28, fontWeight: 900, color: acc, letterSpacing: '-0.02em', lineHeight: 1, marginBottom: 8, textTransform: 'uppercase' }}>
               {full.bizGst ? 'Tax Invoice' : 'Invoice'}
             </div>
-            <div style={{ fontFamily: 'monospace', fontSize: 13, fontWeight: 700, color: '#1a1a2e', letterSpacing: '0.04em' }}>
+            <div style={{ fontFamily: 'monospace', fontSize: 13, fontWeight: 700, color: '#14202E', letterSpacing: '0.04em' }}>
               {full.no || '—'}
             </div>
             {st === 'paid' && (
@@ -143,18 +143,18 @@ export function InvoicePreview({ inv = {}, items, currency, discPct, taxPct, tem
             <div style={{ fontSize: 9, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.14em', color: acc, marginBottom: 8 }}>
               Bill To
             </div>
-            <div style={{ fontSize: 13, fontWeight: 800, color: '#1a1a2e', marginBottom: 4, wordBreak: 'break-word' }}>
+            <div style={{ fontSize: 13, fontWeight: 800, color: '#14202E', marginBottom: 4, wordBreak: 'break-word' }}>
               {full.clientName || '—'}
             </div>
             {full.clientAddr && (
-              <div style={{ fontSize: 10.5, color: '#5A578A', lineHeight: 1.6, whiteSpace: 'pre-line', marginBottom: 4 }}>
+              <div style={{ fontSize: 10.5, color: '#4B5B6E', lineHeight: 1.6, whiteSpace: 'pre-line', marginBottom: 4 }}>
                 {full.clientAddr}
               </div>
             )}
-            <div style={{ fontSize: 10.5, color: '#5A578A', display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <div style={{ fontSize: 10.5, color: '#4B5B6E', display: 'flex', flexDirection: 'column', gap: 2 }}>
               {full.clientPhone && <div>Ph: {full.clientPhone}</div>}
               {full.clientEmail && <div>Email: {full.clientEmail}</div>}
-              {full.clientGst && <div style={{ fontWeight: 700, color: '#3d3b63' }}>GSTIN: {full.clientGst}</div>}
+              {full.clientGst && <div style={{ fontWeight: 700, color: '#263A52' }}>GSTIN: {full.clientGst}</div>}
             </div>
           </div>
 
@@ -166,8 +166,8 @@ export function InvoicePreview({ inv = {}, items, currency, discPct, taxPct, tem
               <tbody>
                 {metaRows.map(([label, value, mono]) => (
                   <tr key={label}>
-                    <td style={{ padding: '3px 0', color: '#5A578A' }}>{label}</td>
-                    <td style={{ padding: '3px 0', textAlign: 'right', fontWeight: 700, fontFamily: mono ? 'monospace' : 'inherit', color: '#1a1a2e' }}>{value}</td>
+                    <td style={{ padding: '3px 0', color: '#4B5B6E' }}>{label}</td>
+                    <td style={{ padding: '3px 0', textAlign: 'right', fontWeight: 700, fontFamily: mono ? 'monospace' : 'inherit', color: '#14202E' }}>{value}</td>
                   </tr>
                 ))}
               </tbody>
@@ -193,26 +193,26 @@ export function InvoicePreview({ inv = {}, items, currency, discPct, taxPct, tem
             <tbody>
               {c.lines.length === 0 && (
                 <tr>
-                  <td colSpan={8} style={{ padding: 20, textAlign: 'center', color: '#9492C0', fontSize: 11 }}>No items added yet</td>
+                  <td colSpan={8} style={{ padding: 20, textAlign: 'center', color: '#8A97A6', fontSize: 11 }}>No items added yet</td>
                 </tr>
               )}
               {c.lines.map((it, idx) => (
                 <tr key={it.id || idx} style={{ background: idx % 2 === 0 ? '#fff' : accLight, borderBottom: `1px solid ${accMid}` }}>
-                  <td style={{ ...td('left'), color: '#9492C0', fontWeight: 600, fontSize: 10 }}>{idx + 1}</td>
+                  <td style={{ ...td('left'), color: '#8A97A6', fontWeight: 600, fontSize: 10 }}>{idx + 1}</td>
                   <td style={td('left')}>
-                    <div style={{ fontWeight: 600, fontSize: 11, color: '#1a1a2e', wordBreak: 'break-word' }}>{it.desc || '—'}</div>
+                    <div style={{ fontWeight: 600, fontSize: 11, color: '#14202E', wordBreak: 'break-word' }}>{it.desc || '—'}</div>
                   </td>
-                  <td style={{ ...td('center'), fontFamily: 'monospace', fontSize: 10, color: '#6B6A9A' }}>{it.hsnSac || it.hsn || '—'}</td>
+                  <td style={{ ...td('center'), fontFamily: 'monospace', fontSize: 10, color: '#5C6B7C' }}>{it.hsnSac || it.hsn || '—'}</td>
                   <td style={{ ...td('center'), fontWeight: 600, whiteSpace: 'nowrap' }}>
-                    {it.qty} <span style={{ fontSize: 8.5, color: '#9492C0', fontWeight: 500 }}>{uqcLabel(it.uqc)}</span>
+                    {it.qty} <span style={{ fontSize: 8.5, color: '#8A97A6', fontWeight: 500 }}>{uqcLabel(it.uqc)}</span>
                   </td>
                   <td style={{ ...td('right'), fontFamily: 'monospace', fontSize: 10.5 }}>{money(it.rate)}</td>
                   <td style={{ ...td('right'), fontFamily: 'monospace', fontSize: 10.5 }}>{money(it.taxable)}</td>
-                  <td style={{ ...td('right'), fontFamily: 'monospace', fontSize: 10, color: '#6B6A9A' }}>
+                  <td style={{ ...td('right'), fontFamily: 'monospace', fontSize: 10, color: '#5C6B7C' }}>
                     {money(it.gstAmt)}
                     <div style={{ fontSize: 8.5, color: acc, fontWeight: 700 }}>@ {it.gstRate}%</div>
                   </td>
-                  <td style={{ ...td('right'), fontFamily: 'monospace', fontWeight: 800, fontSize: 11, color: '#1a1a2e' }}>{money(it.total)}</td>
+                  <td style={{ ...td('right'), fontFamily: 'monospace', fontWeight: 800, fontSize: 11, color: '#14202E' }}>{money(it.total)}</td>
                 </tr>
               ))}
             </tbody>
@@ -224,7 +224,7 @@ export function InvoicePreview({ inv = {}, items, currency, discPct, taxPct, tem
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10, minWidth: 0 }}>
             <div style={{ background: accLight, border: `1px solid ${accMid}`, borderRadius: 8, padding: '10px 14px' }}>
               <div style={{ fontSize: 9, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', color: acc, marginBottom: 4 }}>Amount in Words</div>
-              <div style={{ fontSize: 11, color: '#1a1a2e', fontWeight: 500, fontStyle: 'italic', lineHeight: 1.5 }}>
+              <div style={{ fontSize: 11, color: '#14202E', fontWeight: 500, fontStyle: 'italic', lineHeight: 1.5 }}>
                 {amountInWords(c.total, cur)}
               </div>
             </div>
@@ -233,8 +233,8 @@ export function InvoicePreview({ inv = {}, items, currency, discPct, taxPct, tem
               <div style={{ border: `1px solid ${accMid}`, borderRadius: 8, padding: '10px 14px', display: 'flex', gap: 14, alignItems: 'center', justifyContent: 'space-between' }}>
                 <div style={{ minWidth: 0 }}>
                   <div style={{ fontSize: 9, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', color: acc, marginBottom: 4 }}>Payment Details</div>
-                  {full.bankDetails && <div style={{ fontSize: 10.5, color: '#5A578A', lineHeight: 1.6, whiteSpace: 'pre-line' }}>{full.bankDetails}</div>}
-                  {full.upiId && <div style={{ fontSize: 10.5, color: '#3d3b63', fontWeight: 700, marginTop: full.bankDetails ? 4 : 0, wordBreak: 'break-all' }}>UPI: {full.upiId}</div>}
+                  {full.bankDetails && <div style={{ fontSize: 10.5, color: '#4B5B6E', lineHeight: 1.6, whiteSpace: 'pre-line' }}>{full.bankDetails}</div>}
+                  {full.upiId && <div style={{ fontSize: 10.5, color: '#263A52', fontWeight: 700, marginTop: full.bankDetails ? 4 : 0, wordBreak: 'break-all' }}>UPI: {full.upiId}</div>}
                 </div>
                 {qr && (
                   <div style={{ textAlign: 'center', flexShrink: 0 }}>
@@ -242,8 +242,8 @@ export function InvoicePreview({ inv = {}, items, currency, discPct, taxPct, tem
                       <rect width={qr.size} height={qr.size} fill="#ffffff" />
                       <path d={qr.path} fill="#000000" />
                     </svg>
-                    <div style={{ fontSize: 8.5, fontWeight: 700, color: '#3d3b63', marginTop: 3 }}>Scan to pay {money(payable)}</div>
-                    <div style={{ fontSize: 7.5, color: '#9492C0' }}>Any UPI app</div>
+                    <div style={{ fontSize: 8.5, fontWeight: 700, color: '#263A52', marginTop: 3 }}>Scan to pay {money(payable)}</div>
+                    <div style={{ fontSize: 7.5, color: '#8A97A6' }}>Any UPI app</div>
                   </div>
                 )}
               </div>
@@ -252,14 +252,14 @@ export function InvoicePreview({ inv = {}, items, currency, discPct, taxPct, tem
             {full.notes && (
               <div style={{ background: '#fffbf0', border: '1px solid #f5e6b0', borderRadius: 8, padding: '10px 14px' }}>
                 <div style={{ fontSize: 9, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#B8860B', marginBottom: 4 }}>Notes</div>
-                <div style={{ fontSize: 10.5, color: '#5A578A', lineHeight: 1.6, whiteSpace: 'pre-line' }}>{full.notes}</div>
+                <div style={{ fontSize: 10.5, color: '#4B5B6E', lineHeight: 1.6, whiteSpace: 'pre-line' }}>{full.notes}</div>
               </div>
             )}
 
             {full.terms && (
               <div>
-                <div style={{ fontSize: 9, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#9492C0', marginBottom: 3 }}>Terms &amp; Conditions</div>
-                <div style={{ fontSize: 9.5, color: '#6B6A9A', lineHeight: 1.6, whiteSpace: 'pre-line' }}>{full.terms}</div>
+                <div style={{ fontSize: 9, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#8A97A6', marginBottom: 3 }}>Terms &amp; Conditions</div>
+                <div style={{ fontSize: 9.5, color: '#5C6B7C', lineHeight: 1.6, whiteSpace: 'pre-line' }}>{full.terms}</div>
               </div>
             )}
           </div>
@@ -288,7 +288,7 @@ export function InvoicePreview({ inv = {}, items, currency, discPct, taxPct, tem
                 {paid > 0 && (
                   <div style={{ marginTop: 6 }}>
                     {sumRow('Amount paid', `−${money(paid)}`, '#1F9C5A')}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: 11.5, fontWeight: 800, color: '#1a1a2e' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: 11.5, fontWeight: 800, color: '#14202E' }}>
                       <span>Balance due</span>
                       <span style={{ fontFamily: 'monospace' }}>{money(balance)}</span>
                     </div>
@@ -298,9 +298,9 @@ export function InvoicePreview({ inv = {}, items, currency, discPct, taxPct, tem
             </div>
 
             <div style={{ marginTop: 34, textAlign: 'right' }}>
-              <div style={{ fontSize: 10, color: '#5A578A' }}>For <span style={{ fontWeight: 700, color: '#1a1a2e' }}>{full.bizName || 'Your Business'}</span></div>
+              <div style={{ fontSize: 10, color: '#4B5B6E' }}>For <span style={{ fontWeight: 700, color: '#14202E' }}>{full.bizName || 'Your Business'}</span></div>
               <div style={{ height: 34 }} />
-              <div style={{ borderTop: '1px solid #c9c7e0', paddingTop: 4, fontSize: 9.5, color: '#6B6A9A', display: 'inline-block', minWidth: 150 }}>
+              <div style={{ borderTop: '1px solid #C5CCD4', paddingTop: 4, fontSize: 9.5, color: '#5C6B7C', display: 'inline-block', minWidth: 150 }}>
                 {full.signatory || 'Authorised Signatory'}
               </div>
             </div>
@@ -314,8 +314,8 @@ export function InvoicePreview({ inv = {}, items, currency, discPct, taxPct, tem
           padding: '12px 32px',
           display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12,
         }}>
-          <div style={{ fontSize: 9, color: '#9492C0' }}>This is a computer-generated invoice</div>
-          <div style={{ fontSize: 9, color: '#9492C0', textAlign: 'right' }}>
+          <div style={{ fontSize: 9, color: '#8A97A6' }}>This is a computer-generated invoice</div>
+          <div style={{ fontSize: 9, color: '#8A97A6', textAlign: 'right' }}>
             {full.bizName && <span style={{ fontWeight: 700, color: acc }}>{full.bizName}</span>}
             {full.bizGst && <span> · GSTIN: {full.bizGst}</span>}
           </div>
@@ -328,14 +328,14 @@ export function InvoicePreview({ inv = {}, items, currency, discPct, taxPct, tem
           <div style={{
             padding: '8px 32px 12px',
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-            borderTop: '1px dashed #e8e5f5',
-            background: '#fafafe',
+            borderTop: '1px dashed #DDE1D9',
+            background: '#FAFBF8',
           }}>
             <span style={{ fontSize: 8, color: '#aaa', letterSpacing: '0.04em', fontStyle: 'italic' }}>Created with</span>
-            <span style={{ fontSize: 11, fontWeight: 900, letterSpacing: '0.06em', color: '#8B7FFF' }}>ZEROFY</span>
+            <span style={{ fontSize: 11, fontWeight: 900, letterSpacing: '0.06em', color: '#5C7189' }}>ZEROFY</span>
             <span style={{ fontSize: 8, color: '#bbb' }}>Invoice Generator</span>
             <span style={{ fontSize: 8, color: '#ccc' }}>·</span>
-            <a href="https://www.zerofy.co.in" style={{ fontSize: 8, color: '#8B7FFF', textDecoration: 'none', fontWeight: 600 }}>www.zerofy.co.in</a>
+            <a href="https://www.zerofy.co.in" style={{ fontSize: 8, color: '#5C7189', textDecoration: 'none', fontWeight: 600 }}>www.zerofy.co.in</a>
           </div>
         )}
       </div>

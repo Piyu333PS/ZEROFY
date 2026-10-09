@@ -2,39 +2,39 @@
 // Imported by PricingPage and BillingPage so copy/colors never drift apart.
 
 export const PRO_FEATURES = [
-  { icon: '🧾', label: 'Unlimited invoice generation' },
-  { icon: '🛠️', label: 'Every tool unlocked' },
-  { icon: '📁', label: 'Unlimited file processing' },
-  { icon: '📦', label: 'Max 100MB file size' },
-  { icon: '🚫', label: 'No watermarks' },
-  { icon: '🎧', label: 'Priority support' },
+  { icon: '', label: 'Unlimited invoice generation' },
+  { icon: '', label: 'Every tool unlocked' },
+  { icon: '', label: 'Unlimited file processing' },
+  { icon: '', label: 'Max 100MB file size' },
+  { icon: '', label: 'No watermarks' },
+  { icon: '', label: 'Priority support' },
 ]
 
 // Accent theme per billing cycle — reused across Pricing + Billing pages.
 export const PLAN_THEME = {
   monthly: {
     name: 'Monthly',
-    emoji: '⚡',
-    accent: '#60A5FA',
-    soft: 'rgba(96,165,250,0.08)',
-    border: 'rgba(96,165,250,0.25)',
-    gradient: 'linear-gradient(135deg, #60A5FA, #3B82F6)',
+    emoji: '',
+    accent: '#EFA02F',
+    soft: 'rgba(239,160,47,0.08)',
+    border: 'rgba(239,160,47,0.25)',
+    gradient: '#EFA02F',
   },
   quarterly: {
     name: 'Quarterly',
-    emoji: '🔥',
-    accent: '#A78BFA',
-    soft: 'linear-gradient(135deg, rgba(96,165,250,0.12) 0%, rgba(167,139,250,0.14) 100%)',
-    border: 'rgba(167,139,250,0.5)',
-    gradient: 'linear-gradient(135deg, #60A5FA, #A78BFA)',
+    emoji: '',
+    accent: '#F6B24E',
+    soft: 'linear-gradient(135deg, rgba(239,160,47,0.12) 0%, rgba(239,160,47,0.14) 100%)',
+    border: 'rgba(239,160,47,0.5)',
+    gradient: '#EFA02F',
   },
   yearly: {
     name: 'Yearly',
-    emoji: '💰',
+    emoji: '',
     accent: '#fbbf24',
     soft: 'rgba(251,191,36,0.07)',
     border: 'rgba(251,191,36,0.3)',
-    gradient: 'linear-gradient(135deg, #f59e0b, #fbbf24)',
+    gradient: '#EFA02F',
   },
 }
 
@@ -55,7 +55,7 @@ export const PLANS = [
     period: '/3 months',
     months: 3,
     desc: 'Save vs monthly. Billed every 3 months.',
-    badge: '🔥 Most Popular',
+    badge: 'Most Popular',
     cta: 'Get Started',
     ctaStyle: 'gradient',
   },
@@ -65,7 +65,7 @@ export const PLANS = [
     period: '/year',
     months: 12,
     desc: 'Best value. Billed once a year.',
-    badge: '💰 Best Value',
+    badge: 'Best Value',
     cta: 'Get Started',
     ctaStyle: 'gold',
   },

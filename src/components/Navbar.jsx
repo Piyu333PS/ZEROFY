@@ -7,8 +7,9 @@ import AuthModal from './AuthModal'
 
 function UserDropdown({ user, logout, onClose, navigate }) {
   const menuItems = [
-    { icon: '⚙️', label: 'Settings', route: '/settings' },
-    { icon: '💳', label: 'Billing & Plan', route: '/billing' },
+    { icon: '', label: 'Settings', route: '/settings' },
+    { icon: '', label: 'Billing & plan', route: '/billing' },
+    { icon: '', label: 'Back to billing app', route: '/app' },
   ]
 
   return (
@@ -232,7 +233,7 @@ export default function Navbar() {
             {/* LOGGED IN FREE USER */}
             {user && !user.isPro && (
               <>
-                <Link to="/pricing" className={styles.proLink}>⚡ Go Pro</Link>
+                <Link to="/pricing" className={styles.proLink}>Go Pro</Link>
                 <div style={{ position: 'relative' }}>
                   <button
                     onClick={() => setShowDropdown(s => !s)}

@@ -1,12 +1,12 @@
 export const CATEGORIES = [
-  { id: 'pdf',       label: 'PDF',       icon: '📄', color: '#63b3ed', dim: 'rgba(99,179,237,0.12)' },
-  { id: 'video',     label: 'Video',     icon: '🎬', color: '#9f7aea', dim: 'rgba(159,122,234,0.12)' },
-  { id: 'audio',     label: 'Audio',     icon: '🎵', color: '#90cdf4', dim: 'rgba(144,205,244,0.12)' },
-  { id: 'image',     label: 'Image',     icon: '🖼️', color: '#b794f4', dim: 'rgba(183,148,244,0.12)' },
+  { id: 'pdf',       label: 'PDF',       icon: '📄', color: '#EFA02F', dim: 'rgba(239,160,47,0.12)' },
+  { id: 'video',     label: 'Video',     icon: '🎬', color: '#EFA02F', dim: 'rgba(239,160,47,0.12)' },
+  { id: 'audio',     label: 'Audio',     icon: '🎵', color: '#F6B24E', dim: 'rgba(144,205,244,0.12)' },
+  { id: 'image',     label: 'Image',     icon: '🖼️', color: '#F6B24E', dim: 'rgba(183,148,244,0.12)' },
   { id: 'document',  label: 'Document',  icon: '📝', color: '#a3bffa', dim: 'rgba(163,191,250,0.12)' },
   { id: 'converter', label: 'Converter', icon: '🔄', color: '#7f9cf5', dim: 'rgba(127,156,245,0.12)' },
-  { id: 'developer', label: 'Developer', icon: '⚙️', color: '#9f7aea', dim: 'rgba(159,122,234,0.12)' },
-  { id: 'security',  label: 'Security',  icon: '🔒', color: '#63b3ed', dim: 'rgba(99,179,237,0.12)' },
+  { id: 'developer', label: 'Developer', icon: '⚙️', color: '#EFA02F', dim: 'rgba(239,160,47,0.12)' },
+  { id: 'security',  label: 'Security',  icon: '🔒', color: '#EFA02F', dim: 'rgba(239,160,47,0.12)' },
 ]
 
 export const TOOLS = [

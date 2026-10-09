@@ -16,7 +16,7 @@
   margin-bottom: 8px;
   transition: all 0.2s;
 }
-.fileItem:hover { border-color: rgba(99,179,237,0.25); background: rgba(255,255,255,0.06); }
+.fileItem:hover { border-color: rgba(239,160,47,0.25); background: rgba(255,255,255,0.06); }
 
 .fileNum {
   font-size: 11px;
@@ -85,12 +85,12 @@
   justify-content: center;
   gap: 10px;
   letter-spacing: 0.2px;
-  box-shadow: 0 4px 20px rgba(59,130,246,0.25);
+  box-shadow: 0 4px 20px rgba(239,160,47,0.25);
 }
 
 .actionBtn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 8px 32px rgba(59,130,246,0.4), 0 0 0 1px rgba(59,130,246,0.3);
+  box-shadow: 0 8px 32px rgba(239,160,47,0.4), 0 0 0 1px rgba(239,160,47,0.3);
   filter: brightness(1.08);
 }
 
@@ -129,8 +129,8 @@
 .hint {
   margin-top: 14px;
   padding: 11px 14px;
-  background: rgba(59,130,246,0.05);
-  border: 1px solid rgba(59,130,246,0.15);
+  background: rgba(239,160,47,0.05);
+  border: 1px solid rgba(239,160,47,0.15);
   border-radius: var(--radius);
   color: var(--text2);
   font-size: 13px;
@@ -281,7 +281,7 @@
   background: var(--grad);
   border-radius: 3px;
   transition: width 0.3s ease;
-  box-shadow: 0 0 8px rgba(59,130,246,0.4);
+  box-shadow: 0 0 8px rgba(239,160,47,0.4);
 }
 
 @media (max-width: 640px) {

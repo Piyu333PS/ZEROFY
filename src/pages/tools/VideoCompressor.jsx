@@ -388,7 +388,7 @@ export default function VideoCompressor() {
                   background: 'var(--grad)',
                   borderRadius: 6,
                   transition: 'width 0.3s ease',
-                  boxShadow: '0 0 10px rgba(59,130,246,0.5)'
+                  boxShadow: '0 0 10px rgba(239,160,47,0.5)'
                 }} />
               </div>
 

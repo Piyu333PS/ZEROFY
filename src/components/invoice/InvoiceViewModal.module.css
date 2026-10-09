@@ -1,35 +1,35 @@
 .overlay {
   position: fixed; inset: 0; z-index: 3000;
-  background: rgba(27, 35, 64, 0.55); backdrop-filter: blur(4px);
+  background: rgba(18,38,63, 0.55); backdrop-filter: blur(4px);
   display: flex; align-items: flex-start; justify-content: center;
   padding: 24px 16px; overflow-y: auto;
   font-family: 'Inter', system-ui, sans-serif;
 }
 .modal {
   width: 100%; max-width: 860px; background: #fff; border-radius: 16px;
-  box-shadow: 0 24px 60px rgba(27, 35, 64, 0.3); overflow: hidden;
+  box-shadow: 0 24px 60px rgba(18,38,63, 0.3); overflow: hidden;
 }
 .head {
   display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;
-  padding: 14px 18px; border-bottom: 1px solid #E1D9C4; background: #FCFAF4;
+  padding: 14px 18px; border-bottom: 1px solid #DDE1D9; background: #FAFBF8;
   position: sticky; top: 0; z-index: 2;
 }
-.title { font-weight: 700; font-size: 15px; color: #1B2340; font-family: 'IBM Plex Mono', monospace; }
-.sub { font-size: 12px; color: #69708A; margin-top: 2px; }
+.title { font-weight: 700; font-size: 15px; color: #12263F; font-family: 'IBM Plex Mono', monospace; }
+.sub { font-size: 12px; color: #5C7189; margin-top: 2px; }
 .actions { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
 .btn {
-  border: 1px solid #E1D9C4; background: #fff; color: #1B2340;
+  border: 1px solid #DDE1D9; background: #fff; color: #12263F;
   font-size: 12.5px; font-weight: 600; padding: 8px 12px; border-radius: 8px; cursor: pointer;
   font-family: inherit; white-space: nowrap;
 }
-.btn:hover:not(:disabled) { background: #EFE9DA; }
+.btn:hover:not(:disabled) { background: #ECEEE8; }
 .btn:disabled { opacity: 0.55; cursor: wait; }
-.primary { background: #E8933C; border-color: #E8933C; color: #fff; }
-.primary:hover:not(:disabled) { background: #C97423; }
+.primary { background: #EFA02F; border-color: #EFA02F; color: #fff; }
+.primary:hover:not(:disabled) { background: #A85E08; }
 .close { font-size: 20px; line-height: 1; padding: 5px 11px; }
-.body { padding: 18px; background: #EFE9DA; overflow-x: auto; }
-.sheet { min-width: 700px; background: #fff; box-shadow: 0 6px 24px rgba(27, 35, 64, 0.14); }
-.error { color: #C1443C; font-size: 12.5px; padding: 8px 18px 0; }
+.body { padding: 18px; background: #ECEEE8; overflow-x: auto; }
+.sheet { min-width: 700px; background: #fff; box-shadow: 0 6px 24px rgba(18,38,63, 0.14); }
+.error { color: #B3261E; font-size: 12.5px; padding: 8px 18px 0; }
 @media (max-width: 640px) {
   .overlay { padding: 0; }
   .modal { border-radius: 0; min-height: 100vh; }

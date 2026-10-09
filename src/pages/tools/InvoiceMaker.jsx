@@ -174,7 +174,7 @@ function BizModal({ businesses, onSave, onClose }) {
     <div className="modal-bg" onClick={e => e.target === e.currentTarget && onClose()}>
       <div className="modal">
         <div className="modal-h">
-          <div className="modal-title">🏢 Business Profiles</div>
+          <div className="modal-title">Business profiles</div>
           <button className="btn btn-icon btn-ghost" onClick={onClose} style={{ fontSize: 18 }}>×</button>
         </div>
         {!editing && (
@@ -195,7 +195,7 @@ function BizModal({ businesses, onSave, onClose }) {
                   ) : (
                     <>
                       <button className="btn btn-sm" onClick={() => { setEditing(b.id); setForm({ ...empty, ...b }); setTouched({}); setFormMsg('') }}>Edit</button>
-                      <button className="btn btn-sm" style={{ color: 'var(--red)', borderColor: 'rgba(193,68,60,0.3)', background: 'rgba(193,68,60,0.08)' }}
+                      <button className="btn btn-sm" style={{ color: 'var(--red)', borderColor: 'rgba(179,38,30,0.3)', background: 'rgba(179,38,30,0.08)' }}
                         onClick={() => setConfirmDel(b.id)}>Del</button>
                     </>
                   )}
@@ -277,8 +277,8 @@ function BizModal({ businesses, onSave, onClose }) {
 /* ─── Upgrade Payment Flow (Razorpay inline) ─────────────────── */
 const UPGRADE_PLANS = [
   { id: 'monthly',   label: '₹49/month',   desc: `Monthly`,   amount: 49,  badge: null,           days: 30 },
-  { id: 'quarterly', label: '₹129/quarter', desc: `Quarterly`, amount: 129, badge: '🔥 Popular',  days: 90 },
-  { id: 'yearly',    label: '₹399/year',   desc: `Yearly`,    amount: 399, badge: '💰 Best Value', days: 365 },
+  { id: 'quarterly', label: '₹129/quarter', desc: `Quarterly`, amount: 129, badge: 'Most popular',  days: 90 },
+  { id: 'yearly',    label: '₹399/year',   desc: `Yearly`,    amount: 399, badge: 'Best value', days: 365 },
 ]
 
 function UpgradePaymentFlow({ token, API, onSuccess, onClose }) {
@@ -346,7 +346,7 @@ function UpgradePaymentFlow({ token, API, onSuccess, onClose }) {
         name: 'Zerofy Pro',
         description: orderData.planName,
         order_id: orderData.orderId,
-        theme: { color: '#E8933C' },
+        theme: { color: '#EFA02F' },
         handler: async (response) => {
           // 4. Verify payment on backend
           const verifyRes = await fetch(`${API}/api/payment/verify`, {
@@ -393,9 +393,9 @@ function UpgradePaymentFlow({ token, API, onSuccess, onClose }) {
             onClick={() => setSelected(plan.id)}
             style={{
               padding: '12px 16px', borderRadius: 12, cursor: 'pointer',
-              border: selected === plan.id ? '2px solid rgba(201,116,35,0.6)' : '1px solid #E1D9C4',
+              border: selected === plan.id ? '2px solid rgba(168,94,8,0.6)' : '1px solid #DDE1D9',
               background: selected === plan.id
-                ? 'linear-gradient(135deg, rgba(232,147,60,0.12), rgba(31,111,84,0.08))'
+                ? 'linear-gradient(135deg, rgba(239,160,47,0.12), rgba(11,110,79,0.08))'
                 : '#FFFFFF',
               display: 'flex', justifyContent: 'space-between', alignItems: 'center',
               transition: 'all 0.15s',
@@ -404,18 +404,18 @@ function UpgradePaymentFlow({ token, API, onSuccess, onClose }) {
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <div style={{
                 width: 16, height: 16, borderRadius: '50%',
-                border: `2px solid ${selected === plan.id ? '#C97423' : '#D6CBA8'}`,
-                background: selected === plan.id ? '#C97423' : 'transparent',
+                border: `2px solid ${selected === plan.id ? '#A85E08' : '#C9CFC4'}`,
+                background: selected === plan.id ? '#A85E08' : 'transparent',
                 flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>
                 {selected === plan.id && <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#fff' }} />}
               </div>
               <div>
-                <div style={{ fontSize: 14, fontWeight: 600, color: '#1B2340' }}>{plan.desc}</div>
-                {plan.badge && <div style={{ fontSize: 10, color: '#C97423', fontWeight: 700 }}>{plan.badge}</div>}
+                <div style={{ fontSize: 14, fontWeight: 600, color: '#12263F' }}>{plan.desc}</div>
+                {plan.badge && <div style={{ fontSize: 10, color: '#A85E08', fontWeight: 700 }}>{plan.badge}</div>}
               </div>
             </div>
-            <div style={{ fontSize: 14, fontWeight: 700, color: '#C97423', flexShrink: 0 }}>{plan.label}</div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: '#A85E08', flexShrink: 0 }}>{plan.label}</div>
           </button>
         ))}
       </div>
@@ -433,8 +433,8 @@ function UpgradePaymentFlow({ token, API, onSuccess, onClose }) {
           onClick={validateCoupon}
           disabled={couponLoading || !coupon.trim()}
           style={{
-            padding: '9px 14px', borderRadius: 8, border: '1px solid rgba(31,111,84,0.35)',
-            background: 'rgba(31,111,84,0.1)', color: '#1F6F54',
+            padding: '9px 14px', borderRadius: 8, border: '1px solid rgba(11,110,79,0.35)',
+            background: 'rgba(11,110,79,0.1)', color: '#0B6E4F',
             fontSize: 12, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap',
             opacity: couponLoading || !coupon.trim() ? 0.5 : 1,
           }}
@@ -445,13 +445,13 @@ function UpgradePaymentFlow({ token, API, onSuccess, onClose }) {
       {couponStatus && (
         <div style={{
           marginBottom: 12, padding: '8px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600,
-          background: couponStatus.valid ? 'rgba(31,111,84,0.1)' : 'rgba(193,68,60,0.1)',
-          border: `1px solid ${couponStatus.valid ? 'rgba(31,111,84,0.3)' : 'rgba(193,68,60,0.3)'}`,
-          color: couponStatus.valid ? '#1F6F54' : '#C1443C',
+          background: couponStatus.valid ? 'rgba(11,110,79,0.1)' : 'rgba(179,38,30,0.1)',
+          border: `1px solid ${couponStatus.valid ? 'rgba(11,110,79,0.3)' : 'rgba(179,38,30,0.3)'}`,
+          color: couponStatus.valid ? '#0B6E4F' : '#B3261E',
         }}>
           {couponStatus.valid
-            ? `✅ ${couponStatus.desc} — You save ₹${(couponStatus.discountAmount / 100).toFixed(0)}!`
-            : `❌ ${couponStatus.desc}`}
+            ? `${couponStatus.desc} — you save ₹${(couponStatus.discountAmount / 100).toFixed(0)}!`
+            : couponStatus.desc}
         </div>
       )}
 
@@ -459,9 +459,9 @@ function UpgradePaymentFlow({ token, API, onSuccess, onClose }) {
       {error && (
         <div style={{
           marginBottom: 12, padding: '10px 12px', borderRadius: 8, fontSize: 12,
-          background: 'rgba(193,68,60,0.1)', border: '1px solid rgba(193,68,60,0.3)', color: '#C1443C',
+          background: 'rgba(179,38,30,0.1)', border: '1px solid rgba(179,38,30,0.3)', color: '#B3261E',
         }}>
-          ⚠️ {error}
+          {error}
         </div>
       )}
 
@@ -472,26 +472,25 @@ function UpgradePaymentFlow({ token, API, onSuccess, onClose }) {
         style={{
           width: '100%', padding: '14px',
           borderRadius: 12, border: 'none',
-          background: loading ? 'rgba(232,147,60,0.4)' : 'linear-gradient(135deg, #E8933C, #C97423)',
-          color: '#fff', fontSize: 15, fontWeight: 700,
+          background: loading ? 'rgba(239,160,47,0.45)' : '#EFA02F',
+          color: '#12263F', fontSize: 15, fontWeight: 700,
           cursor: loading ? 'not-allowed' : 'pointer',
-          boxShadow: loading ? 'none' : '0 4px 18px rgba(232,147,60,0.4)',
           marginBottom: 10, transition: 'all 0.2s',
         }}
       >
-        {loading ? '⏳ Processing...' : `⚡ Pay ₹${displayAmount} — Activate Pro`}
+        {loading ? 'Processing…' : `Pay ₹${displayAmount} and activate Pro`}
       </button>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <button
           onClick={onClose}
-          style={{ background: 'none', border: 'none', color: '#8890A6', fontSize: 12, cursor: 'pointer', padding: '4px 0' }}
+          style={{ background: 'none', border: 'none', color: '#8494A6', fontSize: 12, cursor: 'pointer', padding: '4px 0' }}
         >
           Maybe later
         </button>
         <a
           href="/pricing"
-          style={{ color: '#8890A6', fontSize: 12, textDecoration: 'none' }}
+          style={{ color: '#8494A6', fontSize: 12, textDecoration: 'none' }}
           onClick={onClose}
         >
           View all plans →
@@ -914,7 +913,7 @@ export default function InvoiceMaker() {
   const limitReached = Boolean(token) && !isPro && !editing && invoiceCount >= FREE_LIMIT
   const sellerState = stateCodeOf(f.bizGst)
   const busy = Boolean(saving)
-  const mono = { fontFamily: "'JetBrains Mono', monospace" }
+  const mono = { fontFamily: "'IBM Plex Mono', monospace" }
 
   return (
     <div className="ig-root">
@@ -922,26 +921,15 @@ export default function InvoiceMaker() {
       <div className="ig-top">
         <div className="ig-top-inner">
           <div className="ig-top-left">
-            <button className="ig-back" onClick={() => navigate(token ? '/app/invoices' : '/')}>‹ Back</button>
-            <div className="ig-crumb">
-              <span>Invoices</span><span className="ig-crumb-sep">›</span>
-              <span className="ig-crumb-cur">{editing ? `Edit ${editing.no}` : 'New invoice'}</span>
-            </div>
+            <button className="ig-back" onClick={() => navigate(token ? '/app/invoices' : '/')}>‹ Invoices</button>
             <div className="ig-vsep" />
             <div className="ig-brand">
-              <div className="ig-icon">🧾</div>
-              <div>
-                <div className="ig-name">Invoice Generator</div>
-                <div className="ig-sub">GST-ready · Instant PDF · Multi-business</div>
-              </div>
+              <div className="ig-name">{editing ? `Edit invoice ${editing.no}` : 'New invoice'}</div>
             </div>
           </div>
           <div className="ig-actions">
             <button className="btn" onClick={() => setShowBizModal(true)}>
-              🏢 Businesses {businesses.length > 0 && <span style={{ background: 'var(--accent)', color: '#fff', borderRadius: 10, padding: '1px 7px', fontSize: 10 }}>{businesses.length}</span>}
-            </button>
-            <button className="btn" onClick={() => navigate('/app/invoices')}>
-              📄 All Invoices
+              Business profiles {businesses.length > 0 && <span style={{ background: 'var(--card2)', color: 'var(--text2)', borderRadius: 10, padding: '1px 7px', fontSize: 11 }}>{businesses.length}</span>}
             </button>
             <select className="inp" aria-label="Currency" value={currency} onChange={e => setCurrency(e.target.value)} style={{ width: 'auto', padding: '8px 12px' }}>
               {CURRENCIES.map(c => <option key={c.sym} value={c.sym}>{c.sym} {c.code}</option>)}
@@ -956,7 +944,7 @@ export default function InvoiceMaker() {
         <div className="ig-left">
 
           {token && !cloudLoaded && (
-            <div className="ig-banner" role="status">⏳ Aapka saved business, clients aur items load ho rahe hain…</div>
+            <div className="ig-banner" role="status">Aapka saved business, clients aur items load ho rahe hain…</div>
           )}
 
           {editing && (
@@ -1015,7 +1003,7 @@ export default function InvoiceMaker() {
                     {activeBizId === b.id && '✓ '}{b.name}
                   </button>
                 ))}
-                <button className="biz-pill" style={{ color: 'var(--accent-deep)', borderColor: 'rgba(232,147,60,0.35)', background: 'var(--accent-dim)' }}
+                <button className="biz-pill" style={{ color: 'var(--accent-deep)', borderColor: 'rgba(239,160,47,0.35)', background: 'var(--accent-dim)' }}
                   onClick={() => setShowBizModal(true)}>+ Add / Edit</button>
               </div>
             </div>
@@ -1125,8 +1113,8 @@ export default function InvoiceMaker() {
                 <div>
                   <select className="inp" aria-label="Item type" value={it.type}
                     onChange={e => { updateItem(it.id, 'type', e.target.value); updateItem(it.id, 'hsnSac', '') }}>
-                    <option value="goods">🟡 Goods</option>
-                    <option value="service">🔵 Service</option>
+                    <option value="goods">Goods</option>
+                    <option value="service">Service</option>
                   </select>
                 </div>
                 {/* Description */}
@@ -1306,43 +1294,38 @@ export default function InvoiceMaker() {
 
             {/* Save area */}
             <div className="gen-area">
-              <div className="gen-label">Total Amount</div>
+              <div className="gen-label">Invoice total</div>
               <div className="gen-total">{fmt(total, currency)}</div>
-              {f.dueDate && <div style={{ fontSize: 11.5, color: 'var(--text3)', marginTop: 4 }}>Due {formatDate(f.dueDate)}</div>}
+              {f.dueDate && <div className="gen-note" style={{ marginTop: 4 }}>Due {formatDate(f.dueDate)}</div>}
 
               {/* Free limit indicator */}
               {token && !isPro && !editing && (
                 limitReached ? (
                   <div style={{
                     margin: '14px 0 0', padding: '14px 16px',
-                    background: 'linear-gradient(135deg, rgba(232,147,60,0.1), rgba(31,111,84,0.08))',
-                    border: '1px solid rgba(232,147,60,0.35)', borderRadius: 14, textAlign: 'center',
+                    background: '#FCEFD9',
+                    border: '1px solid rgba(239,160,47,0.45)', borderRadius: 12, textAlign: 'center',
                   }}>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: '#C97423', marginBottom: 4 }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: '#A85E08', marginBottom: 4 }}>
                       {FREE_LIMIT} free invoices use ho chuke hain
                     </div>
-                    <div style={{ fontSize: 12, color: 'var(--text2)', lineHeight: 1.5, marginBottom: 10 }}>
-                      Pro par unlimited invoices — <strong style={{ color: '#C97423' }}>₹49/month</strong> se shuru
+                    <div style={{ fontSize: 12, color: '#44566B', lineHeight: 1.5, marginBottom: 10 }}>
+                      Pro par unlimited invoices — <strong style={{ color: '#A85E08' }}>₹49/month</strong> se shuru
                     </div>
                     <button
                       onClick={() => setShowUpgradeModal(true)}
                       style={{
                         padding: '8px 18px', borderRadius: 20, border: 'none',
-                        background: 'linear-gradient(135deg, #E8933C, #C97423)',
-                        color: '#fff', fontSize: 12, fontWeight: 700, cursor: 'pointer',
-                        boxShadow: '0 4px 14px rgba(232,147,60,0.4)',
+                        background: '#EFA02F',
+                        color: '#12263F', fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
                       }}
                     >
-                      ⚡ Upgrade to Pro
+                      Upgrade to Pro
                     </button>
                   </div>
                 ) : (
-                  <div style={{
-                    margin: '12px 0 0', padding: '8px 14px',
-                    background: 'rgba(232,147,60,0.08)', border: '1px solid rgba(232,147,60,0.25)',
-                    borderRadius: 10, fontSize: 13, color: 'var(--text2)', textAlign: 'center'
-                  }}>
-                    ⚡ {FREE_LIMIT - invoiceCount} free invoice{FREE_LIMIT - invoiceCount === 1 ? '' : 's'} remaining
+                  <div className="gen-note" style={{ marginTop: 6 }}>
+                    {FREE_LIMIT - invoiceCount} of {FREE_LIMIT} free invoices left
                   </div>
                 )
               )}
@@ -1352,15 +1335,15 @@ export default function InvoiceMaker() {
                   <div style={{ marginTop: 16, display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
                     <button className="btn btn-accent" onClick={() => saveInvoice('final')} disabled={busy}
                       style={{ fontSize: 14, padding: '10px 22px', opacity: busy ? 0.6 : 1, cursor: busy ? 'wait' : 'pointer' }}>
-                      {saving === 'final' ? '⏳ Saving…' : '⚡ Save & Print'}
+                      {saving === 'final' ? 'Saving…' : 'Save & print'}
                     </button>
                     <button className="btn" onClick={() => saveInvoice('draft')} disabled={busy}
                       style={{ fontSize: 13, padding: '10px 16px', opacity: busy ? 0.6 : 1, cursor: busy ? 'wait' : 'pointer' }}>
                       {saving === 'draft' ? 'Saving…' : (editing && editing.status !== 'draft' ? 'Save changes' : 'Save as draft')}
                     </button>
                   </div>
-                  <div style={{ fontSize: 11, color: 'var(--text3)', marginTop: 10 }}>
-                    Save &amp; Print: invoice save hokar print / PDF dialog khulta hai
+                  <div className="gen-note">
+                    Save &amp; print karne par invoice save hota hai aur print / PDF dialog khulta hai
                   </div>
                 </>
               )}
@@ -1379,29 +1362,26 @@ export default function InvoiceMaker() {
               <>
                 <div onClick={() => setShowUpgradeModal(false)} style={{
                   position: 'fixed', inset: 0, zIndex: 2000,
-                  background: 'rgba(27,35,64,0.45)', backdropFilter: 'blur(6px)'
+                  background: 'rgba(18,38,63,0.45)', backdropFilter: 'blur(6px)'
                 }} />
                 <div style={{
                   position: 'fixed', inset: 0, zIndex: 2001,
                   display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16
                 }}>
                   <div style={{
-                    background: '#FFFFFF', border: '1px solid #E1D9C4',
+                    background: '#FFFFFF', border: '1px solid #DDE1D9',
                     borderRadius: 20, padding: '36px 28px',
                     maxWidth: 420, width: '100%', textAlign: 'center',
-                    boxShadow: '0 24px 60px rgba(27,35,64,0.22)',
+                    boxShadow: '0 24px 60px rgba(18,38,63,0.22)',
                     animation: 'slideUp 0.25s ease', position: 'relative',
                   }}>
-                    <button onClick={() => setShowUpgradeModal(false)} aria-label="Close" style={{ position: 'absolute', top: 14, right: 14, background: '#F3EEE0', border: '1px solid #E1D9C4', borderRadius: 8, width: 30, height: 30, color: '#4B5566', fontSize: 18, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>×</button>
-                    <div style={{ fontSize: 44, marginBottom: 10 }}>⚡</div>
+                    <button onClick={() => setShowUpgradeModal(false)} aria-label="Close" style={{ position: 'absolute', top: 14, right: 14, background: '#EEF0EA', border: '1px solid #DDE1D9', borderRadius: 8, width: 30, height: 30, color: '#44566B', fontSize: 18, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>×</button>
                     <h2 style={{
-                      fontFamily: "'Space Grotesk', sans-serif",
-                      fontSize: 22, fontWeight: 800, marginBottom: 6,
-                      background: 'linear-gradient(135deg, #E8933C, #C97423)',
-                      WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'
-                    }}>Go Pro — Unlimited Invoices!</h2>
-                    <p style={{ color: '#4B5566', fontSize: 13, marginBottom: 22, lineHeight: 1.6 }}>
-                      You've used <strong style={{ color: '#1B2340' }}>{FREE_LIMIT} free invoices</strong>. Upgrade to Pro for unlimited invoice generation. Aapka bhara hua form safe hai.
+                      fontFamily: "'Fraunces', Georgia, serif",
+                      fontSize: 24, fontWeight: 600, margin: '0 0 8px', color: '#12263F',
+                    }}>Unlimited invoices with Pro</h2>
+                    <p style={{ color: '#44566B', fontSize: 13, marginBottom: 22, lineHeight: 1.6 }}>
+                      You've used <strong style={{ color: '#12263F' }}>{FREE_LIMIT} free invoices</strong>. Upgrade to Pro for unlimited invoice generation. Aapka bhara hua form safe hai.
                     </p>
                     <UpgradePaymentFlow
                       token={token}

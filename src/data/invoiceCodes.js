@@ -22719,8 +22719,8 @@ export const CURRENCIES = [
 ]
 
 export const TEMPLATES = [
-  { key: 'modern', label: 'Modern', accent: '#7C6FFF' },
-  { key: 'clean', label: 'Clean', accent: '#0EA5E9' },
-  { key: 'bold', label: 'Bold', accent: '#F59E0B' },
-  { key: 'minimal', label: 'Minimal', accent: '#1a1a2e' },
+  { key: 'modern', label: 'Ink', accent: '#1D4F91' },
+  { key: 'clean', label: 'Emerald', accent: '#0B6E4F' },
+  { key: 'bold', label: 'Saffron', accent: '#C2670A' },
+  { key: 'minimal', label: 'Classic', accent: '#1F2937' },
 ]

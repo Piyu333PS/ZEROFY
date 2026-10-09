@@ -186,16 +186,16 @@
   padding: 12px;
   border: none;
   border-radius: 9px;
-  background: var(--ink);
-  color: #fff;
+  background: #EFA02F;
+  color: var(--ink);
   font-family: 'Inter', sans-serif;
   font-size: 14.5px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   transition: background 0.15s, transform 0.1s;
   margin-top: 4px;
 }
-.submitBtn:hover:not(:disabled) { background: var(--ink-soft); }
+.submitBtn:hover:not(:disabled) { background: #F6B24E; }
 .submitBtn:disabled { opacity: 0.6; cursor: not-allowed; }
 
 .switchLine {
@@ -356,3 +356,8 @@
   .visualSide { display: none; }
   .formSide { border-right: none; padding: 40px 24px; }
 }
+
+/* brand alignment with the app */
+.logoMark { background: #EFA02F; color: var(--ink); }
+.stamp { top: 58px; right: 26px; }
+.invoiceLogo { background: #EFA02F !important; color: var(--ink) !important; }

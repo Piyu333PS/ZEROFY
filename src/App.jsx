@@ -130,10 +130,19 @@ function AppInner() {
   useBackButton()
   const location = useLocation()
   const isLoginScreen = location.pathname === '/'
+  // Billing app aur invoice maker ka apna shell hai — site ka navbar / marketing footer wahan nahi aate
+  const isAppScreen = location.pathname.startsWith('/app') || location.pathname === '/tools/invoice-maker'
+  const bare = isLoginScreen || isAppScreen
+
+  // App / login ke peeche page ka background bhi paper rahe (warna neeche dark patti dikhti thi)
+  useEffect(() => {
+    document.body.style.background = bare ? '#F4F5F1' : ''
+    return () => { document.body.style.background = '' }
+  }, [bare])
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      {!isLoginScreen && <Navbar />}
+      {!bare && <Navbar />}
       <main style={{ flex: 1 }}>
         <Routes>
           <Route path="/" element={<RootGate />} />
@@ -257,7 +266,7 @@ function AppInner() {
           <Route path="*" element={<ComingSoon name="Page Not Found" />} />
         </Routes>
       </main>
-      {!isLoginScreen && <Footer />}
+      {!bare && <Footer />}
     </div>
   )
 }

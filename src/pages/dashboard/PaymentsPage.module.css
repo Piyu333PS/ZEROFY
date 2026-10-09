@@ -12,7 +12,7 @@
   font-weight: 600;
   font-size: 13.5px;
   cursor: pointer;
-  box-shadow: 0 6px 16px -6px rgba(232,147,60,0.6);
+  
   font-family: var(--body);
 }
 .primaryBtn:hover { opacity: 0.9; }
@@ -65,7 +65,7 @@
   border-bottom: 1px solid var(--paper-line);
 }
 .tableRow { color: var(--ink); border-top: 1px solid var(--paper-line); }
-.tableRow:nth-child(even) { background: #FCFAF4; }
+.tableRow:nth-child(even) { background: #FAFBF8; }
 
 .methodBadge {
   display: inline-block;
@@ -107,7 +107,7 @@
 .noteText { font-size: 11.5px; color: var(--slate); margin-top: 2px; }
 .mono { font-family: var(--mono); font-weight: 600; }
 .notice {
-  background: var(--green-soft); color: var(--green-deep); border: 1px solid #BFDCCD;
+  background: var(--green-soft); color: var(--green-deep); border: 1px solid #BCDCCB;
   border-radius: 10px; padding: 10px 14px; font-size: 13px; margin-bottom: 14px;
 }
 .deleteBtn { background: none; border: none; color: var(--rust); font-size: 12px; cursor: pointer; justify-self: end; font-family: var(--body); }
@@ -117,3 +117,8 @@
   .tableHead { display: none; }
   .tableRow { grid-template-columns: 1fr 1fr; row-gap: 6px; }
 }
+
+/* brand: primary action = saffron with ink text (white on saffron was hard to read) */
+.primaryBtn { color: var(--ink); font-weight: 700; transition: background 0.15s ease; }
+.primaryBtn:hover:not(:disabled) { background: #F6B24E; opacity: 1; }
+.title { font-weight: 600; font-size: 28px; letter-spacing: -0.01em; }

@@ -80,14 +80,14 @@
 .iconWrap {
   width: 68px; height: 68px;
   background: var(--surface);
-  border: 1px solid rgba(59,130,246,0.2);
+  border: 1px solid rgba(239,160,47,0.2);
   border-radius: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   font-size: 34px;
-  box-shadow: 0 4px 24px rgba(59,130,246,0.1), 0 0 0 1px rgba(59,130,246,0.08);
+  box-shadow: 0 4px 24px rgba(239,160,47,0.1), 0 0 0 1px rgba(239,160,47,0.08);
 }
 
 .icon { line-height: 1; }
@@ -106,7 +106,7 @@
 /* ── Content ── */
 .content {
   background: var(--surface);
-  border: 1px solid rgba(59,130,246,0.1);
+  border: 1px solid rgba(239,160,47,0.1);
   border-radius: var(--radius-lg);
   padding: 28px;
   animation: fadeUp 0.35s 0.08s ease both;

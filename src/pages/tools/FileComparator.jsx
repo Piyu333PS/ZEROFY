@@ -106,7 +106,7 @@ function FileCard({ index, file, onUpload, onRemove, onPaste }) {
     if (f) onUpload(f, index)
   }, [index, onUpload])
 
-  const colors = ['#6C63FF', '#FF6B9D', '#00D4AA', '#FFB347']
+  const colors = ['#EFA02F', '#FF6B9D', '#00D4AA', '#FFB347']
   const color = colors[index % colors.length]
 
   return (
@@ -168,7 +168,7 @@ function Badge({ type }) {
     added:        { bg: 'rgba(0,212,120,0.15)', color: '#00d478', label: '+ Added' },
     removed:      { bg: 'rgba(255,80,80,0.12)', color: '#ff6060', label: '− Removed' },
     changed:      { bg: 'rgba(255,180,50,0.15)', color: '#ffb432', label: '~ Changed' },
-    type_changed: { bg: 'rgba(160,80,255,0.15)', color: '#c084fc', label: '⚡ Type' },
+    type_changed: { bg: 'rgba(160,80,255,0.15)', color: '#F6B24E', label: '⚡ Type' },
   }
   const s = map[type] || map.changed
   return <span style={{ background: s.bg, color: s.color, fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 100, letterSpacing: '0.05em' }}>{s.label}</span>
@@ -238,20 +238,20 @@ export default function FileComparator() {
         .fc-wrap { min-height:100vh; background:#07080F; font-family:'Space Grotesk',sans-serif; }
         .fc-wrap::before {
           content:''; position:fixed; inset:0; pointer-events:none;
-          background: radial-gradient(ellipse 60% 40% at 20% 20%, rgba(108,99,255,0.12) 0%, transparent 60%),
+          background: radial-gradient(ellipse 60% 40% at 20% 20%, rgba(239,160,47,0.12) 0%, transparent 60%),
                       radial-gradient(ellipse 50% 50% at 80% 80%, rgba(0,212,170,0.08) 0%, transparent 60%);
         }
         .fc-inner { position:relative; z-index:1; max-width:900px; margin:0 auto; padding:48px 24px 80px; }
         .fc-head { text-align:center; margin-bottom:44px; animation:fadeUp 0.5s ease both; }
-        .fc-eyebrow { display:inline-flex; align-items:center; gap:6px; background:rgba(108,99,255,0.1); border:1px solid rgba(108,99,255,0.25); color:#a89eff; font-size:11px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; padding:5px 14px; border-radius:100px; margin-bottom:18px; }
+        .fc-eyebrow { display:inline-flex; align-items:center; gap:6px; background:rgba(239,160,47,0.1); border:1px solid rgba(239,160,47,0.25); color:#a89eff; font-size:11px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; padding:5px 14px; border-radius:100px; margin-bottom:18px; }
         .fc-title { font-size:clamp(28px,5vw,46px); font-weight:700; color:#fff; margin:0 0 10px; letter-spacing:-0.02em; }
-        .fc-title em { font-style:normal; background:linear-gradient(135deg,#6C63FF,#00D4AA); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+        .fc-title em { font-style:normal; background:linear-gradient(135deg,#EFA02F,#00D4AA); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
         .fc-sub { color:rgba(255,255,255,0.38); font-size:14px; font-weight:300; }
         .fc-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:14px; margin-bottom:20px; }
         .fc-actions { display:flex; gap:12px; align-items:center; margin-bottom:32px; flex-wrap:wrap; }
         .fc-btn { padding:12px 28px; border-radius:12px; border:none; font-family:'Space Grotesk',sans-serif; font-size:14px; font-weight:600; cursor:pointer; transition:all 0.2s; }
-        .fc-btn-primary { background:linear-gradient(135deg,#6C63FF,#5B54E8); color:#fff; box-shadow:0 4px 20px rgba(108,99,255,0.3); }
-        .fc-btn-primary:hover:not(:disabled) { transform:translateY(-1px); box-shadow:0 8px 28px rgba(108,99,255,0.45); }
+        .fc-btn-primary { background:linear-gradient(135deg,#EFA02F,#5B54E8); color:#fff; box-shadow:0 4px 20px rgba(239,160,47,0.3); }
+        .fc-btn-primary:hover:not(:disabled) { transform:translateY(-1px); box-shadow:0 8px 28px rgba(239,160,47,0.45); }
         .fc-btn-primary:disabled { opacity:0.4; cursor:not-allowed; }
         .fc-btn-ghost { background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.5); border:1px solid rgba(255,255,255,0.1); }
         .fc-btn-ghost:hover { background:rgba(255,255,255,0.08); color:#fff; }
@@ -273,7 +273,7 @@ export default function FileComparator() {
         .fc-empty .big { font-size:40px; margin-bottom:10px; }
         .fc-tabs { display:flex; gap:6px; margin-bottom:20px; }
         .fc-tab { padding:7px 16px; border-radius:100px; font-size:12px; font-weight:600; cursor:pointer; border:none; font-family:'Space Grotesk',sans-serif; transition:all 0.2s; }
-        .fc-tab.active { background:#6C63FF; color:#fff; }
+        .fc-tab.active { background:#EFA02F; color:#fff; }
         .fc-tab.idle { background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.4); }
         .fc-section { background:rgba(255,255,255,0.025); border:1px solid rgba(255,255,255,0.07); border-radius:16px; padding:24px; margin-bottom:16px; }
         .fc-section-title { font-size:13px; font-weight:700; color:rgba(255,255,255,0.6); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:16px; }
@@ -380,7 +380,7 @@ export default function FileComparator() {
                                     {d.type === 'added' && <>📥 <strong style={{ color: '#00d478' }}>New item in File 2</strong> not present in File 1</>}
                                     {d.type === 'removed' && <>📤 <strong style={{ color: '#ff6060' }}>Present in File 1</strong> but missing in File 2</>}
                                     {d.type === 'changed' && <>✏️ <strong style={{ color: '#ffb432' }}>Value alag hai</strong> dono files mein</>}
-                                    {d.type === 'type_changed' && <>⚡ <strong style={{ color: '#c084fc' }}>Data type badal gaya</strong> ({d.from} → {d.to})</>}
+                                    {d.type === 'type_changed' && <>⚡ <strong style={{ color: '#F6B24E' }}>Data type badal gaya</strong> ({d.from} → {d.to})</>}
                                   </div>
 
                                   <div className="fc-vals">

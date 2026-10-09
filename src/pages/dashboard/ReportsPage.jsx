@@ -16,8 +16,8 @@ const invoiceTotal = (inv) => inv.grandTotal !== undefined ? Number(inv.grandTot
 // Draft (abhi bheja nahi) aur cancelled invoices billing mein nahi gine jate
 const isBillable = (inv) => inv.status !== 'cancelled' && inv.status !== 'draft'
 
-const STATUS_COLORS = { paid: '#1F6F54', sent: '#E8933C', partial: '#2B5D8C', overdue: '#C1443C', draft: '#69708A', cancelled: '#B9A9A7' }
-const CHART_COLORS = ['#E8933C', '#1F6F54', '#2B5D8C', '#C1443C', '#7A5AA8', '#C97423', '#69708A']
+const STATUS_COLORS = { paid: '#0B6E4F', sent: '#EFA02F', partial: '#2B5D8C', overdue: '#B3261E', draft: '#5C7189', cancelled: '#B9A9A7' }
+const CHART_COLORS = ['#EFA02F', '#0B6E4F', '#2B5D8C', '#B3261E', '#7A5AA8', '#A85E08', '#5C7189']
 
 const PERIODS = [
   { value: 'monthly', label: 'Monthly', count: 12 },
@@ -233,13 +233,13 @@ export default function ReportsPage() {
             <div className={styles.chartBox}>
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={billingHistory} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#E1D9C4" vertical={false} />
-                  <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#69708A' }} axisLine={{ stroke: '#E1D9C4' }} tickLine={false} />
-                  <YAxis tick={{ fontSize: 11, fill: '#69708A' }} axisLine={false} tickLine={false} tickFormatter={fmt} />
-                  <Tooltip formatter={(v) => fmt2(v)} contentStyle={{ borderRadius: 10, border: '1px solid #E1D9C4', fontSize: 12.5 }} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#DDE1D9" vertical={false} />
+                  <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#5C7189' }} axisLine={{ stroke: '#DDE1D9' }} tickLine={false} />
+                  <YAxis tick={{ fontSize: 11, fill: '#5C7189' }} axisLine={false} tickLine={false} tickFormatter={fmt} />
+                  <Tooltip formatter={(v) => fmt2(v)} contentStyle={{ borderRadius: 10, border: '1px solid #DDE1D9', fontSize: 12.5 }} />
                   <Legend wrapperStyle={{ fontSize: 12.5 }} />
-                  <Bar dataKey="invoiced" name="Invoiced" fill="#E8933C" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="received" name="Received" fill="#1F6F54" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="invoiced" name="Invoiced" fill="#EFA02F" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="received" name="Received" fill="#0B6E4F" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -255,10 +255,10 @@ export default function ReportsPage() {
                 ) : (
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={topClients} layout="vertical" margin={{ top: 8, right: 24, left: 12, bottom: 0 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#E1D9C4" horizontal={false} />
-                      <XAxis type="number" tick={{ fontSize: 11, fill: '#69708A' }} axisLine={false} tickLine={false} tickFormatter={fmt} />
-                      <YAxis type="category" dataKey="name" width={110} tick={{ fontSize: 11.5, fill: '#1B2340' }} axisLine={false} tickLine={false} />
-                      <Tooltip formatter={(v) => fmt2(v)} contentStyle={{ borderRadius: 10, border: '1px solid #E1D9C4', fontSize: 12.5 }} />
+                      <CartesianGrid strokeDasharray="3 3" stroke="#DDE1D9" horizontal={false} />
+                      <XAxis type="number" tick={{ fontSize: 11, fill: '#5C7189' }} axisLine={false} tickLine={false} tickFormatter={fmt} />
+                      <YAxis type="category" dataKey="name" width={110} tick={{ fontSize: 11.5, fill: '#12263F' }} axisLine={false} tickLine={false} />
+                      <Tooltip formatter={(v) => fmt2(v)} contentStyle={{ borderRadius: 10, border: '1px solid #DDE1D9', fontSize: 12.5 }} />
                       <Bar dataKey="amount" name="Received" radius={[0, 4, 4, 0]}>
                         {topClients.map((_, i) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
                       </Bar>
@@ -288,7 +288,7 @@ export default function ReportsPage() {
                         <Cell key={i} fill={STATUS_COLORS[s.status] || CHART_COLORS[i % CHART_COLORS.length]} />
                       ))}
                     </Pie>
-                    <Tooltip formatter={(v, n, props) => [fmt2(v), `${STATUS_LABELS[props.payload.status] || props.payload.status} (${props.payload.count})`]} contentStyle={{ borderRadius: 10, border: '1px solid #E1D9C4', fontSize: 12.5 }} />
+                    <Tooltip formatter={(v, n, props) => [fmt2(v), `${STATUS_LABELS[props.payload.status] || props.payload.status} (${props.payload.count})`]} contentStyle={{ borderRadius: 10, border: '1px solid #DDE1D9', fontSize: 12.5 }} />
                     <Legend wrapperStyle={{ fontSize: 12.5 }} formatter={(v) => STATUS_LABELS[v] || v} />
                   </PieChart>
                 </ResponsiveContainer>

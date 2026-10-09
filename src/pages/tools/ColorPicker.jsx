@@ -37,7 +37,7 @@ function generateShades(hex) {
 }
 
 export default function ColorPicker() {
-  const [color, setColor] = useState('#6c63ff')
+  const [color, setColor] = useState('#EFA02F')
   const [copied, setCopied] = useState('')
 
   const { r, g, b } = hexToRgb(color)

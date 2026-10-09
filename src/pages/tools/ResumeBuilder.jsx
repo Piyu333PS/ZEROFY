@@ -107,7 +107,7 @@ function SmartSelect({ value, onChange, options, placeholder }) {
         fontSize: 14, padding: '10px 36px 10px 14px', cursor: 'pointer',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         transition: 'all 0.2s', userSelect: 'none', fontFamily: 'inherit',
-        ...(open ? { borderColor: '#6C63FF66', background: 'rgba(108,99,255,0.08)', boxShadow: '0 0 0 3px rgba(108,99,255,0.15)' } : {})
+        ...(open ? { borderColor: '#6C63FF66', background: 'rgba(239,160,47,0.08)', boxShadow: '0 0 0 3px rgba(239,160,47,0.15)' } : {})
       }}>
         <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{value || placeholder}</span>
         <span style={{ position: 'absolute', right: 13, opacity: 0.4, transition: 'transform 0.2s', transform: open ? 'rotate(180deg)' : 'none', fontSize: 11 }}>▼</span>
@@ -135,11 +135,11 @@ function SmartSelect({ value, onChange, options, placeholder }) {
                 style={{
                   padding: '8px 10px', borderRadius: 7, cursor: 'pointer', fontSize: 13,
                   color: value === o ? '#a89eff' : 'rgba(255,255,255,0.8)',
-                  background: value === o ? 'rgba(108,99,255,0.18)' : 'transparent',
+                  background: value === o ? 'rgba(239,160,47,0.18)' : 'transparent',
                   fontWeight: value === o ? 600 : 400, transition: 'background 0.12s'
                 }}
-                onMouseEnter={e => e.currentTarget.style.background = 'rgba(108,99,255,0.14)'}
-                onMouseLeave={e => e.currentTarget.style.background = value === o ? 'rgba(108,99,255,0.18)' : 'transparent'}>
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(239,160,47,0.14)'}
+                onMouseLeave={e => e.currentTarget.style.background = value === o ? 'rgba(239,160,47,0.18)' : 'transparent'}>
                 {o}
               </div>
             ))}
@@ -154,7 +154,7 @@ function SmartSelect({ value, onChange, options, placeholder }) {
 /* ─────────────────────────────────────────
    TAG INPUT
 ───────────────────────────────────────── */
-function TagInput({ tags, onAdd, onRemove, suggestions, placeholder, color = '#6C63FF' }) {
+function TagInput({ tags, onAdd, onRemove, suggestions, placeholder, color = '#EFA02F' }) {
   const [input, setInput] = useState('')
   const [showSug, setShowSug] = useState(false)
   const ref = useRef()
@@ -214,7 +214,7 @@ function TagInput({ tags, onAdd, onRemove, suggestions, placeholder, color = '#6
               padding: '7px 12px', borderRadius: 7, cursor: 'pointer', fontSize: 13,
               color: 'rgba(255,255,255,0.8)', transition: 'background 0.15s'
             }}
-            onMouseEnter={e => e.target.style.background = 'rgba(108,99,255,0.15)'}
+            onMouseEnter={e => e.target.style.background = 'rgba(239,160,47,0.15)'}
             onMouseLeave={e => e.target.style.background = 'transparent'}>
               {s}
             </div>
@@ -232,7 +232,7 @@ function SectionDivider({ label }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '22px 0 14px' }}>
       <div style={{ height: 1, flex: 1, background: 'rgba(255,255,255,0.08)' }} />
-      <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: '#6C63FF', textTransform: 'uppercase' }}>{label}</span>
+      <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: '#EFA02F', textTransform: 'uppercase' }}>{label}</span>
       <div style={{ height: 1, flex: 1, background: 'rgba(255,255,255,0.08)' }} />
     </div>
   )
@@ -287,7 +287,7 @@ function ExperienceEntry({ exp, idx, onChange, onRemove }) {
         </div>
       </div>
       <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'rgba(255,255,255,0.6)', marginBottom: 10, cursor: 'pointer' }}>
-        <input type="checkbox" checked={exp.current} onChange={e => upd('current', e.target.checked)} style={{ accentColor: '#6C63FF' }} />
+        <input type="checkbox" checked={exp.current} onChange={e => upd('current', e.target.checked)} style={{ accentColor: '#EFA02F' }} />
         Currently working here
       </label>
       <div>
@@ -412,7 +412,7 @@ function ZerofyWatermark() {
       opacity: 0.35, pointerEvents: 'none', userSelect: 'none'
     }}>
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-        <circle cx="12" cy="12" r="10" fill="#6C63FF" />
+        <circle cx="12" cy="12" r="10" fill="#EFA02F" />
         <path d="M8 16l8-8M8 8h8v8" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
       </svg>
       <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', color: '#333', fontFamily: 'sans-serif' }}>
@@ -535,7 +535,7 @@ function TemplateModern({ data, settings }) {
     return [from, to].filter(Boolean).join(' – ')
   }
   return (
-    <div style={{ fontFamily: '"Segoe UI", Arial, sans-serif', color: '#1a1a2e', display: 'flex', minHeight: 900, position: 'relative', background: '#fff' }}>
+    <div style={{ fontFamily: '"Segoe UI", Arial, sans-serif', color: '#12263F', display: 'flex', minHeight: 900, position: 'relative', background: '#fff' }}>
       <ZerofyWatermark />
       {/* Sidebar */}
       <div style={{ width: 220, background: 'linear-gradient(180deg, #1e1b4b 0%, #312e81 100%)', color: '#fff', padding: '32px 20px', flexShrink: 0 }}>
@@ -596,12 +596,12 @@ function TemplateModern({ data, settings }) {
         {settings.showExperience && experiences.some(e => e.title) && (
           <MSection title="Work Experience">
             {experiences.filter(e => e.title).map((exp, i) => (
-              <div key={i} style={{ marginBottom: 14, paddingLeft: 14, borderLeft: '2px solid #6366f1' }}>
+              <div key={i} style={{ marginBottom: 14, paddingLeft: 14, borderLeft: '2px solid #EFA02F' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
                   <strong style={{ fontSize: 13, color: '#1e1b4b' }}>{exp.title}</strong>
                   <span style={{ fontSize: 11, color: '#888', whiteSpace: 'nowrap' }}>{expDur(exp)}</span>
                 </div>
-                {exp.company && <p style={{ margin: '0 0 4px', fontSize: 12, color: '#6366f1' }}>{exp.company}</p>}
+                {exp.company && <p style={{ margin: '0 0 4px', fontSize: 12, color: '#EFA02F' }}>{exp.company}</p>}
                 {exp.description && <ul style={{ margin: 0, paddingLeft: 16, fontSize: 12, color: '#555', lineHeight: 1.6 }}>
                   {exp.description.split('\n').filter(Boolean).map((b, j) => <li key={j}>{b}</li>)}
                 </ul>}
@@ -617,7 +617,7 @@ function TemplateModern({ data, settings }) {
                   <strong style={{ fontSize: 13, color: '#1e1b4b' }}>{proj.name}</strong>
                   {proj.tech && <span style={{ fontSize: 11, color: '#888' }}>{proj.tech}</span>}
                 </div>
-                {proj.link && <p style={{ margin: '1px 0 2px', fontSize: 11, color: '#6366f1' }}>🔗 {proj.link}</p>}
+                {proj.link && <p style={{ margin: '1px 0 2px', fontSize: 11, color: '#EFA02F' }}>🔗 {proj.link}</p>}
                 {proj.description && <p style={{ margin: 0, fontSize: 12, color: '#555' }}>{proj.description}</p>}
               </div>
             ))}
@@ -651,7 +651,7 @@ function TemplateExecutive({ data, settings }) {
   return (
     <div style={{ fontFamily: '"Segoe UI", Calibri, sans-serif', color: '#1a1a1a', background: '#fff', position: 'relative', minHeight: 900 }}>
       <ZerofyWatermark />
-      <div style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)', color: '#fff', padding: '32px 40px 24px' }}>
+      <div style={{ background: 'linear-gradient(135deg, #12263F 0%, #16213e 100%)', color: '#fff', padding: '32px 40px 24px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div>
             <h1 style={{ margin: 0, fontSize: 30, fontWeight: 300, letterSpacing: '0.06em' }}>{fd.name || 'Your Name'}</h1>
@@ -668,7 +668,7 @@ function TemplateExecutive({ data, settings }) {
       <div style={{ padding: '28px 40px' }}>
         {settings.showSummary && summary && (
           <ExSection title="Professional Profile">
-            <p style={{ margin: 0, fontSize: 13, lineHeight: 1.7, color: '#444', borderLeft: '3px solid #6C63FF', paddingLeft: 12 }}>{summary}</p>
+            <p style={{ margin: 0, fontSize: 13, lineHeight: 1.7, color: '#444', borderLeft: '3px solid #EFA02F', paddingLeft: 12 }}>{summary}</p>
           </ExSection>
         )}
         {settings.showExperience && experiences.some(e => e.title) && (
@@ -677,8 +677,8 @@ function TemplateExecutive({ data, settings }) {
               <div key={i} style={{ marginBottom: 14, display: 'flex', gap: 16 }}>
                 <div style={{ width: 120, flexShrink: 0, fontSize: 11, color: '#888', paddingTop: 2, textAlign: 'right' }}>{expDur(exp)}</div>
                 <div style={{ flex: 1 }}>
-                  <strong style={{ fontSize: 13.5, color: '#1a1a2e' }}>{exp.title}</strong>
-                  {exp.company && <span style={{ fontSize: 13, color: '#6C63FF' }}> · {exp.company}</span>}
+                  <strong style={{ fontSize: 13.5, color: '#12263F' }}>{exp.title}</strong>
+                  {exp.company && <span style={{ fontSize: 13, color: '#EFA02F' }}> · {exp.company}</span>}
                   {exp.description && <ul style={{ margin: '4px 0 0', paddingLeft: 16, fontSize: 12.5, color: '#444', lineHeight: 1.7 }}>
                     {exp.description.split('\n').filter(Boolean).map((b, j) => <li key={j}>{b}</li>)}
                   </ul>}
@@ -716,7 +716,7 @@ function TemplateExecutive({ data, settings }) {
               <div key={i} style={{ marginBottom: 10 }}>
                 <strong style={{ fontSize: 13 }}>{proj.name}</strong>
                 {proj.tech && <span style={{ fontSize: 11, color: '#888', marginLeft: 8 }}>[{proj.tech}]</span>}
-                {proj.link && <span style={{ fontSize: 11, color: '#6C63FF', marginLeft: 8 }}>🔗 {proj.link}</span>}
+                {proj.link && <span style={{ fontSize: 11, color: '#EFA02F', marginLeft: 8 }}>🔗 {proj.link}</span>}
                 {proj.description && <p style={{ margin: '2px 0 0', fontSize: 12.5, color: '#444' }}>{proj.description}</p>}
               </div>
             ))}
@@ -746,8 +746,8 @@ function ExSection({ title, children, style = {} }) {
   return (
     <div style={{ marginBottom: 20, ...style }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-        <div style={{ width: 3, height: 16, background: '#6C63FF', borderRadius: 2, flexShrink: 0 }} />
-        <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', color: '#1a1a2e', textTransform: 'uppercase' }}>{title}</div>
+        <div style={{ width: 3, height: 16, background: '#EFA02F', borderRadius: 2, flexShrink: 0 }} />
+        <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', color: '#12263F', textTransform: 'uppercase' }}>{title}</div>
       </div>
       {children}
     </div>
@@ -1530,7 +1530,7 @@ function SettingsPanel({ settings, onChange, onClose }) {
             <button
               onClick={() => Object.keys(DEFAULT_SETTINGS).forEach(k => onChange(k, true))}
               style={{
-                background: 'rgba(108,99,255,0.12)', border: '1px solid rgba(108,99,255,0.3)',
+                background: 'rgba(239,160,47,0.12)', border: '1px solid rgba(239,160,47,0.3)',
                 color: '#a89eff', fontSize: 11, padding: '5px 10px', borderRadius: 7,
                 cursor: 'pointer', fontFamily: 'inherit', fontWeight: 600
               }}>
@@ -1559,7 +1559,7 @@ function SettingsPanel({ settings, onChange, onClose }) {
                 onClick={() => onChange(key, !settings[key])}
                 style={{
                   width: 44, height: 24, borderRadius: 12, cursor: 'pointer', flexShrink: 0,
-                  background: settings[key] ? '#6C63FF' : 'rgba(255,255,255,0.12)',
+                  background: settings[key] ? '#EFA02F' : 'rgba(255,255,255,0.12)',
                   position: 'relative', transition: 'background 0.2s'
                 }}>
                 <div style={{
@@ -1577,7 +1577,7 @@ function SettingsPanel({ settings, onChange, onClose }) {
           <button
             onClick={onClose}
             style={{
-              width: '100%', background: 'linear-gradient(135deg,#6C63FF,#8B5CF6)',
+              width: '100%', background: 'linear-gradient(135deg,#EFA02F,#EFA02F)',
               border: 'none', color: '#fff', fontSize: 14, fontWeight: 700,
               padding: '11px 0', borderRadius: 12, cursor: 'pointer', fontFamily: 'inherit'
             }}>
@@ -1674,18 +1674,18 @@ export default function ResumeBuilder() {
     <>
       {/* Global styles */}
       <style>{`
-        .rb-input:focus { border-color: rgba(108,99,255,0.55) !important; background: rgba(108,99,255,0.07) !important; box-shadow: 0 0 0 3px rgba(108,99,255,0.15) !important; }
-        .rb-textarea:focus { border-color: rgba(108,99,255,0.55) !important; background: rgba(108,99,255,0.07) !important; box-shadow: 0 0 0 3px rgba(108,99,255,0.15) !important; }
+        .rb-input:focus { border-color: rgba(239,160,47,0.55) !important; background: rgba(239,160,47,0.07) !important; box-shadow: 0 0 0 3px rgba(239,160,47,0.15) !important; }
+        .rb-textarea:focus { border-color: rgba(239,160,47,0.55) !important; background: rgba(239,160,47,0.07) !important; box-shadow: 0 0 0 3px rgba(239,160,47,0.15) !important; }
         .tpl-card { cursor: pointer; background: rgba(255,255,255,0.03); border: 2px solid rgba(255,255,255,0.07); border-radius: 14px; padding: 16px; transition: all 0.2s; }
-        .tpl-card:hover { border-color: rgba(108,99,255,0.4); background: rgba(108,99,255,0.07); transform: translateY(-2px); }
-        .tpl-card.selected { border-color: #6C63FF; background: rgba(108,99,255,0.12); box-shadow: 0 0 0 3px rgba(108,99,255,0.2); }
+        .tpl-card:hover { border-color: rgba(239,160,47,0.4); background: rgba(239,160,47,0.07); transform: translateY(-2px); }
+        .tpl-card.selected { border-color: #EFA02F; background: rgba(239,160,47,0.12); box-shadow: 0 0 0 3px rgba(239,160,47,0.2); }
         .step-btn { background: none; border: none; color: rgba(255,255,255,0.5); font-size: 13px; cursor: pointer; padding: 6px 14px; border-radius: 8px; font-family: inherit; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
         .step-btn:hover { color: #fff; background: rgba(255,255,255,0.07); }
         .step-btn.active { color: #fff; }
-        .add-btn { background: rgba(108,99,255,0.1); border: 1.5px dashed rgba(108,99,255,0.35); color: #a89eff; border-radius: 10px; padding: 10px; width: 100%; font-family: inherit; font-size: 13px; cursor: pointer; transition: all 0.2s; margin-top: 4px; }
-        .add-btn:hover { background: rgba(108,99,255,0.18); border-color: rgba(108,99,255,0.6); }
-        .primary-btn { background: linear-gradient(135deg, #6C63FF, #8B5CF6); border: none; color: #fff; font-size: 15px; font-weight: 700; padding: 13px 28px; border-radius: 12px; cursor: pointer; font-family: inherit; transition: all 0.2s; display: flex; align-items: center; gap: 8px; justify-content: center; }
-        .primary-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(108,99,255,0.4); }
+        .add-btn { background: rgba(239,160,47,0.1); border: 1.5px dashed rgba(239,160,47,0.35); color: #a89eff; border-radius: 10px; padding: 10px; width: 100%; font-family: inherit; font-size: 13px; cursor: pointer; transition: all 0.2s; margin-top: 4px; }
+        .add-btn:hover { background: rgba(239,160,47,0.18); border-color: rgba(239,160,47,0.6); }
+        .primary-btn { background: linear-gradient(135deg, #EFA02F, #EFA02F); border: none; color: #fff; font-size: 15px; font-weight: 700; padding: 13px 28px; border-radius: 12px; cursor: pointer; font-family: inherit; transition: all 0.2s; display: flex; align-items: center; gap: 8px; justify-content: center; }
+        .primary-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(239,160,47,0.4); }
         .ghost-btn { background: rgba(255,255,255,0.06); border: 1.5px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.7); font-size: 14px; padding: 11px 22px; border-radius: 12px; cursor: pointer; font-family: inherit; transition: all 0.2s; }
         .ghost-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
       `}</style>
@@ -1720,7 +1720,7 @@ export default function ResumeBuilder() {
         {/* Header */}
         <div style={{ borderBottom: '1px solid rgba(255,255,255,0.07)', padding: '14px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 28, marginTop: 12 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ width: 32, height: 32, borderRadius: 8, background: 'linear-gradient(135deg,#6C63FF,#8B5CF6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>📄</div>
+            <div style={{ width: 32, height: 32, borderRadius: 8, background: 'linear-gradient(135deg,#EFA02F,#EFA02F)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>📄</div>
             <div>
               <div style={{ fontSize: 16, fontWeight: 700, color: '#fff', lineHeight: 1 }}>Resume Builder</div>
               <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', marginTop: 2 }}>by Zerofy</div>
@@ -1731,7 +1731,7 @@ export default function ResumeBuilder() {
               <button key={s} className={`step-btn ${step === s ? 'active' : ''}`}
                 onClick={() => { if (s < step || s === step) setStep(s) }}
                 style={{ opacity: step >= s ? 1 : 0.4 }}>
-                <div style={{ width: 22, height: 22, borderRadius: '50%', background: step >= s ? '#6C63FF' : 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, transition: 'all 0.2s' }}>{s}</div>
+                <div style={{ width: 22, height: 22, borderRadius: '50%', background: step >= s ? '#EFA02F' : 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, transition: 'all 0.2s' }}>{s}</div>
                 {s === 1 ? 'Template' : s === 2 ? 'Details' : 'Preview'}
               </button>
             ))}
@@ -1745,7 +1745,7 @@ export default function ResumeBuilder() {
         {step === 1 && (
           <div style={{ maxWidth: 860, margin: '0 auto', padding: '0 20px' }}>
             <div style={{ textAlign: 'center', marginBottom: 32 }}>
-              <h1 style={{ margin: '0 0 8px', fontSize: 28, fontWeight: 800, background: 'linear-gradient(135deg,#6C63FF,#a89eff)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Choose Your Template</h1>
+              <h1 style={{ margin: '0 0 8px', fontSize: 28, fontWeight: 800, background: 'linear-gradient(135deg,#EFA02F,#a89eff)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Choose Your Template</h1>
               <p style={{ margin: 0, fontSize: 15, color: 'rgba(255,255,255,0.4)' }}>10 professional designs — pick the one that fits your career</p>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 14 }}>
@@ -1754,12 +1754,12 @@ export default function ResumeBuilder() {
                   onClick={() => setSelectedTemplate(t.id)}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
                     <span style={{ fontSize: 28 }}>{t.icon}</span>
-                    <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 20, background: 'rgba(108,99,255,0.15)', color: '#a89eff', letterSpacing: '0.05em' }}>{t.category}</span>
+                    <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 20, background: 'rgba(239,160,47,0.15)', color: '#a89eff', letterSpacing: '0.05em' }}>{t.category}</span>
                   </div>
                   <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 4 }}>{t.label}</div>
                   <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', lineHeight: 1.5 }}>{t.desc}</div>
                   {selectedTemplate === t.id && (
-                    <div style={{ marginTop: 10, fontSize: 11, color: '#6C63FF', fontWeight: 700 }}>✓ Selected</div>
+                    <div style={{ marginTop: 10, fontSize: 11, color: '#EFA02F', fontWeight: 700 }}>✓ Selected</div>
                   )}
                 </div>
               ))}
@@ -1805,8 +1805,8 @@ export default function ResumeBuilder() {
                   <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                     <div style={{
                       width: 64, height: 64, borderRadius: '50%', flexShrink: 0,
-                      background: photoUrl ? 'transparent' : 'rgba(108,99,255,0.15)',
-                      border: '2px solid rgba(108,99,255,0.35)',
+                      background: photoUrl ? 'transparent' : 'rgba(239,160,47,0.15)',
+                      border: '2px solid rgba(239,160,47,0.35)',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       overflow: 'hidden', fontSize: 24
                     }}>
@@ -1827,7 +1827,7 @@ export default function ResumeBuilder() {
                         type="button"
                         onClick={() => photoInputRef.current?.click()}
                         style={{
-                          background: 'rgba(108,99,255,0.12)', border: '1.5px solid rgba(108,99,255,0.35)',
+                          background: 'rgba(239,160,47,0.12)', border: '1.5px solid rgba(239,160,47,0.35)',
                           color: '#a89eff', borderRadius: 10, padding: '8px 18px',
                           fontSize: 13, cursor: 'pointer', fontFamily: 'inherit',
                           transition: 'all 0.2s', marginRight: 8
@@ -1904,7 +1904,7 @@ export default function ResumeBuilder() {
               <div style={{ marginBottom: 12 }}>
                 <label style={lbl}>Technical Skills — type or select</label>
                 <TagInput tags={techSkills} onAdd={t => setTechSkills(p => [...p, t])} onRemove={t => setTechSkills(p => p.filter(x => x !== t))}
-                  suggestions={SKILL_SUGGESTIONS.tech} placeholder="e.g. React, Python, Excel..." color="#6C63FF" />
+                  suggestions={SKILL_SUGGESTIONS.tech} placeholder="e.g. React, Python, Excel..." color="#EFA02F" />
               </div>
               <div>
                 <label style={lbl}>Soft Skills</label>
@@ -1947,8 +1947,8 @@ export default function ResumeBuilder() {
                   onClick={() => setSelectedTemplate(t.id)}
                   style={{
                     width: '100%', textAlign: 'left', marginBottom: 6,
-                    background: selectedTemplate === t.id ? 'rgba(108,99,255,0.2)' : 'rgba(255,255,255,0.04)',
-                    border: `1.5px solid ${selectedTemplate === t.id ? '#6C63FF' : 'rgba(255,255,255,0.08)'}`,
+                    background: selectedTemplate === t.id ? 'rgba(239,160,47,0.2)' : 'rgba(255,255,255,0.04)',
+                    border: `1.5px solid ${selectedTemplate === t.id ? '#EFA02F' : 'rgba(255,255,255,0.08)'}`,
                     color: '#fff', borderRadius: 10, padding: '9px 11px', cursor: 'pointer',
                     fontSize: 12, fontFamily: 'inherit',
                     fontWeight: selectedTemplate === t.id ? 700 : 400,
@@ -1959,7 +1959,7 @@ export default function ResumeBuilder() {
                     <div style={{ fontSize: 12, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{t.label}</div>
                     <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', marginTop: 1 }}>{t.category}</div>
                   </div>
-                  {selectedTemplate === t.id && <span style={{ fontSize: 10, color: '#6C63FF' }}>✓</span>}
+                  {selectedTemplate === t.id && <span style={{ fontSize: 10, color: '#EFA02F' }}>✓</span>}
                 </button>
               ))}
             </div>

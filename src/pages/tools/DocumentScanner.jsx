@@ -342,7 +342,7 @@ export default function DocumentScanner() {
           )}
 
           {pages.length === 0 && (
-            <div style={{ marginTop:24, padding:'16px 18px', background:'rgba(108,99,255,0.07)', border:'1px solid rgba(108,99,255,0.18)', borderRadius:'var(--radius)' }}>
+            <div style={{ marginTop:24, padding:'16px 18px', background:'rgba(239,160,47,0.07)', border:'1px solid rgba(239,160,47,0.18)', borderRadius:'var(--radius)' }}>
               <div style={{ fontSize:13, fontWeight:600, color:'var(--accent2)', marginBottom:8 }}>⚡ Yahan kya special hai?</div>
               <div style={{ fontSize:13, color:'var(--text3)', lineHeight:1.9 }}>
                 📸 Scan → choose <b style={{color:'var(--text2)'}}>PDF, JPG, or Text</b> output in one click<br/>
@@ -407,7 +407,7 @@ export default function DocumentScanner() {
               <div style={{ fontSize:11, color:'var(--text3)', marginBottom:12, lineHeight:1.5 }}>
                 {mergeAll && pages.length > 1 ? `${pages.length} pages → ek PDF` : 'Best for sharing'}
               </div>
-              <button onClick={() => doExport('pdf')} disabled={processing} style={C.expBtn('#6c63ff','#fff')}>
+              <button onClick={() => doExport('pdf')} disabled={processing} style={C.expBtn('#EFA02F','#fff')}>
                 {processing && exportType==='pdf' ? <><span className={styles.spinner}/> Ban raha hai...</> : '⬇ PDF Download'}
               </button>
             </div>
@@ -514,5 +514,5 @@ const C = {
   expBtn:  (bg, col) => ({ width:'100%', background:bg, color:col, border:'none', borderRadius:8, padding:'9px 0', fontSize:12, fontWeight:600, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:5 }),
   select:  { width:'100%', background:'var(--surface2)', border:'1px solid var(--border)', borderRadius:6, padding:'5px 8px', color:'var(--text)', fontSize:11, outline:'none', marginBottom:2 },
   successLink: { display:'flex', alignItems:'center', justifyContent:'center', marginTop:10, padding:'13px', background:'rgba(0,212,170,0.1)', border:'1px solid rgba(0,212,170,0.35)', borderRadius:'var(--radius)', color:'var(--green)', fontWeight:600, fontSize:14, textDecoration:'none' },
-  capBtn:  (outline) => ({ background: outline?'var(--bg3)':'var(--accent)', border: outline?'2px dashed var(--border2)':'none', borderRadius:'var(--radius)', padding:'22px 16px', display:'flex', flexDirection:'column', alignItems:'center', gap:6, cursor:'pointer', color: outline?'var(--text2)':'#fff', boxShadow: outline?'none':'0 4px 20px rgba(108,99,255,0.4)' }),
+  capBtn:  (outline) => ({ background: outline?'var(--bg3)':'var(--accent)', border: outline?'2px dashed var(--border2)':'none', borderRadius:'var(--radius)', padding:'22px 16px', display:'flex', flexDirection:'column', alignItems:'center', gap:6, cursor:'pointer', color: outline?'var(--text2)':'#fff', boxShadow: outline?'none':'0 4px 20px rgba(239,160,47,0.4)' }),
 }

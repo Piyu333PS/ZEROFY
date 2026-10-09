@@ -134,7 +134,7 @@ export default function AuthModal({ isOpen, onClose, defaultTab = 'login' }) {
             <div style={{
               fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 800,
               letterSpacing: '3px',
-              background: 'linear-gradient(135deg, #60A5FA 0%, #A78BFA 100%)',
+              background: 'linear-gradient(135deg, #EFA02F 0%, #F6B24E 100%)',
               WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
               backgroundClip: 'text', marginBottom: 4
             }}>ZEROFY</div>
@@ -199,7 +199,7 @@ export default function AuthModal({ isOpen, onClose, defaultTab = 'login' }) {
                 fontSize: 14, outline: 'none', boxSizing: 'border-box',
                 transition: 'border-color 0.2s'
               }}
-              onFocus={e => e.target.style.borderColor = '#60A5FA'}
+              onFocus={e => e.target.style.borderColor = '#EFA02F'}
               onBlur={e => e.target.style.borderColor = 'var(--border2)'}
             />
           </div>
@@ -219,7 +219,7 @@ export default function AuthModal({ isOpen, onClose, defaultTab = 'login' }) {
                 fontSize: 14, outline: 'none', boxSizing: 'border-box',
                 transition: 'border-color 0.2s'
               }}
-              onFocus={e => e.target.style.borderColor = '#60A5FA'}
+              onFocus={e => e.target.style.borderColor = '#EFA02F'}
               onBlur={e => e.target.style.borderColor = 'var(--border2)'}
             />
             <button
@@ -255,7 +255,7 @@ export default function AuthModal({ isOpen, onClose, defaultTab = 'login' }) {
             style={{
               width: '100%', padding: '12px',
               borderRadius: 12, border: 'none',
-              background: 'linear-gradient(135deg, #60A5FA 0%, #A78BFA 100%)',
+              background: 'linear-gradient(135deg, #EFA02F 0%, #F6B24E 100%)',
               color: '#fff', fontSize: 15, fontWeight: 600,
               cursor: loading || !email || !password ? 'not-allowed' : 'pointer',
               opacity: loading || !email || !password ? 0.6 : 1,
@@ -274,7 +274,7 @@ export default function AuthModal({ isOpen, onClose, defaultTab = 'login' }) {
               onClick={() => setTab(tab === 'login' ? 'signup' : 'login')}
               style={{
                 background: 'none', border: 'none', cursor: 'pointer',
-                color: '#60A5FA', fontSize: 13, fontWeight: 600, padding: 0
+                color: '#EFA02F', fontSize: 13, fontWeight: 600, padding: 0
               }}
             >
               {tab === 'login' ? 'Sign Up' : 'Login'}

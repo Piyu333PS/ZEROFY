@@ -21,7 +21,7 @@ function makeQR(text, size) {
   try {
     new window.QRCode(div, {
       text, width: size, height: size,
-      colorDark: '#6c63ff', colorLight: '#0a0a0f',
+      colorDark: '#EFA02F', colorLight: '#0D1B2E',
       correctLevel: window.QRCode.CorrectLevel.H
     })
     const canvas = div.querySelector('canvas')
@@ -101,7 +101,7 @@ export default function QRGenerator() {
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
           <div style={{
-            background: '#0a0a0f', border: '2px solid var(--border2)', borderRadius: 16, padding: 16,
+            background: '#0D1B2E', border: '2px solid var(--border2)', borderRadius: 16, padding: 16,
             width: 200, height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center'
           }}>
             {loading ? <span className={styles.spinner} style={{ width: 28, height: 28 }} />

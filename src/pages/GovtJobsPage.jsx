@@ -26,7 +26,7 @@ const RSS_SOURCES = [
     id: 'sarkariexam',
     name: 'Sarkari Exam',
     feedUrl: 'https://www.sarkariexam.com/feed/',
-    color: '#8b5cf6',
+    color: '#EFA02F',
   },
   {
     id: 'govtjobsguru',

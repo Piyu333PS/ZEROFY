@@ -7,12 +7,12 @@ import styles from './HomePage.module.css'
 // Category color map
 const CAT_COLORS = {
   pdf:       { color: '#ef4444', dim: 'rgba(239,68,68,0.08)' },
-  video:     { color: '#a855f7', dim: 'rgba(168,85,247,0.08)' },
+  video:     { color: '#EFA02F', dim: 'rgba(168,85,247,0.08)' },
   audio:     { color: '#f59e0b', dim: 'rgba(245,158,11,0.08)' },
   image:     { color: '#10b981', dim: 'rgba(16,185,129,0.08)' },
-  document:  { color: '#3b82f6', dim: 'rgba(59,130,246,0.08)' },
+  document:  { color: '#E08A1E', dim: 'rgba(239,160,47,0.08)' },
   converter: { color: '#06b6d4', dim: 'rgba(6,182,212,0.08)' },
-  developer: { color: '#8b5cf6', dim: 'rgba(139,92,246,0.08)' },
+  developer: { color: '#EFA02F', dim: 'rgba(239,160,47,0.08)' },
   security:  { color: '#f97316', dim: 'rgba(249,115,22,0.08)' },
 }
 
@@ -121,9 +121,9 @@ export default function AllToolsPage() {
               All Tools
             </h1>
             <span style={{
-              background: 'rgba(99,102,241,0.15)', color: '#818cf8',
+              background: 'rgba(239,160,47,0.15)', color: '#F6B24E',
               fontSize: 11, fontWeight: 600, padding: '2px 8px',
-              borderRadius: 100, border: '1px solid rgba(99,102,241,0.25)'
+              borderRadius: 100, border: '1px solid rgba(239,160,47,0.25)'
             }}>
               {TOOLS.filter(t => t.status === 'ready').length}+ Live
             </span>
