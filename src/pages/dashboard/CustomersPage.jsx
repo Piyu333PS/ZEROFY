@@ -5,6 +5,9 @@ import { api, API } from '../../utils/api'
 import { useBilling } from '../../utils/billingStore'
 import { fmtMoney } from '../../utils/invoiceCalc'
 import ConfirmDialog from '../../components/ConfirmDialog'
+import { toast } from '../../components/ui/Toast'
+import { SkeletonRows } from '../../components/ui/Skeleton'
+import EmptyState from '../../components/ui/EmptyState'
 import styles from './CustomersPage.module.css'
 
 const emptyForm = { name: '', email: '', phone: '', gst: '', addr: '' }
@@ -23,7 +26,6 @@ export default function CustomersPage() {
   const [saving, setSaving] = useState(false)
   const [actionError, setError] = useState(null)
   const error = actionError || loadError
-  const [notice, setNotice] = useState(null)
   const [query, setQuery] = useState('')
   const [toDelete, setToDelete] = useState(null)
   const [deleting, setDeleting] = useState(false)
@@ -65,8 +67,7 @@ export default function CustomersPage() {
       : await api('/api/customers', token, { method: 'POST', body: form })
     setSaving(false)
     if (!res.ok || !res.data.success) { setError(res.data.error || 'Could not save. Please try again.'); return }
-    setNotice(editingId ? 'Client updated.' : 'Client added.')
-    setTimeout(() => setNotice(null), 4000)
+    toast(editingId ? 'Client updated' : 'Client added')
     closeForm()
     load(true)
   }
@@ -76,7 +77,8 @@ export default function CustomersPage() {
     const res = await api(`/api/customers/${toDelete._id}`, token, { method: 'DELETE' })
     setDeleting(false)
     setToDelete(null)
-    if (!res.ok) { setError(res.data.error || 'Could not delete. Please try again.'); return }
+    if (!res.ok) { toast.error(res.data.error || 'Could not delete. Please try again.'); return }
+    toast('Client deleted')
     load(true)
   }
 
@@ -175,7 +177,6 @@ export default function CustomersPage() {
         </div>
       )}
 
-      {notice && <p className={styles.notice}>{notice}</p>}
       {error && !showForm && <p className={styles.error}>{error}</p>}
 
       {showForm && (
@@ -210,7 +211,7 @@ export default function CustomersPage() {
       )}
 
       {customers.length > 5 && (
-        <input className={styles.searchBox} placeholder="Search by name, phone, email or GSTIN…" value={query} onChange={e => setQuery(e.target.value)} />
+        <input className={styles.searchBox} type="search" placeholder="Search clients (press / )" value={query} onChange={e => setQuery(e.target.value)} />
       )}
 
       <div className={styles.table}>
@@ -218,9 +219,15 @@ export default function CustomersPage() {
           <span>Client</span><span>GSTIN</span><span>Invoices</span><span>Billed</span><span>Outstanding</span><span></span>
         </div>
         {loading ? (
-          <p className={styles.empty}>Loading...</p>
+          <SkeletonRows rows={4} />
         ) : customers.length === 0 ? (
-          <p className={styles.empty}>No clients yet. Use "+ Add client", or just create an invoice and the client will appear here.</p>
+          <EmptyState
+            kind="clients"
+            title="No clients yet"
+            text="Clients are saved here automatically when you invoice them. You can also add one now or import a list from Excel."
+            action={{ label: 'Add client', onClick: openAdd }}
+            secondary={{ label: 'New invoice', onClick: () => navigate('/tools/invoice-maker') }}
+          />
         ) : filtered.length === 0 ? (
           <p className={styles.empty}>No clients match your search.</p>
         ) : (

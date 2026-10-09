@@ -5,6 +5,9 @@ import { api } from '../../utils/api'
 import { useBilling } from '../../utils/billingStore'
 import { invoiceTotal, displayStatus, formatDate, fmtMoney, localToday, r2 } from '../../utils/invoiceCalc'
 import ConfirmDialog from '../../components/ConfirmDialog'
+import { toast } from '../../components/ui/Toast'
+import { SkeletonRows } from '../../components/ui/Skeleton'
+import EmptyState from '../../components/ui/EmptyState'
 import styles from './PaymentsPage.module.css'
 
 const METHODS = [
@@ -31,7 +34,6 @@ export default function PaymentsPage() {
   const [saving, setSaving] = useState(false)
   const [actionError, setError] = useState(null)
   const error = actionError || loadError
-  const [notice, setNotice] = useState(null)
   const [toDelete, setToDelete] = useState(null)
   const [deleting, setDeleting] = useState(false)
 
@@ -77,10 +79,8 @@ export default function PaymentsPage() {
     const res = await api('/api/payments', token, { method: 'POST', body: { ...form, amount: amountNum } })
     setSaving(false)
     if (!res.ok || !res.data.success) { setError(res.data.error || 'Could not record the payment. Please try again.'); return }
-    setNotice(res.data.invoiceStatus === 'paid'
-      ? `Payment recorded. Invoice ${selected?.no || ''} is now fully paid.`
-      : `Payment recorded. Balance left: ${fmtMoney(res.data.balance, selected?.currency || '₹')}`)
-    setTimeout(() => setNotice(null), 5000)
+    if (res.data.invoiceStatus === 'paid') toast.paid(selected?.no || '')
+    else toast(`Payment recorded. Balance left: ${fmtMoney(res.data.balance, selected?.currency || '₹')}`)
     closeForm()
     load(true)
   }
@@ -90,7 +90,8 @@ export default function PaymentsPage() {
     const res = await api(`/api/payments/${toDelete._id}`, token, { method: 'DELETE' })
     setDeleting(false)
     setToDelete(null)
-    if (!res.ok) { setError(res.data.error || 'Could not delete. Please try again.'); return }
+    if (!res.ok) { toast.error(res.data.error || 'Could not delete. Please try again.'); return }
+    toast('Payment deleted')
     load(true)
   }
 
@@ -108,7 +109,6 @@ export default function PaymentsPage() {
         </button>
       </div>
 
-      {notice && <p className={styles.notice}>{notice}</p>}
       {error && !showForm && <p className={styles.error}>{error}</p>}
 
       {showForm && (
@@ -160,9 +160,14 @@ export default function PaymentsPage() {
           <span>Invoice</span><span>Client</span><span>Amount</span><span>Date</span><span>Method</span><span></span>
         </div>
         {loading ? (
-          <p className={styles.empty}>Loading...</p>
+          <SkeletonRows rows={3} />
         ) : payments.length === 0 ? (
-          <p className={styles.empty}>No payments recorded yet.</p>
+          <EmptyState
+            kind="payments"
+            title="No payments recorded yet"
+            text="When a client pays, record it here. Part payments are fine. The invoice balance and status update by themselves."
+            action={payable.length ? { label: 'Record payment', onClick: () => setShowForm(true) } : undefined}
+          />
         ) : (
           payments.map(p => {
             const inv = invoiceMap[p.invoiceId]

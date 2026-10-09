@@ -421,4 +421,8 @@ select.inp option { background: #fff; color: var(--text); }
 .items-head { text-transform: none; letter-spacing: 0; font-size: 12px; font-weight: 600; color: var(--text2); }
 .ig-name { font-size: 18px; font-weight: 600; }
 .ig-card { box-shadow: none; }
+.ig-recover { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; background: #FCEFD9; border-color: rgba(239,160,47,0.5); color: #6B3D05; }
+.ig-recover-actions { display: flex; gap: 6px; }
+.ig-banner { animation: slideUp 0.25s ease both; }
+@media (prefers-reduced-motion: reduce) { .ig-banner, .item-row { animation: none; } }
 `

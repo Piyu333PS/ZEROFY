@@ -1,0 +1,78 @@
+/* ───────── Toasts ───────── */
+.toaster {
+  position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 5000;
+  display: flex; flex-direction: column; gap: 8px; align-items: center;
+  width: max-content; max-width: calc(100vw - 24px);
+  font-family: 'Inter', system-ui, sans-serif; pointer-events: none;
+}
+.toast {
+  pointer-events: auto; display: flex; align-items: center; gap: 10px;
+  background: #12263F; color: #fff; border-radius: 12px; padding: 11px 12px 11px 14px;
+  box-shadow: 0 14px 36px rgba(8, 18, 32, 0.32);
+  font-size: 14px; font-weight: 500; max-width: 100%;
+  animation: toastIn 0.28s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+}
+.toast_error { background: #8F1F18; }
+.toastText { line-height: 1.4; }
+.toastClose {
+  background: none; border: none; color: rgba(255, 255, 255, 0.6); font-size: 18px; line-height: 1;
+  cursor: pointer; padding: 2px 4px; margin-left: 2px;
+}
+.toastClose:hover { color: #fff; }
+@keyframes toastIn { from { opacity: 0; transform: translateY(14px) scale(0.97); } to { opacity: 1; transform: none; } }
+
+/* animated tick */
+.tick { width: 22px; height: 22px; flex-shrink: 0; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.tick circle { stroke: #37B58A; stroke-width: 2; stroke-dasharray: 63; stroke-dashoffset: 63; animation: draw 0.4s ease forwards; }
+.tick path { stroke: #37B58A; stroke-width: 2.4; stroke-dasharray: 16; stroke-dashoffset: 16; animation: draw 0.25s 0.32s ease forwards; }
+@keyframes draw { to { stroke-dashoffset: 0; } }
+
+.bang {
+  width: 20px; height: 20px; border-radius: 50%; background: #fff; color: #8F1F18; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px;
+}
+
+/* PAID stamp that thumps onto the toast */
+.stampFx {
+  font-family: 'IBM Plex Mono', monospace; font-weight: 600; font-size: 12px; letter-spacing: 0.16em;
+  color: #5CE0B0; border: 2px solid #5CE0B0; border-radius: 5px; padding: 2px 8px; flex-shrink: 0;
+  transform: rotate(-7deg); animation: stamp 0.5s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+@keyframes stamp {
+  0% { opacity: 0; transform: rotate(-18deg) scale(2.4); }
+  60% { opacity: 1; transform: rotate(-5deg) scale(0.92); }
+  100% { opacity: 1; transform: rotate(-7deg) scale(1); }
+}
+
+/* ───────── Skeletons ───────── */
+.skel {
+  display: block; height: 12px; border-radius: 6px;
+  background: linear-gradient(90deg, #ECEEE8 25%, #F7F8F5 45%, #ECEEE8 65%);
+  background-size: 300% 100%; animation: shimmer 1.3s linear infinite;
+}
+@keyframes shimmer { from { background-position: 100% 0; } to { background-position: 0 0; } }
+.skelWrap { padding: 4px 0; }
+.skelRow { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 12px; border-top: 1px solid #ECEEE8; }
+.skelRow:first-child { border-top: none; }
+.skelBlock { border-radius: 16px; width: 100%; }
+
+/* ───────── Empty states ───────── */
+.empty { text-align: center; padding: 36px 20px 40px; font-family: 'Inter', system-ui, sans-serif; }
+.emptyArt { width: 120px; height: 96px; margin: 0 auto 14px; }
+.emptyArt svg { width: 100%; height: 100%; }
+.emptyTitle { font-family: 'Fraunces', Georgia, serif; font-size: 20px; font-weight: 600; color: #12263F; margin: 0 0 6px; }
+.emptyText { font-size: 14px; color: #5C7189; line-height: 1.6; max-width: 420px; margin: 0 auto 18px; }
+.emptyActions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.emptyPrimary, .emptySecondary {
+  font-family: inherit; font-size: 14px; font-weight: 700; padding: 10px 18px; border-radius: 10px; cursor: pointer;
+}
+.emptyPrimary { background: #EFA02F; border: 1px solid #EFA02F; color: #12263F; }
+.emptyPrimary:hover { background: #F6B24E; }
+.emptySecondary { background: #fff; border: 1px solid #DDE1D9; color: #12263F; font-weight: 600; }
+.emptySecondary:hover { background: #ECEEE8; }
+
+@media (max-width: 600px) { .toaster { bottom: 14px; } }
+@media (prefers-reduced-motion: reduce) {
+  .toast, .stampFx, .tick circle, .tick path { animation: none; stroke-dashoffset: 0; }
+  .skel { animation: none; }
+}

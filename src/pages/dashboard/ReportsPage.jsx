@@ -7,6 +7,9 @@ import { useAuth } from '../../context/AuthContext'
 import { useBilling } from '../../utils/billingStore'
 import { calcInvoice, displayStatus, STATUS_LABELS } from '../../utils/invoiceCalc'
 import { downloadText } from '../../utils/download'
+import { SkeletonBlock } from '../../components/ui/Skeleton'
+import EmptyState from '../../components/ui/EmptyState'
+import { useNavigate } from 'react-router-dom'
 import styles from './ReportsPage.module.css'
 
 const fmt = (n) => `₹${Number(n || 0).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
@@ -67,6 +70,7 @@ function buildBuckets(period, count) {
 
 export default function ReportsPage() {
   const { token } = useAuth()
+  const navigate = useNavigate()
   const { data, loading, error } = useBilling(token)
   const invoices = data?.invoices || []
   const payments = data?.payments || []
@@ -213,9 +217,14 @@ export default function ReportsPage() {
       {error && <p className={styles.error}>{error}</p>}
 
       {loading ? (
-        <p className={styles.empty}>Loading report data…</p>
+        <div style={{ display: 'grid', gap: 16 }}><SkeletonBlock height={96} /><SkeletonBlock height={280} /></div>
       ) : invoices.length === 0 ? (
-        <p className={styles.empty}>No invoices yet. Reports will appear here once you create one.</p>
+        <EmptyState
+          kind="reports"
+          title="Reports appear after your first invoice"
+          text="You will see billing by month, your top clients, who still owes you, and a GST summary you can export."
+          action={{ label: 'New invoice', onClick: () => navigate('/tools/invoice-maker') }}
+        />
       ) : (
         <>
           <div className={styles.statsGrid}>

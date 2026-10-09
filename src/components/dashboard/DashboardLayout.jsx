@@ -57,6 +57,23 @@ export default function DashboardLayout() {
   // Page badalte hi mobile drawer band
   useEffect(() => { setOpen(false) }, [location.pathname])
 
+  // Keyboard shortcuts:  N = new invoice,  / = jump to the search box on this page
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.ctrlKey || e.metaKey || e.altKey) return
+      const el = e.target
+      const typing = el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT' || el.isContentEditable)
+      if (typing || document.querySelector('[role="dialog"], [role="alertdialog"]')) return
+      if (e.key === 'n' || e.key === 'N') { e.preventDefault(); navigate('/tools/invoice-maker') }
+      else if (e.key === '/') {
+        const box = document.querySelector('main input[type="search"]')
+        if (box) { e.preventDefault(); box.focus() }
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [navigate])
+
   // Jab tak localStorage se session check nahi ho jata, kuch mat dikhao
   if (initializing) return null
   if (!user) return null
@@ -91,7 +108,7 @@ export default function DashboardLayout() {
         <div className={styles.brandSub}>Billing &amp; GST</div>
 
         <button className={styles.newBtn} data-tour="new-invoice" onClick={() => navigate('/tools/invoice-maker')}>
-          {icons.plus} New invoice
+          {icons.plus} New invoice <kbd className={styles.kbd}>N</kbd>
         </button>
 
         <nav className={styles.nav}>
@@ -134,7 +151,10 @@ export default function DashboardLayout() {
       </aside>
 
       <main className={styles.content}>
-        <Outlet />
+        {/* key = path, so each page fades in when you switch */}
+        <div key={location.pathname} className={styles.pageIn}>
+          <Outlet />
+        </div>
       </main>
 
       {tour && <GuidedTour email={user.email} onClose={() => setTour(false)} />}

@@ -4,6 +4,10 @@ import { useAuth } from '../../context/AuthContext'
 import { useBilling } from '../../utils/billingStore'
 import { invoiceTotal, displayStatus, STATUS_LABELS, fmtMoney } from '../../utils/invoiceCalc'
 import InvoiceViewModal from '../../components/invoice/InvoiceViewModal'
+import { useCountUp } from '../../utils/useCountUp'
+import { SkeletonRows, SkeletonBlock } from '../../components/ui/Skeleton'
+import EmptyState from '../../components/ui/EmptyState'
+import { sampleInvoice } from '../../data/sampleInvoice'
 import styles from './DashboardHome.module.css'
 
 const fmt = (n) => fmtMoney(n)
@@ -65,6 +69,13 @@ export default function DashboardHome() {
   const drafts = invoices.filter(i => i.status === 'draft').length
   const collected = stats && stats.totalInvoiced > 0 ? Math.round((stats.received / stats.totalInvoiced) * 100) : 0
 
+  // Numbers count up when they first appear or change
+  const pendingShown = useCountUp(stats?.pending)
+  const receivedShown = useCountUp(stats?.received)
+  const overdueShown = useCountUp(overdueAmount)
+  const clientsShown = Math.round(useCountUp(stats?.customerCount, 500))
+  const collectedShown = Math.round(useCountUp(collected, 900))
+
   return (
     <div className={styles.wrap}>
       <div className={styles.pageHead}>
@@ -77,14 +88,14 @@ export default function DashboardHome() {
       {error && <p className={styles.error}>{error}</p>}
 
       {loading && !stats ? (
-        <div className={styles.summary}><div className={styles.skeleton} /></div>
+        <div className={styles.summary}><div style={{ gridColumn: '1 / -1' }}><SkeletonBlock height={190} /></div></div>
       ) : stats && (
         <div className={styles.summary}>
           {/* Sabse zaroori number: kitna paisa aana baaki hai */}
           <div className={styles.hero} data-tour="to-collect">
             <p className={styles.heroLabel}>To collect</p>
-            <p className={styles.heroValue}>{fmt(stats.pending)}</p>
-            <div className={styles.meter} aria-hidden="true"><span style={{ width: `${collected}%` }} /></div>
+            <p className={styles.heroValue}>{fmt(pendingShown)}</p>
+            <div className={styles.meter} aria-hidden="true"><span style={{ width: `${collectedShown}%` }} /></div>
             <p className={styles.heroNote}>
               {stats.totalInvoiced > 0
                 ? `${collected}% collected — ${fmt(stats.received)} of ${fmt(stats.totalInvoiced)} billed`
@@ -94,17 +105,17 @@ export default function DashboardHome() {
           <div className={styles.side}>
             <button className={`${styles.tile} ${overdue.length ? styles.tileAlert : ''}`} onClick={() => navigate('/app/invoices')}>
               <span className={styles.tileLabel}>Overdue</span>
-              <span className={styles.tileValue}>{fmt(overdueAmount)}</span>
+              <span className={styles.tileValue}>{fmt(overdueShown)}</span>
               <span className={styles.tileNote}>{overdue.length ? `${overdue.length} invoice${overdue.length === 1 ? '' : 's'} past due date` : 'Nothing overdue'}</span>
             </button>
             <button className={styles.tile} onClick={() => navigate('/app/payments')}>
               <span className={styles.tileLabel}>Received</span>
-              <span className={`${styles.tileValue} ${styles.green}`}>{fmt(stats.received)}</span>
+              <span className={`${styles.tileValue} ${styles.green}`}>{fmt(receivedShown)}</span>
               <span className={styles.tileNote}>Payments recorded so far</span>
             </button>
             <button className={styles.tile} onClick={() => navigate('/app/customers')}>
               <span className={styles.tileLabel}>Clients</span>
-              <span className={styles.tileValue}>{stats.customerCount}</span>
+              <span className={styles.tileValue}>{clientsShown}</span>
               <span className={styles.tileNote}>{stats.invoiceCount} invoice{stats.invoiceCount === 1 ? '' : 's'}{drafts ? `, ${drafts} draft${drafts === 1 ? '' : 's'}` : ''}</span>
             </button>
           </div>
@@ -121,15 +132,21 @@ export default function DashboardHome() {
       </div>
 
       <div className={styles.ledgerPanel}>
-        <div className={styles.tableHead}>
-          <span>Invoice</span><span>Client</span><span>Amount</span><span>Status</span><span></span>
-        </div>
+        {(loading || recentInvoices.length > 0) && (
+          <div className={styles.tableHead}>
+            <span>Invoice</span><span>Client</span><span>Amount</span><span>Status</span><span></span>
+          </div>
+        )}
         {loading ? (
-          <p className={styles.empty}>Loading...</p>
+          <SkeletonRows rows={4} />
         ) : recentInvoices.length === 0 ? (
-          <p className={styles.empty}>
-            No invoices yet. <a href="/tools/invoice-maker" onClick={e => { e.preventDefault(); navigate('/tools/invoice-maker') }}>Create your first invoice</a>
-          </p>
+          <EmptyState
+            kind="invoice"
+            title="Create your first invoice"
+            text="It takes about two minutes. Your client and items are saved for next time."
+            action={{ label: 'New invoice', onClick: () => navigate('/tools/invoice-maker') }}
+            secondary={{ label: 'See a sample invoice', onClick: () => setViewing({ ...sampleInvoice(), __sample: true }) }}
+          />
         ) : (
           recentInvoices.map(inv => {
             const total = inv.grandTotal !== undefined ? Number(inv.grandTotal) : invoiceTotal(inv)
@@ -158,6 +175,7 @@ export default function DashboardHome() {
       {viewing && (
         <InvoiceViewModal
           invoice={viewing}
+          sample={Boolean(viewing.__sample)}
           hideBranding={isPro}
           onClose={() => setViewing(null)}
           onEdit={(inv) => navigate(`/tools/invoice-maker?edit=${inv._id}`)}

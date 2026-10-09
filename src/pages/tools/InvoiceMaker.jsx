@@ -9,6 +9,7 @@ import { printInvoice } from '../../utils/invoiceShare'
 import { api } from '../../utils/api'
 import { loadBilling, patchBilling } from '../../utils/billingStore'
 import { isValidUpiId } from '../../utils/qr'
+import { toast } from '../../components/ui/Toast'
 import {
   calcInvoice, fmtMoney, localToday, addDays, formatDate, GST_STATES, stateCodeOf, stateName, itemGstRate,
 } from '../../utils/invoiceCalc'
@@ -555,7 +556,7 @@ export default function InvoiceMaker() {
   const [invoiceCount, setInvoiceCount] = useState(0)
   const [isPro, setIsPro] = useState(false)
   const FREE_LIMIT = 3
-  const { token } = useAuth()
+  const { token, user } = useAuth()
   const API = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 
   const refreshStatus = useCallback(() => {
@@ -850,6 +851,69 @@ export default function InvoiceMaker() {
     return p
   }, [invNo, f, totals])
 
+  /* ── Auto-save: a new invoice you are still typing is kept in this browser, so closing the tab
+        or losing the connection does not lose your work. It is cleared once the invoice is saved. ── */
+  const draftKey = `zerofy-unsaved-invoice:${user?.email || 'guest'}`
+  const [recovered, setRecovered] = useState(null) // unsaved invoice found from an earlier visit
+  const skipAutosave = useRef(false)
+  const hasContent = Boolean(f.clientName.trim() || items.some(it => (it.desc || '').trim() || Number(it.rate)))
+
+  useEffect(() => {
+    if (editing || recovered || skipAutosave.current) return
+    if (token && !cloudLoaded) return
+    const timer = setTimeout(() => {
+      try {
+        if (!hasContent) { localStorage.removeItem(draftKey); return }
+        const { bizLogo, ...fields } = f
+        localStorage.setItem(draftKey, JSON.stringify({
+          at: Date.now(), f: fields, items, invNo, discPct, shipping, roundOff, template, currency, activeBizId,
+        }))
+      } catch { /* storage full or blocked — auto-save is best effort */ }
+    }, 700)
+    return () => clearTimeout(timer)
+  }, [f, items, invNo, discPct, shipping, roundOff, template, currency, activeBizId, editing, recovered, cloudLoaded, token, hasContent, draftKey])
+
+  // On opening a blank new invoice, offer to bring back unsaved work (kept for 7 days)
+  useEffect(() => {
+    if (editParam || copyParam || clientParam) return
+    try {
+      const raw = localStorage.getItem(draftKey)
+      if (!raw) return
+      const saved = JSON.parse(raw)
+      if (!saved?.at || Date.now() - saved.at > 7 * 24 * 3600 * 1000) { localStorage.removeItem(draftKey); return }
+      setRecovered(saved)
+    } catch { /* ignore */ }
+  }, [draftKey]) // eslint-disable-line
+
+  const restoreUnsaved = () => {
+    const d = recovered
+    if (!d) return
+    setF(p => ({ ...blankForm(), ...d.f, bizLogo: p.bizLogo || '' }))
+    if (Array.isArray(d.items) && d.items.length) setItems(d.items)
+    setInvNo(d.invNo || '')
+    setDiscPct(Number(d.discPct) || 0)
+    setShipping(d.shipping || '')
+    setRoundOff(Boolean(d.roundOff))
+    setTemplate(d.template || 'modern')
+    setCurrency(d.currency || '₹')
+    if (d.activeBizId) setActiveBizId(d.activeBizId)
+    setRecovered(null)
+    toast('Unsaved invoice restored')
+  }
+  const discardUnsaved = () => {
+    try { localStorage.removeItem(draftKey) } catch { /* ignore */ }
+    setRecovered(null)
+  }
+  const savedAgo = (at) => {
+    const mins = Math.round((Date.now() - at) / 60000)
+    if (mins < 1) return 'just now'
+    if (mins < 60) return `${mins} minute${mins === 1 ? '' : 's'} ago`
+    const hrs = Math.round(mins / 60)
+    if (hrs < 24) return `${hrs} hour${hrs === 1 ? '' : 's'} ago`
+    const days = Math.round(hrs / 24)
+    return `${days} day${days === 1 ? '' : 's'} ago`
+  }
+
   // mode: 'draft' (sirf save) | 'final' (save + print)
   const saveInvoice = async (mode) => {
     setFormError('')
@@ -892,6 +956,11 @@ export default function InvoiceMaker() {
       setFormError(res.data.message || res.data.error || 'Could not save the invoice. Please try again.')
       return
     }
+
+    // Saved on the server — the browser copy is no longer needed
+    skipAutosave.current = true
+    try { localStorage.removeItem(draftKey) } catch { /* ignore */ }
+    toast(mode === 'draft' && status === 'draft' ? `Draft ${invNo.trim()} saved` : `Invoice ${invNo.trim()} saved`)
 
     const saved = { ...res.data.invoice, bizLogo: f.bizLogo || '' }
     if (res.data.invoiceCount !== undefined) setInvoiceCount(res.data.invoiceCount)
@@ -945,6 +1014,18 @@ export default function InvoiceMaker() {
 
           {token && !cloudLoaded && (
             <div className="ig-banner" role="status">Loading your saved business, clients and items…</div>
+          )}
+
+          {recovered && !editing && (
+            <div className="ig-banner ig-recover" role="status">
+              <span>
+                You have an unsaved invoice{recovered.f?.clientName ? <> for <strong>{recovered.f.clientName}</strong></> : ''} from {savedAgo(recovered.at)}.
+              </span>
+              <span className="ig-recover-actions">
+                <button className="btn btn-sm btn-accent" onClick={restoreUnsaved}>Restore</button>
+                <button className="btn btn-sm" onClick={discardUnsaved}>Discard</button>
+              </span>
+            </div>
           )}
 
           {editing && (
@@ -1345,6 +1426,7 @@ export default function InvoiceMaker() {
                   <div className="gen-note">
                     Save &amp; print saves the invoice and opens the print / PDF dialog
                   </div>
+                  {!editing && hasContent && <div className="gen-note" style={{ marginTop: 4 }}>Your work is auto-saved on this device as you type</div>}
                 </>
               )}
 

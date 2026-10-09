@@ -8,6 +8,7 @@ import PricingPage from './pages/PricingPage'
 import { useBackButton } from './hooks/useBackButton'
 import { AuthProvider } from './context/AuthContext'
 import Footer from './components/Footer'
+import { Toaster } from './components/ui/Toast'
 import PrivacyPolicy from './pages/PrivacyPolicy'
 import TermsConditions from './pages/TermsConditions'
 
@@ -267,6 +268,7 @@ function AppInner() {
         </Routes>
       </main>
       {!bare && <Footer />}
+      <Toaster />
     </div>
   )
 }

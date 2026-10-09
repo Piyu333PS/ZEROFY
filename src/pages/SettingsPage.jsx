@@ -135,7 +135,7 @@ export default function SettingsPage({ embedded = false }) {
             <p style={{ fontSize: 14, color: 'var(--text2)', margin: '0 0 14px' }}>
               {account.isPro
                 ? <>Zerofy Pro{account.proExpiry ? ` — valid until ${new Date(account.proExpiry).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}` : ''}</>
-                : <>Free plan — {Math.max(0, 3 - (account.invoiceCount || 0))} free invoices left</>}
+                : <>Free plan — {Math.max(0, 3 - (account.invoiceCount || 0))} of 3 free invoices left</>}
             </p>
             <button onClick={() => navigate(account.isPro ? '/billing' : '/pricing')} style={{
               padding: '9px 20px', borderRadius: 10, border: '1px solid var(--border2)', background: 'var(--surface)',

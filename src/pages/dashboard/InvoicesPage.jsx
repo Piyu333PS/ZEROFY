@@ -3,7 +3,11 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { api } from '../../utils/api'
 import { useBilling } from '../../utils/billingStore'
-import { downloadInvoicePdf } from '../../utils/invoiceShare'
+import { downloadInvoicePdf, sendPaymentReminder } from '../../utils/invoiceShare'
+import { toast } from '../../components/ui/Toast'
+import { SkeletonRows } from '../../components/ui/Skeleton'
+import EmptyState from '../../components/ui/EmptyState'
+import { sampleInvoice } from '../../data/sampleInvoice'
 import { invoiceTotal, displayStatus, STATUS_LABELS, formatDate, fmtMoney } from '../../utils/invoiceCalc'
 import InvoiceViewModal from '../../components/invoice/InvoiceViewModal'
 import ConfirmDialog from '../../components/ConfirmDialog'
@@ -43,7 +47,6 @@ export default function InvoicesPage() {
   const isPro = Boolean(data?.status?.isPro)
   const [actionError, setError] = useState(null)
   const error = actionError || loadError
-  const [notice, setNotice] = useState(null)
 
   const [menuId, setMenuId] = useState(null)
   const [viewing, setViewing] = useState(null)
@@ -99,7 +102,7 @@ export default function InvoicesPage() {
     return nums
   }, [totalPages, currentPage])
 
-  const flash = (msg) => { setNotice(msg); setTimeout(() => setNotice(n => (n === msg ? null : n)), 4000) }
+  const flash = (msg) => toast(msg)
 
   const setStatus = async (inv, status, msg) => {
     setWorking(true)
@@ -107,7 +110,7 @@ export default function InvoicesPage() {
     const res = await api(`/api/invoices/${inv._id}`, token, { method: 'PUT', body: { status } })
     setWorking(false)
     setConfirm(null)
-    if (!res.ok) { setError(res.data.message || res.data.error || 'Could not update. Please try again.'); return }
+    if (!res.ok) { toast.error(res.data.message || res.data.error || 'Could not update. Please try again.'); return }
     flash(msg)
     refresh()
   }
@@ -117,7 +120,7 @@ export default function InvoicesPage() {
     const res = await api(`/api/invoices/${inv._id}`, token, { method: 'DELETE' })
     setWorking(false)
     setConfirm(null)
-    if (!res.ok) { setError(res.data.error || 'Could not delete. Please try again.'); return }
+    if (!res.ok) { toast.error(res.data.error || 'Could not delete. Please try again.'); return }
     flash(`Invoice ${inv.no} deleted.`)
     refresh()
   }
@@ -139,7 +142,8 @@ export default function InvoicesPage() {
         <div className={styles.search}>
           {icons.search}
           <input
-            placeholder="Search by invoice no, client, or business…"
+            type="search"
+            placeholder="Search invoices (press / )"
             value={query}
             onChange={e => setQuery(e.target.value)}
           />
@@ -164,7 +168,6 @@ export default function InvoicesPage() {
         </div>
       )}
 
-      {notice && <p className={styles.notice}>{notice}</p>}
       {error && <p className={styles.error}>{error}</p>}
 
       <div className={styles.panel}>
@@ -173,13 +176,17 @@ export default function InvoicesPage() {
         </div>
 
         {loading ? (
-          <p className={styles.empty}>Loading...</p>
+          <SkeletonRows rows={5} />
+        ) : invoices.length === 0 ? (
+          <EmptyState
+            kind="invoice"
+            title="Create your first invoice"
+            text="Add your business, a client and a few items. Zerofy works out GST and gives you a clean PDF to print or share."
+            action={{ label: 'New invoice', onClick: () => navigate('/tools/invoice-maker') }}
+            secondary={{ label: 'See a sample invoice', onClick: () => setViewing({ ...sampleInvoice(), __sample: true }) }}
+          />
         ) : pageInvoices.length === 0 ? (
-          <p className={styles.empty}>
-            {invoices.length === 0
-              ? <>No invoices yet. <a href="/tools/invoice-maker" onClick={e => { e.preventDefault(); navigate('/tools/invoice-maker') }}>Create your first invoice</a></>
-              : 'No invoices match this filter or search.'}
-          </p>
+          <p className={styles.empty}>No invoices match this filter or search.</p>
         ) : (
           pageInvoices.map(inv => {
             const total = totalOf(inv)
@@ -225,7 +232,8 @@ export default function InvoicesPage() {
                         <button onClick={act(() => navigate(`/tools/invoice-maker?edit=${inv._id}`))}>Edit</button>
                         <button onClick={act(() => navigate(`/tools/invoice-maker?copy=${inv._id}`))}>Duplicate</button>
                         {canPay && <button onClick={act(() => navigate(`/app/payments?invoice=${inv._id}`))}>Record payment</button>}
-                        <button onClick={act(() => downloadInvoicePdf(inv, { hideBranding: isPro }).catch(() => setError('Could not create the PDF. Please try again.')))}>Download PDF</button>
+                        {canPay && <button onClick={act(() => sendPaymentReminder(inv))}>Send reminder on WhatsApp</button>}
+                        <button onClick={act(() => downloadInvoicePdf(inv, { hideBranding: isPro }).then(() => toast('PDF downloaded')).catch(() => toast.error('Could not create the PDF. Please try again.')))}>Download PDF</button>
                         <hr />
                         {inv.status === 'cancelled'
                           ? <button onClick={act(() => setStatus(inv, 'sent', `Invoice ${inv.no} restored.`))}>Restore invoice</button>
@@ -278,6 +286,7 @@ export default function InvoicesPage() {
       {viewing && (
         <InvoiceViewModal
           invoice={viewing}
+          sample={Boolean(viewing.__sample)}
           hideBranding={isPro}
           onClose={() => setViewing(null)}
           onEdit={(inv) => navigate(`/tools/invoice-maker?edit=${inv._id}`)}

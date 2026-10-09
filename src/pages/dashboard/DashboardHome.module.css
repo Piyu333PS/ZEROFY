@@ -329,3 +329,8 @@
   .pageHead h1 { font-size: 24px; }
   .hero { padding: 22px 20px; }
 }
+
+.meter span { transition: width 0.2s linear; }
+.tile { transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease; }
+.tile:hover { transform: translateY(-1px); box-shadow: 0 6px 18px -10px rgba(18,38,63,0.35); }
+@media (prefers-reduced-motion: reduce) { .tile:hover { transform: none; } }

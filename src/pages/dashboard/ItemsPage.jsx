@@ -5,6 +5,9 @@ import { useBilling } from '../../utils/billingStore'
 import { fmtMoney } from '../../utils/invoiceCalc'
 import { UQC_CODES } from '../../data/invoiceCodes'
 import ConfirmDialog from '../../components/ConfirmDialog'
+import { toast } from '../../components/ui/Toast'
+import { SkeletonRows } from '../../components/ui/Skeleton'
+import EmptyState from '../../components/ui/EmptyState'
 import styles from './CustomersPage.module.css'
 
 const emptyForm = { name: '', type: 'goods', hsnSac: '', uqc: 'PCS', rate: '', gstRate: '18' }
@@ -23,7 +26,6 @@ export default function ItemsPage() {
   const [saving, setSaving] = useState(false)
   const [actionError, setError] = useState(null)
   const error = actionError || loadError
-  const [notice, setNotice] = useState(null)
   const [query, setQuery] = useState('')
   const [toDelete, setToDelete] = useState(null)
   const [deleting, setDeleting] = useState(false)
@@ -57,8 +59,7 @@ export default function ItemsPage() {
       : await api('/api/items', token, { method: 'POST', body })
     setSaving(false)
     if (!res.ok || !res.data.success) { setError(res.data.error || 'Could not save. Please try again.'); return }
-    setNotice(editingId ? 'Item updated.' : 'Item added.')
-    setTimeout(() => setNotice(null), 4000)
+    toast(editingId ? 'Item updated' : 'Item added')
     closeForm()
     refresh()
   }
@@ -68,7 +69,8 @@ export default function ItemsPage() {
     const res = await api(`/api/items/${toDelete._id}`, token, { method: 'DELETE' })
     setDeleting(false)
     setToDelete(null)
-    if (!res.ok) { setError(res.data.error || 'Could not delete. Please try again.'); return }
+    if (!res.ok) { toast.error(res.data.error || 'Could not delete. Please try again.'); return }
+    toast('Item deleted')
     refresh()
   }
 
@@ -90,7 +92,6 @@ export default function ItemsPage() {
         </div>
       </div>
 
-      {notice && <p className={styles.notice}>{notice}</p>}
       {error && !showForm && <p className={styles.error}>{error}</p>}
 
       {showForm && (
@@ -121,7 +122,7 @@ export default function ItemsPage() {
       )}
 
       {items.length > 5 && (
-        <input className={styles.searchBox} placeholder="Search by name or HSN/SAC…" value={query} onChange={e => setQuery(e.target.value)} />
+        <input className={styles.searchBox} type="search" placeholder="Search items (press / )" value={query} onChange={e => setQuery(e.target.value)} />
       )}
 
       <div className={styles.table}>
@@ -129,9 +130,14 @@ export default function ItemsPage() {
           <span>Item</span><span>Type</span><span>HSN / SAC</span><span>Unit</span><span>Rate</span><span>GST</span><span></span>
         </div>
         {loading ? (
-          <p className={styles.empty}>Loading...</p>
+          <SkeletonRows rows={4} />
         ) : items.length === 0 ? (
-          <p className={styles.empty}>No saved items yet. Use "+ Add item", or create an invoice and its items will appear here.</p>
+          <EmptyState
+            kind="items"
+            title="No saved items yet"
+            text="Items and services from your invoices are saved here with their rate, GST and HSN/SAC code, so you never type them twice."
+            action={{ label: 'Add item', onClick: openAdd }}
+          />
         ) : filtered.length === 0 ? (
           <p className={styles.empty}>No items match your search.</p>
         ) : (

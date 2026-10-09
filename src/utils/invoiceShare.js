@@ -213,3 +213,27 @@ export async function shareViaEmail(inv, opts = {}) {
   if (blob) saveBlob(blob, safeFileName(inv))
   window.location.href = `mailto:${String(inv.clientEmail || '').trim()}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(buildEmailBody(inv, false))}`
 }
+
+/* ─── Payment reminder on WhatsApp (no attachment — a short, polite nudge) ─── */
+export function sendPaymentReminder(inv) {
+  const total = invoiceTotal(inv)
+  const balance = inv.balance !== undefined ? Number(inv.balance) : total
+  const cur = inv.currency || '₹'
+  const overdue = inv.dueDate && inv.dueDate < new Date().toISOString().slice(0, 10)
+  const lines = [
+    `Hi ${inv.clientName || 'there'},`,
+    '',
+    `This is a gentle reminder about invoice *${inv.no}* dated ${formatDate(inv.date)}.`,
+    `Amount due: *${fmtMoney(balance, cur)}*` + (balance < total ? ` (of ${fmtMoney(total, cur)})` : ''),
+    inv.dueDate ? `Due date: ${formatDate(inv.dueDate)}${overdue ? ' (overdue)' : ''}` : '',
+    inv.upiId ? `You can pay by UPI to ${inv.upiId}.` : '',
+    '',
+    'Please ignore this message if you have already paid. Thank you!',
+    inv.bizName ? `- ${inv.bizName}` : '',
+  ].filter((l, i, arr) => l !== '' || (arr[i - 1] !== '' && i !== arr.length - 1))
+  const digits = String(inv.clientPhone || '').replace(/\D/g, '')
+  const phone = digits.length === 10 ? `91${digits}` : digits
+  const url = `https://wa.me/${phone}?text=${encodeURIComponent(lines.join('\n'))}`
+  const w = window.open(url, '_blank', 'noopener')
+  if (!w) window.location.href = url
+}

@@ -6,7 +6,7 @@ import styles from './InvoiceViewModal.module.css'
 
 /* Saved invoice ko app ke andar hi dikhata hai (pehle "View" naya tab/popup kholta tha,
    jo popup blocker rok deta tha). Yahin se Print, PDF download, WhatsApp, Email, Edit. */
-export default function InvoiceViewModal({ invoice, hideBranding = false, onClose, onEdit }) {
+export default function InvoiceViewModal({ invoice, hideBranding = false, onClose, onEdit, sample = false }) {
   const [busy, setBusy] = useState('')
   const [error, setError] = useState('')
 
@@ -36,7 +36,7 @@ export default function InvoiceViewModal({ invoice, hideBranding = false, onClos
         <div className={styles.head}>
           <div>
             <div className={styles.title}>{invoice.no}</div>
-            <div className={styles.sub}>{invoice.clientName || '—'} · {formatDate(invoice.date)}</div>
+            <div className={styles.sub}>{sample ? 'Sample invoice — this is how your invoices will look' : `${invoice.clientName || '—'} · ${formatDate(invoice.date)}`}</div>
           </div>
           <div className={styles.actions}>
             <button className={`${styles.btn} ${styles.primary}`} disabled={!!busy} onClick={run('print', printInvoice)}>
@@ -45,13 +45,17 @@ export default function InvoiceViewModal({ invoice, hideBranding = false, onClos
             <button className={styles.btn} disabled={!!busy} onClick={run('pdf', downloadInvoicePdf)}>
               {busy === 'pdf' ? 'Preparing…' : 'Download PDF'}
             </button>
-            <button className={styles.btn} disabled={!!busy} onClick={run('wa', shareViaWhatsApp)}>
-              {busy === 'wa' ? 'Preparing…' : 'WhatsApp'}
-            </button>
-            <button className={styles.btn} disabled={!!busy} onClick={run('mail', shareViaEmail)}>
-              {busy === 'mail' ? 'Preparing…' : 'Email'}
-            </button>
-            {onEdit && <button className={styles.btn} disabled={!!busy} onClick={() => onEdit(invoice)}>Edit</button>}
+            {!sample && (
+              <button className={styles.btn} disabled={!!busy} onClick={run('wa', shareViaWhatsApp)}>
+                {busy === 'wa' ? 'Preparing…' : 'WhatsApp'}
+              </button>
+            )}
+            {!sample && (
+              <button className={styles.btn} disabled={!!busy} onClick={run('mail', shareViaEmail)}>
+                {busy === 'mail' ? 'Preparing…' : 'Email'}
+              </button>
+            )}
+            {onEdit && !sample && <button className={styles.btn} disabled={!!busy} onClick={() => onEdit(invoice)}>Edit</button>}
             <button className={`${styles.btn} ${styles.close}`} onClick={onClose} aria-label="Close">×</button>
           </div>
         </div>

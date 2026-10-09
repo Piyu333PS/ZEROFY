@@ -134,6 +134,12 @@
 /* ---------- CONTENT ---------- */
 .content { flex: 1; min-width: 0; background: var(--paper); }
 .content > * { max-width: 1240px; margin-left: auto; margin-right: auto; }
+.pageIn { animation: pageIn 0.22s ease both; }
+@keyframes pageIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.kbd {
+  font-family: var(--mono); font-size: 10.5px; font-weight: 600; line-height: 1;
+  border: 1px solid rgba(18,38,63,0.35); border-radius: 4px; padding: 2px 5px; margin-left: 4px; opacity: 0.75;
+}
 
 .mobileBar, .scrim { display: none; }
 
@@ -162,4 +168,5 @@
   .scrim { display: block; position: fixed; inset: 0; z-index: 40; background: rgba(8,18,32,0.55); }
   .closeBtn { display: flex; }
 }
-@media (prefers-reduced-motion: reduce) { .sidebar, .newBtn, .navLink { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .sidebar, .newBtn, .navLink { transition: none; } .pageIn { animation: none; } }
+@media (max-width: 900px) { .kbd { display: none; } }
