@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { PRO_FEATURES, PLAN_THEME, PLANS, savingsVsMonthly } from '../data/proPlans'
@@ -9,6 +9,10 @@ const faqs = [
   {
     q: 'Do I need a credit card to sign up?',
     a: 'No credit card is required to create an account. You only need to pay when you choose a plan.',
+  },
+  {
+    q: 'Do you have a coupon code?',
+    a: 'If you have a coupon or a sales code, enter it on the checkout page. Coupons work with one-time payment.',
   },
   {
     q: 'Can I cancel my subscription anytime?',
@@ -30,149 +34,26 @@ const faqs = [
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 
-// Razorpay script ek baar load karo
-const loadRazorpay = () => new Promise((resolve, reject) => {
-  if (window.Razorpay) return resolve()
-  const s = document.createElement('script')
-  s.src = 'https://checkout.razorpay.com/v1/checkout.js'
-  s.onload = resolve
-  s.onerror = () => reject(new Error('Failed to load payment gateway'))
-  document.head.appendChild(s)
-})
-
 export default function PricingPage() {
   const [openFaq, setOpenFaq] = useState(null)
-  const [payLoading, setPayLoading] = useState(null)
-  const [payError, setPayError] = useState('')
   const [showAuthPrompt, setShowAuthPrompt] = useState(false)
-  const [pendingPlan, setPendingPlan] = useState(null)
-  const [autoPayEnabled, setAutoPayEnabled] = useState(true) // 🆕 Auto Pay toggle
+  const [gstEnabled, setGstEnabled] = useState(false)
   const navigate = useNavigate()
-  const { token, user } = useAuth()
+  const { token } = useAuth()
 
-  const handlePlanClick = async (planId) => {
+  // Whether GST is added on top of these prices is decided on the server
+  useEffect(() => {
+    fetch(`${API}/api/payment/plans`).then(r => r.json()).then(d => setGstEnabled(Boolean(d.gstEnabled))).catch(() => {})
+  }, [])
+
+  // Choosing a plan opens the checkout page: billing details on the left, order summary on the right
+  const handlePlanClick = (planId) => {
     if (!token) {
-      setPendingPlan(planId)
+      try { sessionStorage.setItem('zerofy-after-login', `/checkout?plan=${planId}`) } catch { /* ignore */ }
       setShowAuthPrompt(true)
       return
     }
-    if (autoPayEnabled) {
-      await startAutoPayment(planId)
-    } else {
-      await startPayment(planId)
-    }
-  }
-
-  // ─── Manual (one-time) payment — purana code same ───────────────
-  const startPayment = async (planId) => {
-    setPayLoading(planId)
-    setPayError('')
-    try {
-      const orderRes = await fetch(`${API}/api/payment/create-order`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ planId })
-      })
-      const orderData = await orderRes.json()
-      if (!orderRes.ok) throw new Error(orderData.error || 'Failed to create order')
-
-      await loadRazorpay()
-
-      const rzp = new window.Razorpay({
-        key: orderData.keyId,
-        amount: orderData.amount,
-        currency: orderData.currency,
-        name: 'Zerofy Pro',
-        description: orderData.planName,
-        order_id: orderData.orderId,
-        theme: { color: '#EFA02F' },
-        handler: async (response) => {
-          const verifyRes = await fetch(`${API}/api/payment/verify`, {
-            method: 'POST',
-            headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature,
-              planId,
-            })
-          })
-          const verifyData = await verifyRes.json()
-          if (verifyRes.ok && verifyData.success) {
-            alert('' + verifyData.message)
-            navigate('/')
-          } else {
-            setPayError('Payment verification failed. Please contact support.')
-          }
-          setPayLoading(null)
-        },
-        modal: { ondismiss: () => setPayLoading(null) }
-      })
-      rzp.on('payment.failed', (r) => {
-        setPayError(r.error?.description || 'Payment failed. Please try again.')
-        setPayLoading(null)
-      })
-      rzp.open()
-    } catch (err) {
-      setPayError(err.message || 'Something went wrong. Please try again.')
-      setPayLoading(null)
-    }
-  }
-
-  // ─── 🆕 Auto Pay (subscription) payment ─────────────────────────
-  const startAutoPayment = async (planId) => {
-    setPayLoading(planId)
-    setPayError('')
-    try {
-      // 1. Subscription create karo backend pe
-      const subRes = await fetch(`${API}/api/payment/create-subscription`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ planId })
-      })
-      const subData = await subRes.json()
-      if (!subRes.ok) throw new Error(subData.error || 'Could not start the subscription')
-
-      await loadRazorpay()
-
-      // 2. Razorpay subscription checkout kholo
-      const rzp = new window.Razorpay({
-        key: subData.keyId,
-        subscription_id: subData.subscriptionId,  // order_id ki jagah subscription_id
-        name: 'Zerofy Pro',
-        description: `${subData.planName} — Auto Pay`,
-        theme: { color: '#EFA02F' },
-        handler: async (response) => {
-          // 3. Pehli payment verify karo
-          const verifyRes = await fetch(`${API}/api/payment/verify-subscription`, {
-            method: 'POST',
-            headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_subscription_id: response.razorpay_subscription_id,
-              razorpay_signature: response.razorpay_signature,
-            })
-          })
-          const verifyData = await verifyRes.json()
-          if (verifyRes.ok && verifyData.success) {
-            alert('' + verifyData.message)
-            navigate('/')
-          } else {
-            setPayError('Subscription verification failed. Please contact support.')
-          }
-          setPayLoading(null)
-        },
-        modal: { ondismiss: () => setPayLoading(null) }
-      })
-      rzp.on('payment.failed', (r) => {
-        setPayError(r.error?.description || 'Payment failed. Please try again.')
-        setPayLoading(null)
-      })
-      rzp.open()
-    } catch (err) {
-      setPayError(err.message || 'Something went wrong. Please try again.')
-      setPayLoading(null)
-    }
+    navigate(`/checkout?plan=${planId}`)
   }
 
   return (
@@ -241,7 +122,7 @@ export default function PricingPage() {
           WebkitTextFillColor: 'transparent',
           backgroundClip: 'text',
         }}>
-          One plan, three ways to pay
+          Simple pricing for your billing
         </h1>
 
         <p style={{
@@ -251,59 +132,9 @@ export default function PricingPage() {
           margin: '0 auto 28px',
           lineHeight: 1.65,
         }}>
-          One Pro plan. Three flexible billing options. No hidden fees, no surprises.
+          Start free with 3 invoices. Go Pro for unlimited invoices — pay monthly, or save with the yearly plan.
         </p>
 
-        {/* 🆕 Auto Pay Toggle */}
-        <div style={{
-          display: 'inline-flex', alignItems: 'center', gap: 12,
-          background: 'rgba(255,255,255,0.04)',
-          border: '1px solid rgba(255,255,255,0.1)',
-          borderRadius: 100, padding: '8px 20px',
-        }}>
-          <span style={{ fontSize: 13, color: autoPayEnabled ? 'var(--text2)' : '#f1f5f9', fontWeight: autoPayEnabled ? 400 : 600 }}>
-            One-time
-          </span>
-
-          {/* Toggle switch */}
-          <div
-            onClick={() => setAutoPayEnabled(!autoPayEnabled)}
-            style={{
-              width: 44, height: 24, borderRadius: 12, cursor: 'pointer',
-              background: autoPayEnabled ? '#EFA02F' : 'rgba(255,255,255,0.15)',
-              position: 'relative', transition: 'background 0.2s', flexShrink: 0,
-            }}
-          >
-            <div style={{
-              position: 'absolute', top: 3,
-              left: autoPayEnabled ? 23 : 3,
-              width: 18, height: 18, borderRadius: '50%',
-              background: '#fff', transition: 'left 0.2s',
-            }} />
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ fontSize: 13, color: autoPayEnabled ? '#f1f5f9' : 'var(--text2)', fontWeight: autoPayEnabled ? 600 : 400 }}>
-              Auto Pay
-            </span>
-            {autoPayEnabled && (
-              <span style={{
-                fontSize: 11, fontWeight: 700, padding: '2px 8px',
-                borderRadius: 100, background: 'rgba(52,211,153,0.15)',
-                color: '#34D399', border: '1px solid rgba(52,211,153,0.3)',
-              }}>
-                Recommended
-              </span>
-            )}
-          </div>
-        </div>
-
-        {/* Auto Pay info */}
-        {autoPayEnabled && (
-          <div style={{ marginTop: 12, fontSize: 12, color: '#64748b' }}>
-            Automatically renews — cancel anytime from billing page
-          </div>
-        )}
       </div>
 
       {/* Plans Grid */}
@@ -311,7 +142,7 @@ export default function PricingPage() {
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
         gap: 20,
-        maxWidth: 980,
+        maxWidth: 700,
         margin: '0 auto',
         padding: '0 24px',
       }}>
@@ -325,19 +156,19 @@ export default function PricingPage() {
               padding: '36px 28px',
               position: 'relative',
               transition: 'transform 0.2s, box-shadow 0.2s',
-              boxShadow: plan.id === 'quarterly'
+              boxShadow: plan.id === 'yearly'
                 ? '0 0 40px rgba(239,160,47,0.12)'
                 : 'none',
             }}
             onMouseEnter={e => {
               e.currentTarget.style.transform = 'translateY(-4px)'
-              e.currentTarget.style.boxShadow = plan.id === 'quarterly'
+              e.currentTarget.style.boxShadow = plan.id === 'yearly'
                 ? '0 12px 50px rgba(239,160,47,0.22)'
                 : '0 8px 32px rgba(0,0,0,0.3)'
             }}
             onMouseLeave={e => {
               e.currentTarget.style.transform = 'translateY(0)'
-              e.currentTarget.style.boxShadow = plan.id === 'quarterly'
+              e.currentTarget.style.boxShadow = plan.id === 'yearly'
                 ? '0 0 40px rgba(239,160,47,0.12)'
                 : 'none'
             }}
@@ -347,7 +178,7 @@ export default function PricingPage() {
                 position: 'absolute',
                 top: -13, left: '50%',
                 transform: 'translateX(-50%)',
-                background: plan.id === 'quarterly'
+                background: plan.id === 'yearly'
                   ? 'linear-gradient(135deg, #EFA02F, #F6B24E)'
                   : 'linear-gradient(135deg, #f59e0b, #fbbf24)',
                 color: '#12263F',
@@ -369,7 +200,7 @@ export default function PricingPage() {
                 {plan.name}
               </div>
               <div style={{ color: 'var(--text2, #94a3b8)', fontSize: 13, lineHeight: 1.5 }}>
-                {autoPayEnabled ? `Auto renews every ${plan.period.replace('/', '')}` : plan.desc}
+                {plan.desc}
               </div>
             </div>
 
@@ -379,12 +210,18 @@ export default function PricingPage() {
                   fontFamily: 'var(--font-display, "Syne", sans-serif)',
                   fontSize: 46, fontWeight: 800, lineHeight: 1,
                 }}>
-                  ₹{plan.price}
+                  ₹{plan.price.toLocaleString('en-IN')}
                 </span>
                 <span style={{ color: 'var(--text2, #94a3b8)', fontSize: 14 }}>
                   {plan.period}
                 </span>
               </div>
+              {plan.listPrice > plan.price && (
+                <div style={{ marginTop: 8, fontSize: 13, color: 'var(--text2, #94a3b8)' }}>
+                  <span style={{ textDecoration: 'line-through' }}>₹{plan.listPrice.toLocaleString('en-IN')}</span>
+                  <span style={{ marginLeft: 8, color: '#34D399', fontWeight: 700 }}>Launch offer</span>
+                </div>
+              )}
               {savingsVsMonthly(plan.id) > 0 && (
                 <div style={{
                   display: 'inline-block', marginTop: 10,
@@ -399,7 +236,6 @@ export default function PricingPage() {
 
             <button
               onClick={() => handlePlanClick(plan.id)}
-              disabled={payLoading === plan.id}
               style={{
                 width: '100%',
                 padding: '13px 0',
@@ -419,9 +255,7 @@ export default function PricingPage() {
               onMouseEnter={e => { e.currentTarget.style.opacity = '0.85'; e.currentTarget.style.transform = 'scale(0.98)' }}
               onMouseLeave={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.transform = 'scale(1)' }}
             >
-              {payLoading === plan.id
-                ? '⏳ Processing...'
-                : autoPayEnabled ? `Start Auto Pay` : plan.cta}
+              {plan.cta}
             </button>
 
             <div style={{
@@ -433,6 +267,10 @@ export default function PricingPage() {
           </div>
         ))}
       </div>
+
+      <p style={{ textAlign: 'center', color: '#64748b', fontSize: 12.5, margin: '18px auto 0', padding: '0 24px' }}>
+        {gstEnabled ? 'Prices are before GST. 18% GST is added at checkout, and you get a GST invoice.' : 'You pay exactly the price shown. No extra charges.'}
+      </p>
 
       {/* Shared Pro feature list — one place, no repeats across plans */}
       <div style={{
@@ -470,7 +308,7 @@ export default function PricingPage() {
       }}>
         {[
           { icon: '', text: 'Secure payments via Razorpay' },
-          { icon: '↩', text: 'Cancel anytime' },
+          { icon: '↩', text: '7-day money-back guarantee' },
           { icon: '🇮🇳', text: 'UPI, Cards & Net Banking accepted' },
         ].map((item, i) => (
           <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#64748b', fontSize: 13 }}>
@@ -534,18 +372,6 @@ export default function PricingPage() {
         </div>
       </div>
 
-      {/* Payment Error */}
-      {payError && (
-        <div style={{ maxWidth: 500, margin: '24px auto 0', padding: '0 24px' }}>
-          <div style={{
-            padding: '12px 16px', borderRadius: 10, fontSize: 13,
-            background: 'rgba(248,113,113,0.1)', border: '1px solid rgba(248,113,113,0.3)', color: '#F87171',
-          }}>
-            {payError}
-          </div>
-        </div>
-      )}
-
       {/* Auth Prompt Modal */}
       {showAuthPrompt && (
         <>
@@ -572,7 +398,7 @@ export default function PricingPage() {
                 WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'
               }}>Login to Continue</h2>
               <p style={{ color: '#9A96C0', fontSize: 13, marginBottom: 24, lineHeight: 1.6 }}>
-                Please log in to proceed with payment. Select your plan after logging in.
+                Please log in or create a free account first. You will come straight back to checkout.
               </p>
               <button
                 onClick={() => { setShowAuthPrompt(false); navigate('/') }}

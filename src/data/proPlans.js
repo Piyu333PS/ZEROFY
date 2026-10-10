@@ -38,36 +38,29 @@ export const PLAN_THEME = {
   },
 }
 
+// Prices are before GST. GST (when Zerofy charges it) is added at checkout.
 export const PLANS = [
   {
     id: 'monthly',
-    price: 49,
+    price: 149,
+    listPrice: 149,
     period: '/month',
     months: 1,
-    desc: 'Billed every month. Cancel anytime.',
+    desc: 'Pay month by month. Good for trying Pro.',
     badge: null,
-    cta: 'Get Started',
+    cta: 'Choose Monthly',
     ctaStyle: 'blue',
   },
   {
-    id: 'quarterly',
-    price: 129,
-    period: '/3 months',
-    months: 3,
-    desc: 'Save vs monthly. Billed every 3 months.',
-    badge: 'Most Popular',
-    cta: 'Get Started',
-    ctaStyle: 'gradient',
-  },
-  {
     id: 'yearly',
-    price: 399,
+    price: 999,
+    listPrice: 1499,
     period: '/year',
     months: 12,
-    desc: 'Best value. Billed once a year.',
+    desc: 'Launch offer. One payment for the whole year.',
     badge: 'Best Value',
-    cta: 'Get Started',
-    ctaStyle: 'gold',
+    cta: 'Choose Yearly',
+    ctaStyle: 'gradient',
   },
 ]
 

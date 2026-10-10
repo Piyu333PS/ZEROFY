@@ -276,232 +276,6 @@ function BizModal({ businesses, onSave, onClose }) {
   )
 }
 
-/* ─── Upgrade Payment Flow (Razorpay inline) ─────────────────── */
-const UPGRADE_PLANS = [
-  { id: 'monthly',   label: '₹49/month',   desc: `Monthly`,   amount: 49,  badge: null,           days: 30 },
-  { id: 'quarterly', label: '₹129/quarter', desc: `Quarterly`, amount: 129, badge: 'Most popular',  days: 90 },
-  { id: 'yearly',    label: '₹399/year',   desc: `Yearly`,    amount: 399, badge: 'Best value', days: 365 },
-]
-
-function UpgradePaymentFlow({ token, API, onSuccess, onClose }) {
-  const [selected, setSelected] = useState('quarterly')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
-  const [coupon, setCoupon] = useState('')
-  const [couponStatus, setCouponStatus] = useState(null) // { valid, desc, finalAmount, discountAmount }
-  const [couponLoading, setCouponLoading] = useState(false)
-
-  const selectedPlan = UPGRADE_PLANS.find(p => p.id === selected)
-
-  const validateCoupon = async () => {
-    if (!coupon.trim()) return
-    setCouponLoading(true)
-    setCouponStatus(null)
-    try {
-      const res = await fetch(`${API}/api/payment/validate-coupon`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ couponCode: coupon, planId: selected })
-      })
-      const data = await res.json()
-      if (res.ok) setCouponStatus({ valid: true, desc: data.desc, finalAmount: data.finalAmount, discountAmount: data.discountAmount })
-      else setCouponStatus({ valid: false, desc: data.error || 'Invalid coupon' })
-    } catch {
-      setCouponStatus({ valid: false, desc: `Network error` })
-    } finally {
-      setCouponLoading(false)
-    }
-  }
-
-  // Reset coupon when plan changes
-  useEffect(() => { setCouponStatus(null); setCoupon('') }, [selected])
-
-  const handlePayment = async () => {
-    setLoading(true)
-    setError('')
-    try {
-      // 1. Create order on backend
-      const orderRes = await fetch(`${API}/api/payment/create-order`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ planId: selected, couponCode: coupon || undefined })
-      })
-      const orderData = await orderRes.json()
-      if (!orderRes.ok) throw new Error(orderData.error || 'Failed to create order')
-
-      // 2. Load Razorpay script if not loaded
-      if (!window.Razorpay) {
-        await new Promise((resolve, reject) => {
-          const s = document.createElement('script')
-          s.src = 'https://checkout.razorpay.com/v1/checkout.js'
-          s.onload = resolve
-          s.onerror = () => reject(new Error('Failed to load payment gateway'))
-          document.head.appendChild(s)
-        })
-      }
-
-      // 3. Open Razorpay checkout
-      const rzp = new window.Razorpay({
-        key: orderData.keyId,
-        amount: orderData.amount,
-        currency: orderData.currency,
-        name: 'Zerofy Pro',
-        description: orderData.planName,
-        order_id: orderData.orderId,
-        theme: { color: '#EFA02F' },
-        handler: async (response) => {
-          // 4. Verify payment on backend
-          const verifyRes = await fetch(`${API}/api/payment/verify`, {
-            method: 'POST',
-            headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature,
-              planId: selected,
-            })
-          })
-          const verifyData = await verifyRes.json()
-          if (verifyRes.ok && verifyData.success) {
-            onSuccess()
-          } else {
-            setError('Payment verification failed. Please contact support.')
-          }
-        },
-        modal: { ondismiss: () => setLoading(false) }
-      })
-      rzp.on('payment.failed', (r) => {
-        setError(r.error?.description || 'Payment failed. Please try again.')
-        setLoading(false)
-      })
-      rzp.open()
-    } catch (err) {
-      setError(err.message || 'Something went wrong. Please try again.')
-      setLoading(false)
-    }
-  }
-
-  const displayAmount = couponStatus?.valid
-    ? (couponStatus.finalAmount / 100).toFixed(0)
-    : selectedPlan?.amount
-
-  return (
-    <div style={{ textAlign: 'left' }}>
-      {/* Plan Cards */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
-        {UPGRADE_PLANS.map(plan => (
-          <button
-            key={plan.id}
-            onClick={() => setSelected(plan.id)}
-            style={{
-              padding: '12px 16px', borderRadius: 12, cursor: 'pointer',
-              border: selected === plan.id ? '2px solid rgba(168,94,8,0.6)' : '1px solid #DDE1D9',
-              background: selected === plan.id
-                ? 'linear-gradient(135deg, rgba(239,160,47,0.12), rgba(11,110,79,0.08))'
-                : '#FFFFFF',
-              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-              transition: 'all 0.15s',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <div style={{
-                width: 16, height: 16, borderRadius: '50%',
-                border: `2px solid ${selected === plan.id ? '#A85E08' : '#C9CFC4'}`,
-                background: selected === plan.id ? '#A85E08' : 'transparent',
-                flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>
-                {selected === plan.id && <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#fff' }} />}
-              </div>
-              <div>
-                <div style={{ fontSize: 14, fontWeight: 600, color: '#12263F' }}>{plan.desc}</div>
-                {plan.badge && <div style={{ fontSize: 10, color: '#A85E08', fontWeight: 700 }}>{plan.badge}</div>}
-              </div>
-            </div>
-            <div style={{ fontSize: 14, fontWeight: 700, color: '#A85E08', flexShrink: 0 }}>{plan.label}</div>
-          </button>
-        ))}
-      </div>
-
-      {/* Coupon code */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-        <input
-          className="inp"
-          placeholder="Coupon code (optional)"
-          value={coupon}
-          onChange={e => { setCoupon(e.target.value.toUpperCase()); setCouponStatus(null) }}
-          style={{ fontSize: 13, flex: 1 }}
-        />
-        <button
-          onClick={validateCoupon}
-          disabled={couponLoading || !coupon.trim()}
-          style={{
-            padding: '9px 14px', borderRadius: 8, border: '1px solid rgba(11,110,79,0.35)',
-            background: 'rgba(11,110,79,0.1)', color: '#0B6E4F',
-            fontSize: 12, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap',
-            opacity: couponLoading || !coupon.trim() ? 0.5 : 1,
-          }}
-        >
-          {couponLoading ? '...' : 'Apply'}
-        </button>
-      </div>
-      {couponStatus && (
-        <div style={{
-          marginBottom: 12, padding: '8px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600,
-          background: couponStatus.valid ? 'rgba(11,110,79,0.1)' : 'rgba(179,38,30,0.1)',
-          border: `1px solid ${couponStatus.valid ? 'rgba(11,110,79,0.3)' : 'rgba(179,38,30,0.3)'}`,
-          color: couponStatus.valid ? '#0B6E4F' : '#B3261E',
-        }}>
-          {couponStatus.valid
-            ? `${couponStatus.desc} — you save ₹${(couponStatus.discountAmount / 100).toFixed(0)}!`
-            : couponStatus.desc}
-        </div>
-      )}
-
-      {/* Error */}
-      {error && (
-        <div style={{
-          marginBottom: 12, padding: '10px 12px', borderRadius: 8, fontSize: 12,
-          background: 'rgba(179,38,30,0.1)', border: '1px solid rgba(179,38,30,0.3)', color: '#B3261E',
-        }}>
-          {error}
-        </div>
-      )}
-
-      {/* Pay button */}
-      <button
-        onClick={handlePayment}
-        disabled={loading}
-        style={{
-          width: '100%', padding: '14px',
-          borderRadius: 12, border: 'none',
-          background: loading ? 'rgba(239,160,47,0.45)' : '#EFA02F',
-          color: '#12263F', fontSize: 15, fontWeight: 700,
-          cursor: loading ? 'not-allowed' : 'pointer',
-          marginBottom: 10, transition: 'all 0.2s',
-        }}
-      >
-        {loading ? 'Processing…' : `Pay ₹${displayAmount} and activate Pro`}
-      </button>
-
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <button
-          onClick={onClose}
-          style={{ background: 'none', border: 'none', color: '#8494A6', fontSize: 12, cursor: 'pointer', padding: '4px 0' }}
-        >
-          Maybe later
-        </button>
-        <a
-          href="/pricing"
-          style={{ color: '#8494A6', fontSize: 12, textDecoration: 'none' }}
-          onClick={onClose}
-        >
-          View all plans →
-        </a>
-      </div>
-    </div>
-  )
-}
-
 /* ─── Main Component ─────────────────────────────────────────── */
 const blankForm = () => ({
   bizName: '', bizEmail: '', bizPhone: '', bizAltPhone: '', bizAltEmail: '', bizGst: '', bizAddr: '', bizLogo: '',
@@ -1548,7 +1322,7 @@ export default function InvoiceMaker() {
                       You have used all {FREE_LIMIT} free invoices
                     </div>
                     <div style={{ fontSize: 12, color: '#44566B', lineHeight: 1.5, marginBottom: 10 }}>
-                      Unlimited invoices on Pro, from <strong style={{ color: '#A85E08' }}>₹49/month</strong>
+                      Unlimited invoices on Pro: <strong style={{ color: '#A85E08' }}>₹149 a month or ₹999 a year</strong>
                     </div>
                     <button
                       onClick={() => setShowUpgradeModal(true)}
@@ -1620,17 +1394,22 @@ export default function InvoiceMaker() {
                       fontSize: 24, fontWeight: 600, margin: '0 0 8px', color: '#12263F',
                     }}>Unlimited invoices with Pro</h2>
                     <p style={{ color: '#44566B', fontSize: 13, marginBottom: 22, lineHeight: 1.6 }}>
-                      You've used <strong style={{ color: '#12263F' }}>{FREE_LIMIT} free invoices</strong>. Upgrade to Pro for unlimited invoice generation. Your form is safe and will still be here.
+                      You've used <strong style={{ color: '#12263F' }}>{FREE_LIMIT} free invoices</strong>. Upgrade to Pro for unlimited invoices.{plainNew ? ' Your invoice is saved on this device and will be here when you come back.' : ''}
                     </p>
-                    <UpgradePaymentFlow
-                      token={token}
-                      API={API}
-                      onSuccess={() => {
-                        setShowUpgradeModal(false)
-                        refreshStatus()
-                      }}
-                      onClose={() => setShowUpgradeModal(false)}
-                    />
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 14 }}>
+                      {[{ id: 'yearly', name: 'Yearly', price: '₹999', note: 'Best value' }, { id: 'monthly', name: 'Monthly', price: '₹149', note: 'Pay monthly' }].map(pl => (
+                        <button key={pl.id} onClick={() => navigate(`/checkout?plan=${pl.id}`)} style={{
+                          padding: '14px 10px', borderRadius: 12, cursor: 'pointer', fontFamily: 'inherit',
+                          border: pl.id === 'yearly' ? '2px solid #EFA02F' : '1px solid #DDE1D9',
+                          background: pl.id === 'yearly' ? '#FCEFD9' : '#fff', color: '#12263F',
+                        }}>
+                          <div style={{ fontSize: 12, fontWeight: 600, color: '#44566B' }}>{pl.name}</div>
+                          <div style={{ fontSize: 22, fontWeight: 700, fontFamily: "'IBM Plex Mono', monospace" }}>{pl.price}</div>
+                          <div style={{ fontSize: 11, color: '#A85E08', fontWeight: 600 }}>{pl.note}</div>
+                        </button>
+                      ))}
+                    </div>
+                    <div style={{ fontSize: 12, color: '#5C7189' }}>Choose a plan to go to checkout. You can enter a coupon code there.</div>
                   </div>
                 </div>
               </>

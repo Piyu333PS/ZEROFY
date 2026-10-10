@@ -32,12 +32,11 @@ const TermsConditions = () => {
 
       <Section title="3. Free Plan and Pro Plan">
         <p><strong>Free plan:</strong> you can create up to 3 invoices. Quotations, credit notes, clients, items, payments and reports are included and do not count towards this limit.</p>
-        <p><strong>Pro plan:</strong> unlimited invoices, plus priority support. Pro is one plan with three ways to pay (in Indian Rupees, inclusive of applicable taxes):</p>
+        <p><strong>Pro plan:</strong> unlimited invoices, plus priority support. Pro is one plan with two ways to pay (in Indian Rupees). Where GST applies, it is shown separately at checkout before you pay:</p>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 14, margin: '20px 0 24px' }}>
           {[
-            { name: 'Monthly', price: '₹49', desc: 'for 1 month' },
-            { name: 'Quarterly', price: '₹129', desc: 'for 3 months' },
-            { name: 'Yearly', price: '₹399', desc: 'for 12 months' },
+            { name: 'Monthly', price: '₹149', desc: 'for 1 month' },
+            { name: 'Yearly', price: '₹999', desc: 'for 12 months' },
           ].map(plan => (
             <div key={plan.name} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '16px 18px' }}>
               <div style={{ fontFamily: 'var(--font-display)', fontSize: 14, fontWeight: 600, color: '#EFA02F', marginBottom: 4 }}>{plan.name}</div>
@@ -65,10 +64,12 @@ const TermsConditions = () => {
         <p>Payments are processed by <strong>Razorpay</strong>. We accept UPI, credit and debit cards, and net banking. We do not see or store your card or bank details.</p>
         <p>You can pay for Pro in two ways:</p>
         <ul>
-          <li><strong>Auto Pay:</strong> your plan renews by itself at the end of each period (monthly, quarterly or yearly) and the plan price is charged again, until you cancel Auto Pay.</li>
+          <li><strong>Auto Pay:</strong> your plan renews by itself at the end of each period (monthly or yearly) and the plan price is charged again, until you cancel Auto Pay.</li>
           <li><strong>One-time payment:</strong> you pay once for one period. It does not renew. When the period ends, your account goes back to the free plan unless you pay again.</li>
         </ul>
-        <p>We may change prices. If we do, we will tell existing Pro users at least 30 days before the new price applies to them.</p>
+        <p>Before you pay, we ask for your billing details (name, business name, address, and GSTIN if you have one) so that we can give you a proper invoice. You can download the invoice for every payment from Settings → Billing &amp; plan.</p>
+        <p>Coupon codes, when we offer them, apply to one-time payments only and cannot be combined.</p>
+        <p>We may change prices. If we do, we will tell existing Pro users at least 30 days before the new price applies to them. Anyone on Auto Pay keeps the price they signed up at until they cancel or we give that notice.</p>
       </Section>
 
       <Section title="6. Refunds">

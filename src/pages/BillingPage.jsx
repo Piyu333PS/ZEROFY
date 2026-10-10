@@ -2,12 +2,13 @@ import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { PRO_FEATURES, PLAN_THEME } from '../data/proPlans'
+import { downloadPurchaseInvoice } from '../utils/purchaseInvoice'
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 
 const PLAN_LABELS = {
   monthly: { name: `Pro ${PLAN_THEME.monthly.name}`, period: '1 Month', color: PLAN_THEME.monthly.accent },
-  quarterly: { name: `Pro ${PLAN_THEME.quarterly.name}`, period: '3 Months', color: PLAN_THEME.quarterly.accent },
+  quarterly: { name: 'Pro Quarterly', period: '3 Months', color: PLAN_THEME.monthly.accent },
   yearly: { name: `Pro ${PLAN_THEME.yearly.name}`, period: '1 Year', color: PLAN_THEME.yearly.accent },
 }
 
@@ -18,6 +19,8 @@ export default function BillingPage() {
   const [loading, setLoading] = useState(true)
   const [cancelLoading, setCancelLoading] = useState(false) // 🆕
   const [cancelMsg, setCancelMsg] = useState('')            // 🆕
+  const [purchases, setPurchases] = useState([])            // payments made for Pro, newest first
+  const [pdfBusy, setPdfBusy] = useState('')
 
   useEffect(() => {
     if (!token) { navigate('/'); return }
@@ -27,6 +30,10 @@ export default function BillingPage() {
       .then(r => r.json())
       .then(d => { setInfo(d); setLoading(false) })
       .catch(() => setLoading(false))
+    fetch(`${API}/api/payment/purchases`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => r.json())
+      .then(d => setPurchases(d.purchases || []))
+      .catch(() => {})
   }, [token])
 
   if (!user) { navigate('/'); return null }
@@ -196,6 +203,31 @@ export default function BillingPage() {
               )}
             </div>
 
+            {/* Payment history — an invoice for every payment */}
+            {purchases.length > 0 && (
+              <div style={cardStyle}>
+                <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 14, marginTop: 0 }}>Payments &amp; invoices</h2>
+                {purchases.map(p => (
+                  <div key={p._id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', padding: '12px 0', borderTop: '1px solid rgba(255,255,255,0.07)' }}>
+                    <div>
+                      <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{p.planName}{p.renewal ? ' (renewal)' : ''}</div>
+                      <div style={{ fontSize: 12, color: 'var(--text3)', marginTop: 3 }}>{p.receiptNo} · {formatDate(p.paidAt)}</div>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                      <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 14, color: 'var(--text)' }}>₹{(p.total / 100).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                      <button
+                        disabled={pdfBusy === p._id}
+                        onClick={async () => { setPdfBusy(p._id); try { await downloadPurchaseInvoice(p) } catch { /* ignore */ } finally { setPdfBusy('') } }}
+                        style={{ padding: '7px 14px', borderRadius: 8, border: '1px solid rgba(239,160,47,0.4)', background: 'transparent', color: '#EFA02F', fontSize: 12.5, fontWeight: 600, cursor: 'pointer' }}
+                      >
+                        {pdfBusy === p._id ? 'Preparing…' : 'Download invoice'}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
             {/* Usage Stats */}
             <div style={cardStyle}>
               <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 16, marginTop: 0 }}>Usage</h2>
@@ -242,7 +274,7 @@ export default function BillingPage() {
               <div style={{ ...cardStyle, borderColor: 'rgba(239,160,47,0.25)', background: 'linear-gradient(135deg, rgba(239,160,47,0.04), rgba(239,160,47,0.06))' }}>
                 <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 8, marginTop: 0 }}>Upgrade to Pro</h2>
                 <p style={{ fontSize: 13, color: 'var(--text2)', marginBottom: 20, lineHeight: 1.6 }}>
-                  The free plan includes 3 invoices. Pro gives you unlimited invoices — starting at just ₹49/month.
+                  The free plan includes 3 invoices. Pro gives you unlimited invoices — ₹149 a month, or ₹999 for the year.
                 </p>
                 <Link to="/pricing" style={{
                   display: 'inline-block', padding: '11px 28px', borderRadius: 12,

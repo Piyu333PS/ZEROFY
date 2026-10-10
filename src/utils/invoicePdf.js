@@ -30,7 +30,8 @@ const GREEN = col('#1F9C5A')
 
 // Jo characters standard fonts mein nahi hain unhe milte-julte Latin se badlo
 const REPLACE = { '–': '-', '—': '-', '−': '-', '‘': "'", '’': "'", '“': '"', '”': '"', '…': '...', ' ': ' ', '•': '-', '\t': ' ' }
-const clean = (s) => String(s ?? '').replace(/[–—−‘’“”… •\t]/g, ch => REPLACE[ch]).replace(/\r/g, '')
+// "₹" typed inside notes or terms is written as "Rs." (amounts draw the real symbol separately)
+const clean = (s) => String(s ?? '').replace(/₹\s?/g, 'Rs. ').replace(/[–—−‘’“”… •\t]/g, ch => REPLACE[ch]).replace(/\r/g, '')
 
 // WinAnsi (cp1252) mein jo aa sakta hai
 const WINANSI_EXTRA = '€‚ƒ„…†‡ˆ‰Š‹ŒŽ‘’“”•–—˜™š›œžŸ'

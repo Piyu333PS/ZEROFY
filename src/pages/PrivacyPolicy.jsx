@@ -33,6 +33,7 @@ const PrivacyPolicy = () => {
           <li><strong>Business details you enter:</strong> business name, address, phone, email, GSTIN, logo, bank details, UPI ID, terms and signatory name. These are printed on your documents.</li>
           <li><strong>Your clients' details:</strong> the names, addresses, phone numbers, email addresses and GSTINs you save.</li>
           <li><strong>Your documents and records:</strong> invoices, quotations, credit notes, saved items and the payments you record.</li>
+          <li><strong>Billing details:</strong> the name, business name, address, PIN code, phone number and GSTIN you give at checkout, used to make your invoice.</li>
           <li><strong>Subscription details:</strong> your plan, its start and end dates, and the payment and subscription reference numbers from Razorpay. Card numbers, UPI PINs and bank passwords are entered on Razorpay's own screen. We never see or store them.</li>
           <li><strong>Technical data:</strong> basic details such as IP address, browser type and time of request, which our hosting provider logs to keep the service running and secure.</li>
         </ul>

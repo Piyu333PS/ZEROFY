@@ -4,6 +4,7 @@ import Navbar from './components/Navbar'
 import LoginPage from './pages/LoginPage'
 import { useAuth } from './context/AuthContext'
 import PricingPage from './pages/PricingPage'
+import CheckoutPage from './pages/CheckoutPage'
 import { useBackButton } from './hooks/useBackButton'
 import { AuthProvider } from './context/AuthContext'
 import Footer from './components/Footer'
@@ -43,8 +44,11 @@ function NotFound() {
 
 function RootGate() {
   const { user, initializing } = useAuth()
+  // Someone who chose a plan before logging in goes straight on to checkout
+  const [next] = useState(() => { try { return sessionStorage.getItem('zerofy-after-login') } catch { return null } })
+  useEffect(() => { if (user && next) { try { sessionStorage.removeItem('zerofy-after-login') } catch { /* ignore */ } } }, [user, next])
   if (initializing) return null
-  if (user) return <Navigate to="/app" replace />
+  if (user) return <Navigate to={next && next.startsWith('/checkout') ? next : '/app'} replace />
   return <LoginPage />
 }
 
@@ -53,7 +57,7 @@ function AppInner() {
   const location = useLocation()
   const isLoginScreen = location.pathname === '/'
   // Billing app aur invoice maker ka apna shell hai — site ka navbar / marketing footer wahan nahi aate
-  const isAppScreen = location.pathname.startsWith('/app') || location.pathname === '/tools/invoice-maker'
+  const isAppScreen = location.pathname.startsWith('/app') || location.pathname === '/tools/invoice-maker' || location.pathname === '/checkout'
   const bare = isLoginScreen || isAppScreen
 
   // App / login ke peeche page ka background bhi paper rahe (warna neeche dark patti dikhti thi)
@@ -69,6 +73,7 @@ function AppInner() {
         <Routes>
           <Route path="/" element={<RootGate />} />
           <Route path="/pricing" element={<PricingPage />} />
+          <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="/settings" element={<Navigate to="/app/settings" replace />} />
           <Route path="/billing" element={<BillingPage />} />
           <Route path="/refund" element={<RefundPage />} />
