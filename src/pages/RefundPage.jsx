@@ -7,14 +7,14 @@ export default function RefundPage() {
 
         <div className={styles.badge}>Policy</div>
         <h1 className={styles.title}>Refund & Cancellation Policy</h1>
-        <p className={styles.meta}>Last updated: May 2025 · Effective immediately upon purchase.</p>
+        <p className={styles.meta}>Last updated: October 2026 · Applies to every Zerofy Pro purchase.</p>
 
         <div className={styles.highlight}>
           <div className={styles.highlightIcon}></div>
           <div>
             <div className={styles.highlightTitle}>7-Day Money Back Guarantee</div>
             <div className={styles.highlightText}>
-              If you are not satisfied within <strong>7 days</strong> of your purchase, you will get a full refund — no questions asked.
+              If you are not satisfied within <strong>7 days</strong> of your first Zerofy Pro payment, you will get a full refund — no questions asked.
             </div>
           </div>
         </div>
@@ -22,10 +22,12 @@ export default function RefundPage() {
         <section className={styles.section}>
           <h2 className={styles.sectionTitle}>Refund Eligibility</h2>
           <ul className={styles.list}>
-            <li>Refunds must be requested within <strong>7 days of your first purchase</strong>.</li>
-            <li>Renewal charges are non-refundable.</li>
-            <li>Refunds will not be issued if the account violated our policies.</li>
-            <li>Partial or prorated refunds are not available.</li>
+            <li>Refunds must be requested within <strong>7 days of your first Pro payment</strong>.</li>
+            <li>The 7-day guarantee applies once per customer. Renewal payments and later purchases are not refundable.</li>
+            <li>Refunds are not given for part of a period (for example, the unused months of a yearly plan after the 7 days).</li>
+            <li>Refunds will not be issued if the account broke our Terms &amp; Conditions.</li>
+            <li>After a refund, your account moves to the free plan. Your invoices, clients and reports stay in your account.</li>
+            <li>If you were charged twice or charged by mistake, write to us at any time and we will refund the extra amount.</li>
           </ul>
         </section>
 
@@ -60,11 +62,13 @@ export default function RefundPage() {
 
         <section className={styles.section}>
           <h2 className={styles.sectionTitle}>Cancellation</h2>
-          <p className={styles.text}>
-            You can cancel your subscription anytime from your account settings.
-            After cancellation, you will keep access until the end of your current billing period.
-            We do not prorate partial months.
-          </p>
+          <ul className={styles.list}>
+            <li><strong>Auto Pay:</strong> cancel it any time from <strong>Settings → Billing &amp; plan → Cancel Auto Pay</strong>. No further payments are taken.</li>
+            <li>After you cancel, you keep Pro until the end of the period you have already paid for. We do not refund part of a period.</li>
+            <li><strong>One-time payment:</strong> it does not renew, so there is nothing to cancel. Pro simply ends when the period is over.</li>
+            <li>When Pro ends, your account moves to the free plan (up to 3 invoices). Everything you have already created stays available to view, print and download.</li>
+            <li>If you cannot cancel from the app, email us and we will cancel it for you.</li>
+          </ul>
         </section>
 
         <section className={styles.section}>
@@ -73,17 +77,17 @@ export default function RefundPage() {
             <div className={styles.planCard}>
               <div className={styles.planName}>Monthly</div>
               <div className={styles.planPrice}>₹49<span>/month</span></div>
-              <div className={styles.planNote}>Cancel anytime</div>
+              <div className={styles.planNote}>For 1 month</div>
             </div>
             <div className={styles.planCard}>
               <div className={styles.planName}>Quarterly</div>
               <div className={styles.planPrice}>₹129<span>/3 months</span></div>
-              <div className={styles.planNote}>Most popular</div>
+              <div className={styles.planNote}>For 3 months</div>
             </div>
             <div className={styles.planCard}>
               <div className={styles.planName}>Yearly</div>
               <div className={styles.planPrice}>₹399<span>/year</span></div>
-              <div className={styles.planNote}>Best value</div>
+              <div className={styles.planNote}>For 12 months</div>
             </div>
           </div>
         </section>

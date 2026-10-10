@@ -52,8 +52,8 @@ export default function ContactPage() {
             <div className={styles.quickLinks}>
               <div className={styles.quickTitle}>Quick Links</div>
               <a href="/refund" className={styles.quickLink}>Refund Policy</a>
-              <a href="/privacy-policy.html" className={styles.quickLink}>Privacy Policy</a>
-              <a href="/terms-conditions.html" className={styles.quickLink}>Terms & Conditions</a>
+              <a href="/privacy-policy" className={styles.quickLink}>Privacy Policy</a>
+              <a href="/terms-conditions" className={styles.quickLink}>Terms & Conditions</a>
               <a href="/pricing" className={styles.quickLink}>Pricing Plans</a>
             </div>
           </div>
@@ -87,7 +87,7 @@ export default function ContactPage() {
                       className={styles.input}
                       type="email"
                       name="email"
-                      placeholder="aap@email.com"
+                      placeholder="you@email.com"
                       value={form.email}
                       onChange={handleChange}
                     />

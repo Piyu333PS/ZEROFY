@@ -19,24 +19,25 @@ const TermsConditions = () => {
         Terms &amp; Conditions
       </h1>
       <p style={{ fontSize: 13, color: 'var(--text2)', marginBottom: 48, paddingBottom: 24, borderBottom: '1px solid var(--border)' }}>
-        Last updated: May 2025 · Please read these terms carefully before using Zerofy.
+        Last updated: October 2026 · Please read these terms carefully before using Zerofy.
       </p>
 
       <Section title="1. Acceptance of Terms">
-        <p>By accessing or using Zerofy ("the Platform"), you agree to be bound by these Terms and Conditions. If you do not agree, please do not use our services. Zerofy is owned and operated by <strong>KumKum Sharma</strong>, Jaipur, Rajasthan, India.</p>
+        <p>By creating an account or using Zerofy ("the Service"), you agree to these Terms &amp; Conditions. If you do not agree, please do not use the Service. Zerofy is owned and operated by <strong>KumKum Sharma</strong>, Jaipur, Rajasthan, India.</p>
       </Section>
 
-      <Section title="2. Description of Service">
-        <p>Zerofy is an online productivity platform that provides tools including unlimited invoice generation, file processing, PDF tools, and more. Access is available via subscription plans.</p>
+      <Section title="2. What Zerofy Is">
+        <p>Zerofy is an online GST billing and invoicing app for businesses in India. With it you can create invoices, quotations and credit notes, save your clients and items, record payments, and see reports such as a GST summary. Documents can be printed, downloaded as PDF, or shared by WhatsApp or email.</p>
       </Section>
 
-      <Section title="3. Subscription Plans & Pricing">
-        <p>We offer the following paid plans (in Indian Rupees, inclusive of taxes):</p>
+      <Section title="3. Free Plan and Pro Plan">
+        <p><strong>Free plan:</strong> you can create up to 3 invoices. Quotations, credit notes, clients, items, payments and reports are included and do not count towards this limit.</p>
+        <p><strong>Pro plan:</strong> unlimited invoices, plus priority support. Pro is one plan with three ways to pay (in Indian Rupees, inclusive of applicable taxes):</p>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 14, margin: '20px 0 24px' }}>
           {[
-            { name: 'Monthly', price: '₹49', desc: 'per month · cancel anytime' },
-            { name: 'Quarterly', price: '₹129', desc: 'every 3 months · most popular' },
-            { name: 'Yearly', price: '₹399', desc: 'per year · best value' },
+            { name: 'Monthly', price: '₹49', desc: 'for 1 month' },
+            { name: 'Quarterly', price: '₹129', desc: 'for 3 months' },
+            { name: 'Yearly', price: '₹399', desc: 'for 12 months' },
           ].map(plan => (
             <div key={plan.name} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '16px 18px' }}>
               <div style={{ fontFamily: 'var(--font-display)', fontSize: 14, fontWeight: 600, color: '#EFA02F', marginBottom: 4 }}>{plan.name}</div>
@@ -45,70 +46,94 @@ const TermsConditions = () => {
             </div>
           ))}
         </div>
-        <p>All plans include: Unlimited invoice generation, all tools unlocked, unlimited file processing, max 100MB file size, no watermarks, and priority support.</p>
+        <p>On every plan, free and Pro, documents made with Zerofy carry a small "Created with Zerofy" line at the bottom.</p>
       </Section>
 
-      <Section title="4. Account Registration & Login">
+      <Section title="4. Your Account">
         <ul>
-          <li>Create an account using a valid email address and password</li>
-          <li>Keep your login credentials confidential and secure</li>
-          <li>Not share your account with others</li>
-          <li>Be at least 18 years of age or have parental consent</li>
+          <li>You can sign up with an email address and password, or with your Google account.</li>
+          <li>You must be at least 18 years old and able to enter into a contract.</li>
+          <li>Keep your login details private. Do not share your account with people outside your business.</li>
+          <li>Give correct information and keep it up to date.</li>
         </ul>
-        <div style={{ background: 'rgba(123,110,246,0.06)', border: '1px solid rgba(123,110,246,0.18)', borderRadius: 10, padding: '18px 22px', margin: '16px 0', fontSize: 14, color: '#b0b0c8' }}>
-          <strong style={{ color: '#EFA02F' }}>Account Security:</strong> You are responsible for all activity that occurs under your account. If you suspect unauthorized access, notify us immediately at <a href="mailto:support@zerofy.co.in" style={{ color: '#EFA02F' }}>support@zerofy.co.in</a>.
+        <div style={{ background: 'rgba(239,160,47,0.07)', border: '1px solid rgba(239,160,47,0.25)', borderRadius: 10, padding: '18px 22px', margin: '16px 0', fontSize: 14, color: '#c8c2b0' }}>
+          <strong style={{ color: '#EFA02F' }}>Account security:</strong> You are responsible for everything done from your account. If you think someone else has used it, write to us straight away at <a href="mailto:support@zerofy.co.in" style={{ color: '#EFA02F' }}>support@zerofy.co.in</a>.
         </div>
       </Section>
 
       <Section title="5. Payment & Billing">
-        <p>Payments are processed securely via <strong>Razorpay</strong> and we accept UPI, Credit/Debit Cards, and Net Banking. Subscriptions automatically renew at the end of each billing cycle unless cancelled.</p>
-        <p>Zerofy reserves the right to change pricing with 30 days' advance notice to existing subscribers.</p>
+        <p>Payments are processed by <strong>Razorpay</strong>. We accept UPI, credit and debit cards, and net banking. We do not see or store your card or bank details.</p>
+        <p>You can pay for Pro in two ways:</p>
+        <ul>
+          <li><strong>Auto Pay:</strong> your plan renews by itself at the end of each period (monthly, quarterly or yearly) and the plan price is charged again, until you cancel Auto Pay.</li>
+          <li><strong>One-time payment:</strong> you pay once for one period. It does not renew. When the period ends, your account goes back to the free plan unless you pay again.</li>
+        </ul>
+        <p>We may change prices. If we do, we will tell existing Pro users at least 30 days before the new price applies to them.</p>
       </Section>
 
-      <Section title="6. Refund Policy">
-        <div style={{ background: 'rgba(245,166,35,0.06)', border: '1px solid rgba(245,166,35,0.2)', borderRadius: 10, padding: '18px 22px', margin: '16px 0', fontSize: 14, color: '#c8b890' }}>
-          <strong style={{ color: '#f5a623' }}>Refund Window: 7 Days</strong><br />
-          You may request a full refund within <strong>7 days</strong> of your initial purchase if you are unsatisfied with our service. Refund requests after 7 days will not be entertained. Renewals are non-refundable. To request a refund, email <a href="mailto:support@zerofy.co.in" style={{ color: '#EFA02F' }}>support@zerofy.co.in</a> with your payment details.
+      <Section title="6. Refunds">
+        <div style={{ background: 'rgba(239,160,47,0.07)', border: '1px solid rgba(239,160,47,0.25)', borderRadius: 10, padding: '18px 22px', margin: '16px 0', fontSize: 14, color: '#c8c2b0' }}>
+          <strong style={{ color: '#EFA02F' }}>Refund window: 7 days</strong><br />
+          You can ask for a full refund within <strong>7 days</strong> of your first Pro payment. Renewal payments are not refundable. The full policy and the steps are on our <a href="/refund" style={{ color: '#EFA02F' }}>Refund &amp; Cancellation Policy</a> page.
         </div>
       </Section>
 
       <Section title="7. Cancellation">
-        <p>You may cancel your subscription at any time from your account settings. Cancellation takes effect at the end of your current billing period — you retain access until then. We do not prorate partial months.</p>
+        <p>You can cancel Auto Pay at any time from <strong>Settings → Billing &amp; plan</strong>. No further payments are taken, and you keep Pro until the end of the period you have already paid for. We do not refund part of a period.</p>
+        <p>When Pro ends, your account moves to the free plan. Your invoices, clients and reports stay in your account and you can still view, print and download them.</p>
       </Section>
 
-      <Section title="8. Acceptable Use">
-        <p>You agree not to:</p>
+      <Section title="8. Your Documents and Tax Responsibility">
         <ul>
-          <li>Use Zerofy for any unlawful purpose or in violation of Indian law</li>
-          <li>Upload malicious files or attempt to hack our systems</li>
-          <li>Resell or redistribute Zerofy's tools without written permission</li>
-          <li>Use automated bots or scrapers on the platform</li>
-          <li>Share your subscription account credentials with others</li>
+          <li>Zerofy works out totals and GST from the details you enter — GSTIN, place of supply, HSN/SAC codes, tax rates, quantities and prices. You are responsible for checking that these details and every document you issue are correct.</li>
+          <li>Zerofy is a billing app. It does not give tax, legal or accounting advice, and it does not file GST returns for you. Filing returns and following GST and other laws is your responsibility.</li>
+          <li>The GST summary and reports are there to help you. Please check them against your own records before you use them for a return.</li>
+          <li>Keep your own copies of important documents by downloading the PDF or the CSV report.</li>
         </ul>
       </Section>
 
-      <Section title="9. Intellectual Property">
-        <p>All content, branding, and tools on Zerofy are the intellectual property of KumKum Sharma / Zerofy. You may not copy, reproduce, or redistribute any part of the platform without explicit written consent.</p>
-        <p>Files you upload and generate on Zerofy remain your property. We claim no ownership over your content.</p>
+      <Section title="9. Your Clients' Details">
+        <p>You may save the names, addresses, phone numbers, email addresses and GSTINs of your clients in Zerofy. You confirm that you are allowed to hold and use these details for your billing. We use them only to provide the Service to you, as explained in our <a href="/privacy-policy" style={{ color: '#EFA02F' }}>Privacy Policy</a>.</p>
       </Section>
 
-      <Section title="10. Limitation of Liability">
-        <p>Zerofy is provided "as is" without warranties of any kind. We shall not be liable for any indirect, incidental, or consequential damages arising from your use of the platform. Our maximum liability shall not exceed the amount paid by you in the last 30 days.</p>
+      <Section title="10. Acceptable Use">
+        <p>You agree not to:</p>
+        <ul>
+          <li>Use Zerofy for anything unlawful, including making false or misleading invoices</li>
+          <li>Use a GSTIN, business name or logo that you have no right to use</li>
+          <li>Try to break into, overload or disrupt the Service</li>
+          <li>Use bots or scrapers on the Service</li>
+          <li>Resell the Service without our written permission</li>
+        </ul>
+        <p>We may suspend or close an account that breaks these terms.</p>
       </Section>
 
-      <Section title="11. Service Availability">
-        <p>We strive for 99%+ uptime but do not guarantee uninterrupted access. Scheduled maintenance will be communicated in advance. We are not liable for downtime caused by third-party services or force majeure events.</p>
+      <Section title="11. Ownership">
+        <p>The Zerofy name, logo, design and software belong to KumKum Sharma / Zerofy. You may not copy or redistribute them without written permission.</p>
+        <p>Your business details, client list and the documents you create are yours. We claim no ownership over them.</p>
       </Section>
 
-      <Section title="12. Governing Law">
-        <p>These Terms are governed by the laws of India. Any disputes shall be subject to the exclusive jurisdiction of courts in Jaipur, Rajasthan, India.</p>
+      <Section title="12. Limitation of Liability">
+        <p>Zerofy is provided "as is", without warranties of any kind. We are not liable for indirect or consequential loss, including tax penalties, interest, lost profit or lost data arising from your use of the Service. Our total liability to you will not be more than the amount you paid us in the 30 days before the claim.</p>
       </Section>
 
-      <Section title="13. Changes to Terms">
-        <p>We may update these Terms at any time. Continued use of Zerofy after changes constitutes acceptance of the revised terms. We will notify users of material changes via email.</p>
+      <Section title="13. Service Availability">
+        <p>We work to keep Zerofy available at all times but cannot promise that it will never be interrupted. We are not liable for downtime caused by maintenance, third-party services (such as hosting or the payment gateway) or events outside our control.</p>
       </Section>
 
-      <Section title="14. Contact">
+      <Section title="14. Closing Your Account">
+        <p>You can stop using Zerofy at any time. To have your account and data deleted, write to <a href="mailto:support@zerofy.co.in" style={{ color: '#EFA02F' }}>support@zerofy.co.in</a> from your registered email address. Please download any documents you need first — deleted data cannot be brought back.</p>
+      </Section>
+
+      <Section title="15. Governing Law">
+        <p>These Terms are governed by the laws of India. Any dispute will be subject to the exclusive jurisdiction of the courts in Jaipur, Rajasthan, India.</p>
+      </Section>
+
+      <Section title="16. Changes to These Terms">
+        <p>We may update these Terms. We will tell you about important changes by email or by a notice in the app. If you keep using Zerofy after a change, you accept the updated Terms.</p>
+      </Section>
+
+      <Section title="17. Contact">
         <p>
           <strong>KumKum Sharma</strong><br />
           Zerofy, Jaipur, Rajasthan, India<br />

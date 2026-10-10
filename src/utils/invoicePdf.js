@@ -398,7 +398,8 @@ export async function buildInvoicePdf(inv, { hideBranding = false } = {}) {
     text(view.footer, M, H - 28, { size: 7, color: SOFT })
     const tail = [inv.bizName, inv.bizGst && `GSTIN: ${inv.bizGst}`].filter(Boolean).join('  |  ')
     text(pages.length > 1 ? `${tail}${tail ? '  |  ' : ''}Page ${i + 1} of ${pages.length}` : tail, W - M, H - 28, { size: 7, color: SOFT, align: 'right' })
-    if (!hideBranding) text('Created with Zerofy Invoice Generator - www.zerofy.co.in', W / 2, H - 15, { size: 6.4, color: SOFT, align: 'center' })
+    // Shown on every plan, free and Pro
+    text('Created with Zerofy Invoice Generator - www.zerofy.co.in', W / 2, H - 15, { size: 6.4, color: SOFT, align: 'center' })
     if (st === 'draft' || st === 'cancelled') {
       const wm = st === 'draft' ? 'DRAFT' : 'CANCELLED'
       const size = st === 'draft' ? 110 : 76

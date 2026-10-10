@@ -2,11 +2,11 @@
 // Imported by PricingPage and BillingPage so copy/colors never drift apart.
 
 export const PRO_FEATURES = [
-  { icon: '', label: 'Unlimited invoice generation' },
-  { icon: '', label: 'Every tool unlocked' },
-  { icon: '', label: 'Unlimited file processing' },
-  { icon: '', label: 'Max 100MB file size' },
-  { icon: '', label: 'No watermarks' },
+  { icon: '', label: 'Unlimited invoices' },
+  { icon: '', label: 'Quotations and credit notes' },
+  { icon: '', label: 'Clients, saved items and payment tracking' },
+  { icon: '', label: 'GST summary and reports with CSV export' },
+  { icon: '', label: 'UPI "Scan to pay" QR code on invoices' },
   { icon: '', label: 'Priority support' },
 ]
 

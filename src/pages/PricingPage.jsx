@@ -12,15 +12,15 @@ const faqs = [
   },
   {
     q: 'Can I cancel my subscription anytime?',
-    a: 'Yes, absolutely. You can cancel at any time with no questions asked and no hidden fees.',
+    a: 'Yes. If you chose Auto Pay, cancel it any time from Settings → Billing & plan. You keep Pro until the end of the period you have paid for. A one-time payment does not renew, so there is nothing to cancel.',
   },
   {
     q: 'What payment methods do you accept?',
-    a: 'We accept UPI, Credit/Debit Cards, Net Banking, and Paytm — all powered by Razorpay.',
+    a: 'UPI, credit and debit cards, and net banking — all processed by Razorpay.',
   },
   {
     q: 'What happens after my plan expires?',
-    a: 'After your plan expires, your account moves to the free tier. You can renew anytime to restore full access.',
+    a: 'Your account moves to the free plan. All your invoices, clients and reports stay as they are. You can renew any time to create more invoices.',
   },
   {
     q: 'Is my payment secure?',
@@ -428,7 +428,7 @@ export default function PricingPage() {
               fontSize: 13, color: plan.accent, fontWeight: 600,
               display: 'flex', alignItems: 'center', gap: 6,
             }}>
-              <span></span> Full Zerofy Pro access — see below
+              <span></span> Unlimited invoices — see below
             </div>
           </div>
         ))}
@@ -447,7 +447,7 @@ export default function PricingPage() {
             fontSize: 15, fontWeight: 700, color: '#34D399',
             margin: '0 0 18px', display: 'flex', alignItems: 'center', gap: 8,
           }}>
-            Every plan unlocks the same full Pro access
+            Every plan gives you the same Pro access
           </h3>
           <div style={{
             display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',

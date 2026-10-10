@@ -316,8 +316,8 @@ export function InvoicePreview({ inv = {}, items, currency, discPct, taxPct, tem
 
         <div style={{ height: 4, background: `linear-gradient(90deg, ${acc}99, ${acc})` }} />
 
-        {/* ZEROFY BRANDING — Pro users ke invoices par nahi aata */}
-        {!hideBranding && (
+        {/* ZEROFY BRANDING — shown on every plan, free and Pro (the `hideBranding` prop is no longer used) */}
+        {(
           <div style={{
             padding: '8px 32px 12px',
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,

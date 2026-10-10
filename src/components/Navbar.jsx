@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { TOOLS } from '../tools/toolsData'
 import styles from './Navbar.module.css'
 import { useAuth } from '../context/AuthContext'
 import AuthModal from './AuthModal'
@@ -182,27 +181,6 @@ export default function Navbar() {
       window.history.replaceState({}, '', location.pathname)
     }
   }, [location.search, user])
-
-  const handleSearch = (e) => {
-    const q = e.target.value
-    setQuery(q)
-    if (q.length > 1) {
-      setResults(
-        TOOLS.filter(t =>
-          (t.name.toLowerCase().includes(q.toLowerCase()) ||
-           t.desc.toLowerCase().includes(q.toLowerCase())) &&
-          t.status === 'ready'
-        ).slice(0, 6)
-      )
-    } else {
-      setResults([])
-    }
-  }
-
-  const goTo = (route) => {
-    setQuery(''); setResults([])
-    navigate(route)
-  }
 
   const openLogin = () => { setAuthTab('login'); setShowAuth(true); setMenuOpen(false) }
   const openSignup = () => { setAuthTab('signup'); setShowAuth(true); setMenuOpen(false) }

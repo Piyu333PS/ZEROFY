@@ -242,7 +242,7 @@ export default function BillingPage() {
               <div style={{ ...cardStyle, borderColor: 'rgba(239,160,47,0.25)', background: 'linear-gradient(135deg, rgba(239,160,47,0.04), rgba(239,160,47,0.06))' }}>
                 <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 8, marginTop: 0 }}>Upgrade to Pro</h2>
                 <p style={{ fontSize: 13, color: 'var(--text2)', marginBottom: 20, lineHeight: 1.6 }}>
-                  Unlimited invoices, every tool unlocked, no limits — starting at just ₹49/month.
+                  The free plan includes 3 invoices. Pro gives you unlimited invoices — starting at just ₹49/month.
                 </p>
                 <Link to="/pricing" style={{
                   display: 'inline-block', padding: '11px 28px', borderRadius: 12,
