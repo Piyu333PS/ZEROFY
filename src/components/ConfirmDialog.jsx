@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { createPortal } from 'react-dom'
 
 /* Browser ke confirm() ki jagah app ke andar ka confirm box —
    confirm() poora page rok deta hai aur kuch browsers/webviews mein dikhta hi nahi. */
@@ -13,7 +14,8 @@ export default function ConfirmDialog({ title, message, confirmLabel = 'Confirm'
     border: '1px solid #DDE1D9', background: '#fff', color: '#12263F', fontSize: 13.5, fontWeight: 600,
     padding: '10px 16px', borderRadius: 10, cursor: busy ? 'wait' : 'pointer', fontFamily: 'inherit',
   }
-  return (
+  // Drawn on document.body so it always sits in the middle of the screen, whatever the page behind it is doing
+  return createPortal(
     <div
       style={{
         position: 'fixed', inset: 0, zIndex: 3100, background: 'rgba(18,38,63,0.5)',
@@ -38,6 +40,7 @@ export default function ConfirmDialog({ title, message, confirmLabel = 'Confirm'
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
