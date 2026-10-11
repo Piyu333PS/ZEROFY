@@ -98,10 +98,14 @@ export async function generateInvoicePdfBlob(inv, opts = {}) {
 }
 
 // Purana tareeka: invoice ki tasveer ko PDF mein rakhna (fallback)
-async function generateInvoiceImagePdfBlob(inv, opts = {}) {
+const generateInvoiceImagePdfBlob = (inv, opts = {}) => markupToPdfBlob(renderInvoiceMarkup(inv, opts))
+
+// Any A4-width markup → PDF (a picture of the page, cut into A4 pages). Used for invoices with
+// non-Latin text and for client statements.
+export async function markupToPdfBlob(markup) {
   const container = document.createElement('div')
   container.style.cssText = 'position:fixed;left:-99999px;top:0;width:794px;background:#fff;'
-  container.innerHTML = renderInvoiceMarkup(inv, opts)
+  container.innerHTML = markup
   document.body.appendChild(container)
 
   try {
@@ -138,7 +142,24 @@ async function generateInvoiceImagePdfBlob(inv, opts = {}) {
   }
 }
 
-function saveBlob(blob, filename) {
+// Print any A4-width markup through a hidden frame (no popup)
+export function printMarkup(markup, title = 'Document') {
+  const old = document.getElementById('zerofy-print-frame')
+  if (old) old.remove()
+  const frame = document.createElement('iframe')
+  frame.id = 'zerofy-print-frame'
+  frame.setAttribute('aria-hidden', 'true')
+  frame.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden;'
+  document.body.appendChild(frame)
+  const doc = frame.contentWindow.document
+  doc.open()
+  doc.write(`<!DOCTYPE html><html><head><title>${esc(title)}</title>${PRINT_DOC_HEAD}</head><body><div class="invoice-wrap">${markup}</div></body></html>`)
+  doc.close()
+  // After printing, the keyboard goes back to the page (otherwise Escape would not close the popup)
+  setTimeout(() => { try { frame.contentWindow.focus(); frame.contentWindow.print() } catch { /* the browser refused to print */ } try { window.focus() } catch { /* nothing to do */ } }, 350)
+}
+
+export function saveBlob(blob, filename) {
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url

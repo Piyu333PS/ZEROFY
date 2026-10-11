@@ -9,6 +9,7 @@ import { calcInvoice, displayStatus, STATUS_LABELS } from '../../utils/invoiceCa
 import { downloadText } from '../../utils/download'
 import { SkeletonBlock } from '../../components/ui/Skeleton'
 import EmptyState from '../../components/ui/EmptyState'
+import Gstr1Panel from '../../components/reports/Gstr1Panel'
 import { useNavigate } from 'react-router-dom'
 import styles from './ReportsPage.module.css'
 
@@ -245,7 +246,7 @@ export default function ReportsPage() {
         <EmptyState
           kind="reports"
           title="Reports appear after your first invoice"
-          text="You will see billing by month, your top clients, who still owes you, and a GST summary you can export."
+          text="You will see billing by month, your top clients, who still owes you, and a GSTR-1 report you can download for your CA."
           action={{ label: 'New invoice', onClick: () => navigate('/tools/invoice-maker') }}
         />
       ) : (
@@ -357,6 +358,8 @@ export default function ReportsPage() {
               </table>
             </div>
           </div>
+
+          <Gstr1Panel invoices={invoices} creditNotes={data?.creditNotes || []} />
 
           <div className={styles.panel}>
             <p className={styles.panelTitle}>Outstanding by client</p>

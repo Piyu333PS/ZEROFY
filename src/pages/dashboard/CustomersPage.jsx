@@ -5,6 +5,7 @@ import { api, API } from '../../utils/api'
 import { useBilling } from '../../utils/billingStore'
 import { fmtMoney } from '../../utils/invoiceCalc'
 import ConfirmDialog from '../../components/ConfirmDialog'
+import StatementModal from '../../components/StatementModal'
 import { toast } from '../../components/ui/Toast'
 import { SkeletonRows } from '../../components/ui/Skeleton'
 import EmptyState from '../../components/ui/EmptyState'
@@ -28,6 +29,7 @@ export default function CustomersPage() {
   const error = actionError || loadError
   const [query, setQuery] = useState('')
   const [toDelete, setToDelete] = useState(null)
+  const [statementFor, setStatementFor] = useState(null)
   const [deleting, setDeleting] = useState(false)
   const [downloadingTemplate, setDownloadingTemplate] = useState(false)
   const [importing, setImporting] = useState(false)
@@ -242,6 +244,7 @@ export default function CustomersPage() {
               <span className={styles.num}><span className={styles.cellLabel}>Billed</span>{fmtMoney(c.billed)}</span>
               <span className={`${styles.num} ${c.outstanding > 0 ? styles.due : ''}`}><span className={styles.cellLabel}>Outstanding</span>{fmtMoney(c.outstanding)}</span>
               <div className={styles.rowBtns}>
+                <button className={styles.linkBtn} onClick={() => setStatementFor(c)}>Statement</button>
                 <button className={styles.linkBtn} onClick={() => navigate(`/tools/invoice-maker?client=${c._id}`)}>New invoice</button>
                 <button className={styles.linkBtn} onClick={() => openEdit(c)}>Edit</button>
                 <button className={styles.deleteBtn} onClick={() => setToDelete(c)}>Delete</button>
@@ -250,6 +253,8 @@ export default function CustomersPage() {
           ))
         )}
       </div>
+
+      {statementFor && <StatementModal customer={statementFor} data={data} onClose={() => setStatementFor(null)} />}
 
       {toDelete && (
         <ConfirmDialog
