@@ -2,14 +2,26 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { startTour } from '../components/tour/GuidedTour'
+import styles from './SettingsPage.module.css'
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 
-// `embedded` = billing dashboard (/app/settings) ke andar — wahan light theme aur sidebar ke saath dikhta hai
-export default function SettingsPage({ embedded = false }) {
+const I = (d) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">{d}</svg>
+const icons = {
+  mail: I(<><rect x="3" y="5" width="18" height="14" rx="2" /><path d="M3.5 7l8.5 6 8.5-6" /></>),
+  lock: I(<><rect x="4" y="11" width="16" height="10" rx="2" /><path d="M8 11V7a4 4 0 018 0v4" /></>),
+  tour: I(<><circle cx="12" cy="12" r="9" /><path d="M15.5 8.5l-2 5-5 2 2-5 5-2z" /></>),
+  help: I(<><path d="M4 5h16v11H9l-5 4V5z" /></>),
+  out: I(<><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" /><path d="M16 17l5-5-5-5M21 12H9" /></>),
+}
+
+/* Settings — a short list of rows. The email and password forms stay closed until asked for,
+   so the whole page fits on one screen. Shown inside the billing app (light theme, sidebar). */
+export default function SettingsPage() {
   const { user, token, logout, initializing } = useAuth()
   const navigate = useNavigate()
 
+  const [open, setOpen] = useState('') // '' | 'email' | 'password'
   const [emailForm, setEmailForm] = useState({ newEmail: '', password: '' })
   const [pwdForm, setPwdForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' })
   const [emailMsg, setEmailMsg] = useState(null)
@@ -17,7 +29,7 @@ export default function SettingsPage({ embedded = false }) {
   const [emailLoading, setEmailLoading] = useState(false)
   const [pwdLoading, setPwdLoading] = useState(false)
 
-  // Google se login karne walon ka password nahi hota — unhe email/password forms dikhana galat hai
+  // People who log in with Google have no password here, so the email / password forms do not apply to them
   const [account, setAccount] = useState(null)
   useEffect(() => {
     if (!token) return
@@ -29,13 +41,14 @@ export default function SettingsPage({ embedded = false }) {
     return () => { cancelled = true }
   }, [token])
 
-  // Session check poora hone se pehle redirect mat karo (warna page refresh par logged-in user bhi bahar ho jata tha)
+  // Wait for the session check before sending anyone away (a refresh used to log people out)
   useEffect(() => {
     if (!initializing && !user) navigate('/')
   }, [initializing, user, navigate])
   if (initializing || !user) return null
 
   const passwordless = account?.hasPassword === false
+  const toggle = (key) => { setOpen(o => (o === key ? '' : key)); setEmailMsg(null); setPwdMsg(null) }
 
   const handleEmailChange = async (e) => {
     e.preventDefault()
@@ -49,12 +62,11 @@ export default function SettingsPage({ embedded = false }) {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error)
-      setEmailMsg({ type: 'success', text: data.message })
+      setEmailMsg({ type: 'success', text: `${data.message} Please log in again with your new email.` })
       setEmailForm({ newEmail: '', password: '' })
-      // Logout karke dobara login karo naye email se
       setTimeout(() => { logout() }, 2000)
     } catch (err) {
-      setEmailMsg({ type: 'error', text: err.message })
+      setEmailMsg({ type: 'error', text: err.message || 'Could not update the email. Please try again.' })
     } finally {
       setEmailLoading(false)
     }
@@ -79,205 +91,162 @@ export default function SettingsPage({ embedded = false }) {
       setPwdMsg({ type: 'success', text: data.message })
       setPwdForm({ currentPassword: '', newPassword: '', confirmPassword: '' })
     } catch (err) {
-      setPwdMsg({ type: 'error', text: err.message })
+      setPwdMsg({ type: 'error', text: err.message || 'Could not change the password. Please try again.' })
     } finally {
       setPwdLoading(false)
     }
   }
 
-  const cardStyle = {
-    background: 'var(--bg2, #12263F)',
-    border: '1px solid var(--border2, rgba(255,255,255,0.08))',
-    borderRadius: 16, padding: '28px 24px', marginBottom: 20
-  }
-
-  const inputStyle = {
-    width: '100%', padding: '11px 14px', borderRadius: 10,
-    border: '1px solid var(--border2, rgba(255,255,255,0.1))',
-    background: 'var(--surface, rgba(255,255,255,0.04))',
-    color: 'var(--text, #f1f5f9)', fontSize: 14, outline: 'none',
-    boxSizing: 'border-box'
-  }
-
-  const labelStyle = { fontSize: 13, color: 'var(--text2, #94a3b8)', marginBottom: 6, display: 'block', fontWeight: 500 }
-
-  const msgStyle = (type) => ({
-    padding: '10px 14px', borderRadius: 10, fontSize: 13, marginTop: 12,
-    background: type === 'success' ? 'rgba(52,211,153,0.1)' : 'rgba(248,113,113,0.1)',
-    border: `1px solid ${type === 'success' ? 'rgba(52,211,153,0.3)' : 'rgba(248,113,113,0.3)'}`,
-    color: type === 'success' ? '#34D399' : '#F87171'
-  })
+  const msg = (m) => m && <div className={`${styles.msg} ${m.type === 'success' ? styles.ok : styles.bad}`} role="status">{m.text}</div>
+  const used = Math.min(3, account?.invoiceCount || 0)
+  const expiry = account?.proExpiry ? new Date(account.proExpiry).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : ''
 
   return (
-    <div style={embedded ? {
-      // Dashboard ke andar light palette
-      '--bg2': '#FFFFFF', '--border2': '#DDE1D9', '--surface': '#F4F5F1',
-      '--text': '#12263F', '--text2': '#5C7189', '--text3': '#8494A6',
-      padding: '26px 34px 60px',
-    } : { minHeight: '100vh', background: 'var(--bg, #0D1B2E)', padding: '48px 24px 80px' }}>
-      <div style={{ maxWidth: 560, margin: embedded ? 0 : '0 auto' }}>
+    <div className={styles.wrap}>
+      <h1 className={styles.title}>Settings</h1>
+      <p className={styles.subtitle}>Your account, plan and help.</p>
 
-        {/* Header */}
-        <div style={{ marginBottom: embedded ? 22 : 32 }}>
-          {!embedded && (
-            <button onClick={() => navigate(-1)} style={{ background: 'none', border: 'none', color: 'var(--text2)', cursor: 'pointer', fontSize: 14, marginBottom: 16, padding: 0 }}>
-              ← Back
-            </button>
-          )}
-          <h1 style={{ fontSize: embedded ? 26 : 28, fontWeight: embedded ? 600 : 800, color: 'var(--text)', fontFamily: embedded ? "'Space Grotesk', sans-serif" : 'var(--font-display)', margin: 0 }}>{embedded ? 'Settings' : 'Settings'}</h1>
-          <p style={{ color: 'var(--text2)', fontSize: 14, marginTop: 6 }}>{user.email}</p>
-        </div>
+      <div className={styles.grid}>
+        {/* ── Account ── */}
+        <div className={styles.col}>
+          <div className={styles.card}>
+            <div className={styles.cardHead}>Account</div>
 
-        {/* Plan */}
-        {account && (
-          <div style={cardStyle}>
-            <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 8, marginTop: 0 }}>Plan</h2>
-            <p style={{ fontSize: 14, color: 'var(--text2)', margin: '0 0 14px' }}>
-              {account.isPro
-                ? <>Zerofy Pro{account.proExpiry ? ` — valid until ${new Date(account.proExpiry).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}` : ''}</>
-                : <>Free plan — {Math.max(0, 3 - (account.invoiceCount || 0))} of 3 free invoices left</>}
-            </p>
-            <button onClick={() => navigate(account.isPro ? '/billing' : '/pricing')} style={{
-              padding: '9px 20px', borderRadius: 10, border: '1px solid var(--border2)', background: 'var(--surface)',
-              color: 'var(--text)', fontWeight: 600, fontSize: 13.5, cursor: 'pointer',
-            }}>
-              {account.isPro ? 'Manage billing' : 'Upgrade to Pro'}
-            </button>
-          </div>
-        )}
-
-        {embedded && (
-          <div style={cardStyle}>
-            <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 8, marginTop: 0 }}>Guided tour</h2>
-            <p style={{ fontSize: 14, color: 'var(--text2)', margin: '0 0 14px', lineHeight: 1.6 }}>
-              A one-minute walk through invoices, clients, items, payments and reports.
-            </p>
-            <button onClick={() => startTour()} style={{
-              padding: '9px 20px', borderRadius: 10, border: '1px solid var(--border2)', background: 'var(--surface)',
-              color: 'var(--text)', fontWeight: 600, fontSize: 13.5, cursor: 'pointer',
-            }}>
-              Take the tour
-            </button>
-          </div>
-        )}
-
-        {passwordless && (
-          <div style={cardStyle}>
-            <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 8, marginTop: 0 }}>Login</h2>
-            <p style={{ fontSize: 14, color: 'var(--text2)', margin: 0, lineHeight: 1.6 }}>
-              You log in with your Google account, so there is no email or password to change here. Manage them in your Google account.
-            </p>
-          </div>
-        )}
-
-        {!passwordless && (<>
-        {/* Change Email */}
-        <div style={cardStyle}>
-          <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 20, marginTop: 0 }}>Change Email</h2>
-          <form onSubmit={handleEmailChange}>
-            <div style={{ marginBottom: 14 }}>
-              <label style={labelStyle}>New Email</label>
-              <input
-                type="email" required style={inputStyle}
-                placeholder="new@email.com"
-                value={emailForm.newEmail}
-                onChange={e => setEmailForm(f => ({ ...f, newEmail: e.target.value }))}
-              />
-            </div>
-            <div style={{ marginBottom: 16 }}>
-              <label style={labelStyle}>Current password (to confirm)</label>
-              <input
-                type="password" required style={inputStyle}
-                placeholder="••••••••"
-                value={emailForm.password}
-                onChange={e => setEmailForm(f => ({ ...f, password: e.target.value }))}
-              />
-            </div>
-            <button
-              type="submit" disabled={emailLoading}
-              style={{
-                padding: '10px 24px', borderRadius: 10, border: 'none',
-                background: 'linear-gradient(135deg, #EFA02F, #F6B24E)',
-                color: '#12263F', fontWeight: 700, fontSize: 14, cursor: 'pointer',
-                opacity: emailLoading ? 0.7 : 1
-              }}
-            >
-              {emailLoading ? '⏳ Updating...' : 'Update Email'}
-            </button>
-            {emailMsg && <div style={msgStyle(emailMsg.type)}>{emailMsg.type === 'success' ? '' : ''} {emailMsg.text}</div>}
-            {emailMsg?.type === 'success' && (
-              <div style={{ fontSize: 12, color: 'var(--text3)', marginTop: 8 }}>
-                Email updated! Please log in again with your new email.
+            <div className={styles.row}>
+              <span className={styles.icon}>{icons.mail}</span>
+              <div className={styles.text}>
+                <div className={styles.label}>Email</div>
+                <div className={styles.value}>{user.email}</div>
               </div>
+              {!passwordless && <button className={styles.btn} aria-expanded={open === 'email'} onClick={() => toggle('email')}>{open === 'email' ? 'Close' : 'Change'}</button>}
+            </div>
+            {open === 'email' && !passwordless && (
+              <form className={styles.panel} onSubmit={handleEmailChange}>
+                <div className={styles.fields}>
+                  <div className={styles.field}>
+                    <label htmlFor="set-new-email">New email</label>
+                    <input id="set-new-email" type="email" required autoFocus className={styles.inp} placeholder="new@email.com"
+                      value={emailForm.newEmail} onChange={e => setEmailForm(f => ({ ...f, newEmail: e.target.value }))} />
+                  </div>
+                  <div className={styles.field}>
+                    <label htmlFor="set-email-pwd">Current password</label>
+                    <input id="set-email-pwd" type="password" required className={styles.inp} autoComplete="current-password"
+                      value={emailForm.password} onChange={e => setEmailForm(f => ({ ...f, password: e.target.value }))} />
+                  </div>
+                </div>
+                <div className={styles.actions}>
+                  <button type="submit" className={`${styles.btn} ${styles.primary}`} disabled={emailLoading}>{emailLoading ? 'Updating…' : 'Update email'}</button>
+                  <button type="button" className={styles.btn} onClick={() => toggle('email')}>Cancel</button>
+                </div>
+                {msg(emailMsg)}
+              </form>
             )}
-          </form>
+
+            <div className={styles.row}>
+              <span className={styles.icon}>{icons.lock}</span>
+              <div className={styles.text}>
+                <div className={styles.label}>Password</div>
+                <div className={styles.value}>{passwordless ? 'You log in with your Google account' : '••••••••'}</div>
+              </div>
+              {!passwordless && <button className={styles.btn} aria-expanded={open === 'password'} onClick={() => toggle('password')}>{open === 'password' ? 'Close' : 'Change'}</button>}
+            </div>
+            {passwordless && (
+              <p className={styles.note}>There is no Zerofy password to change. Manage your email and password in your Google account.</p>
+            )}
+            {open === 'password' && !passwordless && (
+              <form className={styles.panel} onSubmit={handlePwdChange}>
+                <div className={styles.fields}>
+                  <div className={`${styles.field} ${styles.full}`}>
+                    <label htmlFor="set-cur-pwd">Current password</label>
+                    <input id="set-cur-pwd" type="password" required autoFocus className={styles.inp} autoComplete="current-password"
+                      value={pwdForm.currentPassword} onChange={e => setPwdForm(f => ({ ...f, currentPassword: e.target.value }))} />
+                  </div>
+                  <div className={styles.field}>
+                    <label htmlFor="set-new-pwd">New password</label>
+                    <input id="set-new-pwd" type="password" required minLength={6} className={styles.inp} autoComplete="new-password"
+                      value={pwdForm.newPassword} onChange={e => setPwdForm(f => ({ ...f, newPassword: e.target.value }))} />
+                  </div>
+                  <div className={styles.field}>
+                    <label htmlFor="set-new-pwd2">Confirm new password</label>
+                    <input id="set-new-pwd2" type="password" required minLength={6} className={styles.inp} autoComplete="new-password"
+                      value={pwdForm.confirmPassword} onChange={e => setPwdForm(f => ({ ...f, confirmPassword: e.target.value }))} />
+                  </div>
+                </div>
+                <div className={styles.actions}>
+                  <button type="submit" className={`${styles.btn} ${styles.primary}`} disabled={pwdLoading}>{pwdLoading ? 'Updating…' : 'Change password'}</button>
+                  <button type="button" className={styles.btn} onClick={() => toggle('password')}>Cancel</button>
+                </div>
+                {msg(pwdMsg)}
+              </form>
+            )}
+
+            <div className={styles.row}>
+              <span className={styles.icon}>{icons.out}</span>
+              <div className={styles.text}>
+                <div className={styles.label}>Log out</div>
+                <div className={styles.value}>Sign out of Zerofy on this device</div>
+              </div>
+              <button className={`${styles.btn} ${styles.danger}`} onClick={() => logout()}>Log out</button>
+            </div>
+          </div>
         </div>
 
-        {/* Change Password */}
-        <div style={cardStyle}>
-          <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 20, marginTop: 0 }}>Change Password</h2>
-          <form onSubmit={handlePwdChange}>
-            <div style={{ marginBottom: 14 }}>
-              <label style={labelStyle}>Current Password</label>
-              <input
-                type="password" required style={inputStyle}
-                placeholder="••••••••"
-                value={pwdForm.currentPassword}
-                onChange={e => setPwdForm(f => ({ ...f, currentPassword: e.target.value }))}
-              />
+        {/* ── Plan + help ── */}
+        <div className={styles.col}>
+          <div className={styles.card}>
+            <div className={styles.cardHead}>Plan</div>
+            <div className={styles.plan}>
+              {!account ? (
+                <div className={styles.planText}>Loading your plan…</div>
+              ) : account.isPro ? (
+                <>
+                  <div className={styles.planTop}><span className={styles.planName}>Zerofy Pro</span><span className={`${styles.pill} ${styles.pillPro}`}>Active</span></div>
+                  <p className={styles.planText}>Unlimited invoices{expiry ? ` · valid till ${expiry}` : ''}</p>
+                  <div className={styles.planBtns}>
+                    <button className={styles.btn} onClick={() => navigate('/billing')}>Billing &amp; invoices</button>
+                    <button className={styles.btn} onClick={() => navigate('/pricing')}>Renew or extend</button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className={styles.planTop}><span className={styles.planName}>Free plan</span><span className={styles.pill}>{used} of 3 used</span></div>
+                  <p className={styles.planText}>
+                    {used >= 3 ? 'You have used all 3 free invoices.' : `${3 - used} of 3 free invoices left.`} Pro gives you unlimited invoices from ₹149 a month.
+                  </p>
+                  <div className={styles.meter} aria-hidden="true"><span style={{ width: `${(used / 3) * 100}%` }} /></div>
+                  <div className={styles.planBtns}>
+                    <button className={`${styles.btn} ${styles.primary}`} onClick={() => navigate('/pricing')}>Upgrade to Pro</button>
+                  </div>
+                </>
+              )}
             </div>
-            <div style={{ marginBottom: 14 }}>
-              <label style={labelStyle}>New Password</label>
-              <input
-                type="password" required style={inputStyle}
-                placeholder="••••••••"
-                value={pwdForm.newPassword}
-                onChange={e => setPwdForm(f => ({ ...f, newPassword: e.target.value }))}
-              />
+          </div>
+
+          <div className={styles.card}>
+            <div className={styles.cardHead}>Help</div>
+            <div className={styles.row}>
+              <span className={styles.icon}>{icons.tour}</span>
+              <div className={styles.text}>
+                <div className={styles.label}>Guided tour</div>
+                <div className={styles.value}>A one-minute walk through the app</div>
+              </div>
+              <button className={styles.btn} onClick={() => startTour()}>Take the tour</button>
             </div>
-            <div style={{ marginBottom: 16 }}>
-              <label style={labelStyle}>Confirm New Password</label>
-              <input
-                type="password" required style={inputStyle}
-                placeholder="••••••••"
-                value={pwdForm.confirmPassword}
-                onChange={e => setPwdForm(f => ({ ...f, confirmPassword: e.target.value }))}
-              />
+            <div className={styles.row}>
+              <span className={styles.icon}>{icons.help}</span>
+              <div className={styles.text}>
+                <div className={styles.label}>Support</div>
+                <div className={styles.value}>support@zerofy.co.in · reply within 48 hours</div>
+              </div>
+              <a className={styles.btn} href="/contact" style={{ textDecoration: 'none' }}>Contact us</a>
             </div>
-            <button
-              type="submit" disabled={pwdLoading}
-              style={{
-                padding: '10px 24px', borderRadius: 10, border: 'none',
-                background: 'linear-gradient(135deg, #EFA02F, #F6B24E)',
-                color: '#12263F', fontWeight: 700, fontSize: 14, cursor: 'pointer',
-                opacity: pwdLoading ? 0.7 : 1
-              }}
-            >
-              {pwdLoading ? '⏳ Updating...' : 'Change Password'}
-            </button>
-            {pwdMsg && <div style={msgStyle(pwdMsg.type)}>{pwdMsg.type === 'success' ? '' : ''} {pwdMsg.text}</div>}
-          </form>
+            <div className={styles.links}>
+              <a href="/terms-conditions">Terms</a>
+              <a href="/privacy-policy">Privacy</a>
+              <a href="/refund">Refund &amp; cancellation</a>
+            </div>
+          </div>
         </div>
-
-        </>)}
-
-        {/* Danger Zone */}
-        <div style={{ ...cardStyle, borderColor: 'rgba(248,113,113,0.2)' }}>
-          <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 8, marginTop: 0 }}>Log out</h2>
-          <p style={{ fontSize: 13, color: 'var(--text3)', marginBottom: 16 }}>Sign out of Zerofy on this device</p>
-          <button
-            onClick={() => { logout() }}
-            style={{
-              padding: '10px 24px', borderRadius: 10,
-              border: '1px solid rgba(248,113,113,0.3)',
-              background: 'rgba(248,113,113,0.08)',
-              color: '#F87171', fontWeight: 600, fontSize: 14, cursor: 'pointer'
-            }}
-          >
-            Logout
-          </button>
-        </div>
-
       </div>
     </div>
   )

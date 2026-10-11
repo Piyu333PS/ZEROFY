@@ -57,7 +57,7 @@ function AppInner() {
   const location = useLocation()
   const isLoginScreen = location.pathname === '/'
   // Billing app aur invoice maker ka apna shell hai — site ka navbar / marketing footer wahan nahi aate
-  const isAppScreen = location.pathname.startsWith('/app') || location.pathname === '/tools/invoice-maker' || location.pathname === '/checkout'
+  const isAppScreen = location.pathname.startsWith('/app') || location.pathname === '/tools/invoice-maker' || location.pathname === '/checkout' || location.pathname === '/pricing'
   const bare = isLoginScreen || isAppScreen
 
   // App / login ke peeche page ka background bhi paper rahe (warna neeche dark patti dikhti thi)
@@ -91,7 +91,7 @@ function AppInner() {
             <Route path="items" element={<ItemsPage />} />
             <Route path="payments" element={<PaymentsPage />} />
             <Route path="reports" element={<ReportsPage />} />
-            <Route path="settings" element={<SettingsPage embedded />} />
+            <Route path="settings" element={<SettingsPage />} />
           </Route>
 
           <Route path="/tools/invoice-maker" element={<InvoiceMaker />} />
