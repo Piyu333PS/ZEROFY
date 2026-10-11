@@ -3,6 +3,7 @@ import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { useBilling } from '../../utils/billingStore'
 import GuidedTour, { TOUR_EVENT, isTourDone } from '../tour/GuidedTour'
+import BusinessSetup from '../onboarding/BusinessSetup'
 import styles from './DashboardLayout.module.css'
 
 const I = (d) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">{d}</svg>
@@ -50,9 +51,13 @@ export default function DashboardLayout() {
     window.addEventListener(TOUR_EVENT, start)
     return () => window.removeEventListener(TOUR_EVENT, start)
   }, [])
+  // A brand-new account sets up its business first (one short form), then sees the app and the tour.
+  // Accounts that already have invoices or quotations are never stopped here.
+  const needsSetup = Boolean(data) && data.businesses.length === 0 && data.invoices.length === 0
+    && (data.quotations || []).length === 0 && (data.creditNotes || []).length === 0
   useEffect(() => {
-    if (data && user && data.invoices.length === 0 && !isTourDone(user.email)) setTour(true)
-  }, [Boolean(data), user?.email]) // eslint-disable-line
+    if (data && user && !needsSetup && data.invoices.length === 0 && !isTourDone(user.email)) setTour(true)
+  }, [Boolean(data), needsSetup, user?.email]) // eslint-disable-line
 
   useEffect(() => {
     if (!initializing && !user) navigate('/')
@@ -81,6 +86,7 @@ export default function DashboardLayout() {
   // Jab tak localStorage se session check nahi ho jata, kuch mat dikhao
   if (initializing) return null
   if (!user) return null
+  if (needsSetup) return <BusinessSetup token={token} email={user.email} onLogout={logout} />
 
   const status = data?.status
   const isPro = Boolean(status?.isPro)

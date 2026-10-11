@@ -5,6 +5,7 @@ import { api } from '../utils/api'
 import { loadBilling } from '../utils/billingStore'
 import { GST_STATES, stateCodeOf, formatDate } from '../utils/invoiceCalc'
 import { downloadPurchaseInvoice } from '../utils/purchaseInvoice'
+import { cleanMobile } from '../utils/phone'
 import styles from './CheckoutPage.module.css'
 
 /* Checkout for Zerofy Pro.
@@ -96,7 +97,7 @@ export default function CheckoutPage() {
   }, [token, plans, planId, mode, effectiveCoupon, b.state])
 
   const set = (k) => (e) => setB(p => ({ ...p, [k]: e.target.value }))
-  const setPhone = (e) => setB(p => ({ ...p, phone: e.target.value.replace(/\D/g, '').slice(0, 10) }))
+  const setPhone = (e) => setB(p => ({ ...p, phone: cleanMobile(e.target.value) }))
   const setPin = (e) => setB(p => ({ ...p, pincode: e.target.value.replace(/\D/g, '').slice(0, 6) }))
   const setGstin = (e) => {
     const v = e.target.value.toUpperCase().replace(/[^0-9A-Z]/g, '').slice(0, 15)
