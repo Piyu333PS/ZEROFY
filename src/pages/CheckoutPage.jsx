@@ -421,7 +421,7 @@ export default function CheckoutPage() {
                       <input id="co-sales" className={styles.inp} style={{ fontFamily: 'var(--mono)', textTransform: 'uppercase' }} value={salesCode} maxLength={30}
                         onChange={e => setSalesCode(e.target.value.toUpperCase().replace(/[^A-Z0-9_-]/g, ''))} placeholder="Code of the person who helped you" />
                       {salesInfo && salesCode.trim().length >= 3 && (salesInfo.valid
-                        ? <div className={styles.hint} style={{ color: 'var(--green)' }}>✓ Referred by {salesInfo.name}</div>
+                        ? <div className={styles.hint} style={{ color: 'var(--green)' }}>✓ {salesInfo.name ? `Referred by ${salesInfo.name}` : 'Code added'}</div>
                         : <div className={styles.err}>This code was not found. Check it, or clear the box.</div>)}
                     </div>
                   ) : (
