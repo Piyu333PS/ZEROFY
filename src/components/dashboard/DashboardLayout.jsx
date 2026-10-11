@@ -56,8 +56,10 @@ export default function DashboardLayout() {
   const needsSetup = Boolean(data) && data.businesses.length === 0 && data.invoices.length === 0
     && (data.quotations || []).length === 0 && (data.creditNotes || []).length === 0
   useEffect(() => {
-    if (data && user && !needsSetup && data.invoices.length === 0 && !isTourDone(user.email)) setTour(true)
-  }, [Boolean(data), needsSetup, user?.email]) // eslint-disable-line
+    // Only on the overview. Someone who arrived on another page for a reason (for example Settings,
+    // to set a new password) must not be pulled away by the tour — it starts on their next visit to the overview.
+    if (data && user && !needsSetup && data.invoices.length === 0 && !isTourDone(user.email) && location.pathname === '/app') setTour(true)
+  }, [Boolean(data), needsSetup, user?.email, location.pathname]) // eslint-disable-line
 
   useEffect(() => {
     if (!initializing && !user) navigate('/')
