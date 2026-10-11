@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Navbar from './components/Navbar'
 import LoginPage from './pages/LoginPage'
 import { useAuth } from './context/AuthContext'
@@ -44,11 +44,18 @@ function NotFound() {
 
 function RootGate() {
   const { user, initializing } = useAuth()
-  // Someone who chose a plan before logging in goes straight on to checkout
-  const [next] = useState(() => { try { return sessionStorage.getItem('zerofy-after-login') } catch { return null } })
-  useEffect(() => { if (user && next) { try { sessionStorage.removeItem('zerofy-after-login') } catch { /* ignore */ } } }, [user, next])
+  // Where to go after logging in: checkout (a plan was chosen first) or Settings (forgot password → Google).
+  // It must be read at the moment of login, not when this page first opened — the "forgot password"
+  // screen sets it later, while the login page is already on screen.
+  const nextRef = useRef(null)
+  if (user && nextRef.current === null) {
+    let next = ''
+    try { next = sessionStorage.getItem('zerofy-after-login') || '' } catch { /* ignore */ }
+    nextRef.current = next.startsWith('/checkout') || next.startsWith('/app/') ? next : '/app'
+  }
+  useEffect(() => { if (user) { try { sessionStorage.removeItem('zerofy-after-login') } catch { /* ignore */ } } }, [user])
   if (initializing) return null
-  if (user) return <Navigate to={next && (next.startsWith('/checkout') || next.startsWith('/app/')) ? next : '/app'} replace />
+  if (user) return <Navigate to={nextRef.current || '/app'} replace />
   return <LoginPage />
 }
 
