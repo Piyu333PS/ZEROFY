@@ -87,6 +87,8 @@ export function AuthProvider({ children }) {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Google login failed')
+      // A Google account with no Zerofy account before: the overview shows a note in case old data was expected
+      try { if (data.isNew) sessionStorage.setItem('zerofy-new-account', data.email); else sessionStorage.removeItem('zerofy-new-account') } catch { /* ignore */ }
       saveSession(data)
       return { success: true }
     } catch (err) {

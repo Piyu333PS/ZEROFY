@@ -48,7 +48,7 @@ function RootGate() {
   const [next] = useState(() => { try { return sessionStorage.getItem('zerofy-after-login') } catch { return null } })
   useEffect(() => { if (user && next) { try { sessionStorage.removeItem('zerofy-after-login') } catch { /* ignore */ } } }, [user, next])
   if (initializing) return null
-  if (user) return <Navigate to={next && next.startsWith('/checkout') ? next : '/app'} replace />
+  if (user) return <Navigate to={next && (next.startsWith('/checkout') || next.startsWith('/app/')) ? next : '/app'} replace />
   return <LoginPage />
 }
 

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { startTour } from '../components/tour/GuidedTour'
 import styles from './SettingsPage.module.css'
@@ -21,7 +21,9 @@ export default function SettingsPage() {
   const { user, token, logout, initializing } = useAuth()
   const navigate = useNavigate()
 
-  const [open, setOpen] = useState('') // '' | 'email' | 'password'
+  const [params] = useSearchParams()
+  // ?password=1 — arriving from "Forgot password → Continue with Google": open the password form straight away
+  const [open, setOpen] = useState(params.get('password') ? 'password' : '') // '' | 'email' | 'password'
   const [emailForm, setEmailForm] = useState({ newEmail: '', password: '' })
   const [pwdForm, setPwdForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' })
   const [emailMsg, setEmailMsg] = useState(null)
@@ -48,6 +50,8 @@ export default function SettingsPage() {
   if (initializing || !user) return null
 
   const passwordless = account?.hasPassword === false
+  // Logged in with Google in the last hour → may choose a new password without typing the old one
+  const canSet = Boolean(account?.canSetPassword)
   const toggle = (key) => { setOpen(o => (o === key ? '' : key)); setEmailMsg(null); setPwdMsg(null) }
 
   const handleEmailChange = async (e) => {
@@ -81,14 +85,15 @@ export default function SettingsPage() {
     }
     setPwdLoading(true)
     try {
-      const res = await fetch(`${API}/api/user/change-password`, {
+      const res = await fetch(`${API}/api/user/${canSet ? 'set-password' : 'change-password'}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ currentPassword: pwdForm.currentPassword, newPassword: pwdForm.newPassword })
+        body: JSON.stringify(canSet ? { newPassword: pwdForm.newPassword } : { currentPassword: pwdForm.currentPassword, newPassword: pwdForm.newPassword })
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error)
       setPwdMsg({ type: 'success', text: data.message })
+      setAccount(a => (a ? { ...a, hasPassword: true } : a))
       setPwdForm({ currentPassword: '', newPassword: '', confirmPassword: '' })
     } catch (err) {
       setPwdMsg({ type: 'error', text: err.message || 'Could not change the password. Please try again.' })
@@ -146,24 +151,35 @@ export default function SettingsPage() {
               <span className={styles.icon}>{icons.lock}</span>
               <div className={styles.text}>
                 <div className={styles.label}>Password</div>
-                <div className={styles.value}>{passwordless ? 'You log in with your Google account' : '••••••••'}</div>
+                <div className={styles.value}>{passwordless ? 'Not set — you log in with your Google account' : '••••••••'}</div>
               </div>
-              {!passwordless && <button className={styles.btn} aria-expanded={open === 'password'} onClick={() => toggle('password')}>{open === 'password' ? 'Close' : 'Change'}</button>}
+              {(canSet || !passwordless) && (
+                <button className={styles.btn} aria-expanded={open === 'password'} onClick={() => toggle('password')}>
+                  {open === 'password' ? 'Close' : passwordless ? 'Set password' : 'Change'}
+                </button>
+              )}
             </div>
-            {passwordless && (
-              <p className={styles.note}>There is no Zerofy password to change. Manage your email and password in your Google account.</p>
+            {passwordless && !canSet && account && (
+              <p className={styles.note}>To add a password, log out and log in with Google again, then come back here within an hour.</p>
             )}
-            {open === 'password' && !passwordless && (
+            {open === 'password' && (canSet || !passwordless) && (
               <form className={styles.panel} onSubmit={handlePwdChange}>
-                <div className={styles.fields}>
-                  <div className={`${styles.field} ${styles.full}`}>
-                    <label htmlFor="set-cur-pwd">Current password</label>
-                    <input id="set-cur-pwd" type="password" required autoFocus className={styles.inp} autoComplete="current-password"
-                      value={pwdForm.currentPassword} onChange={e => setPwdForm(f => ({ ...f, currentPassword: e.target.value }))} />
+                {canSet && (
+                  <div className={`${styles.msg} ${styles.ok}`} style={{ marginTop: 0, marginBottom: 12 }}>
+                    You logged in with Google, so your old password is not needed. Choose a new one below.
                   </div>
+                )}
+                <div className={styles.fields}>
+                  {!canSet && (
+                    <div className={`${styles.field} ${styles.full}`}>
+                      <label htmlFor="set-cur-pwd">Current password</label>
+                      <input id="set-cur-pwd" type="password" required autoFocus className={styles.inp} autoComplete="current-password"
+                        value={pwdForm.currentPassword} onChange={e => setPwdForm(f => ({ ...f, currentPassword: e.target.value }))} />
+                    </div>
+                  )}
                   <div className={styles.field}>
                     <label htmlFor="set-new-pwd">New password</label>
-                    <input id="set-new-pwd" type="password" required minLength={6} className={styles.inp} autoComplete="new-password"
+                    <input id="set-new-pwd" type="password" required minLength={6} autoFocus={canSet} className={styles.inp} autoComplete="new-password"
                       value={pwdForm.newPassword} onChange={e => setPwdForm(f => ({ ...f, newPassword: e.target.value }))} />
                   </div>
                   <div className={styles.field}>
@@ -173,9 +189,14 @@ export default function SettingsPage() {
                   </div>
                 </div>
                 <div className={styles.actions}>
-                  <button type="submit" className={`${styles.btn} ${styles.primary}`} disabled={pwdLoading}>{pwdLoading ? 'Updating…' : 'Change password'}</button>
+                  <button type="submit" className={`${styles.btn} ${styles.primary}`} disabled={pwdLoading}>{pwdLoading ? 'Saving…' : canSet ? 'Save new password' : 'Change password'}</button>
                   <button type="button" className={styles.btn} onClick={() => toggle('password')}>Cancel</button>
                 </div>
+                {!canSet && (
+                  <p style={{ fontSize: 12.5, color: 'var(--slate)', margin: '12px 0 0', lineHeight: 1.55 }}>
+                    Forgot your current password? Log out and use "Continue with Google" with this email, then set a new one here.
+                  </p>
+                )}
                 {msg(pwdMsg)}
               </form>
             )}

@@ -5,7 +5,7 @@ import { api } from '../utils/api'
    1) email daalo → us par 6-digit code jata hai
    2) code + naya password → password badal jata hai
    `styles` LoginPage ka CSS module hai, taaki dono ek jaise dikhein. */
-export default function ForgotPassword({ styles, initialEmail = '', onDone, onBack }) {
+export default function ForgotPassword({ styles, initialEmail = '', onDone, onBack, onFindAccount, googleSlot }) {
   const [step, setStep] = useState(1)
   const [email, setEmail] = useState(initialEmail)
   const [code, setCode] = useState('')
@@ -47,9 +47,23 @@ export default function ForgotPassword({ styles, initialEmail = '', onDone, onBa
       <h1 className={styles.heading}>Reset your password</h1>
       <p className={styles.subheading}>
         {step === 1
-          ? 'Enter your registered email and we will send you a 6-digit code.'
+          ? 'There are two ways to get back in.'
           : 'Enter the code from your email and choose a new password.'}
       </p>
+
+      {step === 1 && googleSlot && (
+        <>
+          <div style={{ border: '1px solid #DDE1D9', borderRadius: 12, padding: '14px 16px', background: '#fff', marginBottom: 4 }}>
+            <div style={{ fontSize: 13.5, fontWeight: 700, color: '#12263F' }}>1. Log in with Google</div>
+            <p style={{ fontSize: 12.5, color: '#5C7189', lineHeight: 1.55, margin: '4px 0 12px' }}>
+              If your Zerofy email is a Gmail or Google account, continue with Google. You will go straight to Settings to choose a new password — the old one is not needed.
+            </p>
+            <div className={styles.googleWrap} style={{ marginBottom: 0 }}><div ref={googleSlot} /></div>
+          </div>
+          <div className={styles.divider}><span /><p>or</p><span /></div>
+          <div style={{ fontSize: 13.5, fontWeight: 700, color: '#12263F', marginBottom: 10 }}>2. Get a code by email</div>
+        </>
+      )}
 
       {step === 1 ? (
         <form onSubmit={sendCode} className={styles.form} noValidate>
@@ -92,6 +106,7 @@ export default function ForgotPassword({ styles, initialEmail = '', onDone, onBa
 
       <p className={styles.switchLine}>
         <button type="button" className={styles.switchBtn} onClick={onBack}>← Back to log in</button>
+        {onFindAccount && step === 1 && <> · <button type="button" className={styles.switchBtn} onClick={onFindAccount}>Forgot your email?</button></>}
       </p>
     </div>
   )

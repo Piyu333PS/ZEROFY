@@ -28,7 +28,7 @@ const icons = {
 }
 
 export default function DashboardHome() {
-  const { token, user } = useAuth()
+  const { token, user, logout } = useAuth()
   const navigate = useNavigate()
 
   const { data, loading, error } = useBilling(token)
@@ -76,6 +76,10 @@ export default function DashboardHome() {
   const clientsShown = Math.round(useCountUp(stats?.customerCount, 500))
   const collectedShown = Math.round(useCountUp(collected, 900))
 
+  // Shown once after a Google login that created a brand-new account
+  const [newAccount, setNewAccount] = useState(() => { try { return sessionStorage.getItem('zerofy-new-account') || '' } catch { return '' } })
+  const dismissNewAccount = () => { try { sessionStorage.removeItem('zerofy-new-account') } catch { /* ignore */ } setNewAccount('') }
+
   return (
     <div className={styles.wrap}>
       <div className={styles.pageHead}>
@@ -84,6 +88,16 @@ export default function DashboardHome() {
           <p className={styles.dateLine}>{today}</p>
         </div>
       </div>
+
+      {newAccount && (
+        <div role="status" style={{ background: '#FCEFD9', border: '1px solid rgba(239,160,47,0.45)', color: '#6B3D05', borderRadius: 12, padding: '12px 16px', fontSize: 13.5, lineHeight: 1.55, marginBottom: 16, display: 'flex', gap: 14, alignItems: 'flex-start', justifyContent: 'space-between' }}>
+          <span>
+            This is a new account for <strong>{newAccount}</strong>. Expecting to see your old invoices? You may have signed up with a different email —
+            {' '}<button onClick={logout} style={{ background: 'none', border: 'none', padding: 0, font: 'inherit', color: '#A85E08', fontWeight: 700, textDecoration: 'underline', cursor: 'pointer' }}>log out and use "Forgot your email?"</button> to find it.
+          </span>
+          <button onClick={dismissNewAccount} aria-label="Dismiss" style={{ background: 'none', border: 'none', fontSize: 18, lineHeight: 1, color: '#6B3D05', cursor: 'pointer' }}>×</button>
+        </div>
+      )}
 
       {error && <p className={styles.error}>{error}</p>}
 

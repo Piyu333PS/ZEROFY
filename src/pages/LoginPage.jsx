@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import ForgotPassword from '../components/ForgotPassword'
+import FindAccount from '../components/FindAccount'
 import styles from './LoginPage.module.css'
 
 export default function LoginPage() {
@@ -10,6 +11,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [showPass, setShowPass] = useState(false)
   const [forgot, setForgot] = useState(() => new URLSearchParams(window.location.search).has('forgot'))
+  const [finding, setFinding] = useState(false) // "Forgot your email?" screen
   const [notice, setNotice] = useState('')
   const { login, register, googleLogin, loading, error, setError, user } = useAuth()
   const googleButtonRef = useRef(null)
@@ -21,9 +23,28 @@ export default function LoginPage() {
     if (user) navigate('/app', { replace: true })
   }, [user, navigate])
 
+  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
+  const googleOpts = { theme: 'outline', size: 'large', width: 320, text: 'continue_with', shape: 'rectangular' }
+
+  // An extra Google button for the "forgot password" and "find account" screens
+  const googleSlot = (el) => {
+    if (!el || !window.google || el.childElementCount) return
+    window.google.accounts.id.renderButton(el, googleOpts)
+  }
+
+  // While the "forgot password" screen is open, a Google login should land on Settings with the
+  // password form open. (The Google button is an iframe, so we cannot listen for the click itself.)
+  const SET_PASSWORD_URL = '/app/settings?password=1'
+  useEffect(() => {
+    try {
+      if (forgot && !finding) sessionStorage.setItem('zerofy-after-login', SET_PASSWORD_URL)
+      else if (sessionStorage.getItem('zerofy-after-login') === SET_PASSWORD_URL) sessionStorage.removeItem('zerofy-after-login')
+    } catch { /* ignore */ }
+  }, [forgot, finding])
+
   // Google Identity Services setup — same wiring as AuthModal
   useEffect(() => {
-    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
+    const clientId = googleClientId
     if (!clientId) return
 
     const initGoogle = () => {
@@ -84,17 +105,28 @@ export default function LoginPage() {
             >Create account</button>
           </div>
 
-          {forgot && (
+          {finding && (
+            <FindAccount
+              styles={styles}
+              googleSlot={googleClientId ? googleSlot : null}
+              onBack={() => setFinding(false)}
+              onUse={() => { setFinding(false); setTab('login') }}
+            />
+          )}
+
+          {forgot && !finding && (
             <ForgotPassword
               styles={styles}
               initialEmail={email}
+              googleSlot={googleClientId ? googleSlot : null}
+              onFindAccount={() => setFinding(true)}
               onBack={() => setForgot(false)}
               onDone={(doneEmail, message) => { setEmail(doneEmail); setPassword(''); setTab('login'); setNotice(message); setError(null); setForgot(false) }}
             />
           )}
 
           {/* Google button ek hi baar render hota hai, isliye is hisse ko unmount nahi karte — bas chhupa dete hain */}
-          <div style={{ display: forgot ? 'none' : 'block' }}>
+          <div style={{ display: forgot || finding ? 'none' : 'block' }}>
           <h1 className={styles.heading}>
             {tab === 'login' ? 'Welcome back' : 'Set up your business'}
           </h1>
@@ -145,7 +177,8 @@ export default function LoginPage() {
             </label>
 
             {tab === 'login' && (
-              <div style={{ textAlign: 'right', marginTop: -6 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, marginTop: -6, flexWrap: 'wrap' }}>
+                <button type="button" className={styles.switchBtn} onClick={() => { setNotice(''); setError(null); setFinding(true) }}>Forgot your email?</button>
                 <button type="button" className={styles.switchBtn} onClick={() => { setNotice(''); setError(null); setForgot(true) }}>Forgot password?</button>
               </div>
             )}
