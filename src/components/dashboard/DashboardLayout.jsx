@@ -17,8 +17,6 @@ const icons = {
   payments: I(<><rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="M2.5 10h19M6.5 15h4"/></>),
   reports: I(<><path d="M4 19V5M4 19h16"/><path d="M8 19v-6M12 19V9M16 19v-4"/></>),
   settings: I(<><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.34 1.87l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.7 1.7 0 00-1.87-.34 1.7 1.7 0 00-1 1.55V21a2 2 0 01-4 0v-.09A1.7 1.7 0 009 19.36a1.7 1.7 0 00-1.87.34l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.7 1.7 0 004.64 15a1.7 1.7 0 00-1.55-1H3a2 2 0 010-4h.09A1.7 1.7 0 004.64 9a1.7 1.7 0 00-.34-1.87l-.06-.06a2 2 0 112.83-2.83l.06.06A1.7 1.7 0 009 4.64a1.7 1.7 0 001-1.55V3a2 2 0 014 0v.09a1.7 1.7 0 001 1.55 1.7 1.7 0 001.87-.34l.06-.06a2 2 0 112.83 2.83l-.06.06A1.7 1.7 0 0019.36 9a1.7 1.7 0 001.55 1H21a2 2 0 010 4h-.09a1.7 1.7 0 00-1.55 1z"/></>),
-  admin: I(<><path d="M12 3l8 3v6c0 4.5-3.2 7.8-8 9-4.8-1.2-8-4.5-8-9V6l8-3z"/><path d="M9 12l2 2 4-4"/></>),
-  sales: I(<><path d="M4 18l5-5 4 3 7-8"/><path d="M15 8h5v5"/></>),
   plus: I(<path d="M12 5v14M5 12h14"/>),
   logout: I(<><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></>),
   menu: I(<path d="M4 7h16M4 12h16M4 17h16"/>),
@@ -151,18 +149,6 @@ export default function DashboardLayout() {
             </div>
           )}
 
-          {data?.roles?.sales && (
-            <NavLink to="/app/sales" className={linkClass}>
-              <span className={styles.navIcon}>{icons.sales}</span>
-              My sales
-            </NavLink>
-          )}
-          {data?.roles?.admin && (
-            <NavLink to="/app/admin" className={linkClass}>
-              <span className={styles.navIcon}>{icons.admin}</span>
-              Admin
-            </NavLink>
-          )}
           <NavLink to="/app/settings" className={linkClass} data-tour="nav-settings">
             <span className={styles.navIcon}>{icons.settings}</span>
             Settings

@@ -31,7 +31,6 @@ function normalize(raw) {
     items: raw.items || [],
     stats: raw.stats || null,
     status: raw.status || { invoiceCount: 0, freeLimit: 3, isPro: false },
-    roles: raw.roles || { admin: false, sales: false },
   }
 }
 

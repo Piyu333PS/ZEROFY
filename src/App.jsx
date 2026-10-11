@@ -22,8 +22,6 @@ import CustomersPage from './pages/dashboard/CustomersPage'
 import ItemsPage from './pages/dashboard/ItemsPage'
 import PaymentsPage from './pages/dashboard/PaymentsPage'
 import ReportsPage from './pages/dashboard/ReportsPage'
-import AdminPage from './pages/dashboard/AdminPage'
-import SalesPage from './pages/dashboard/SalesPage'
 import SettingsPage from './pages/SettingsPage'
 import BillingPage from './pages/BillingPage'
 import RefundPage from './pages/RefundPage'
@@ -114,8 +112,6 @@ function AppInner() {
             <Route path="payments" element={<PaymentsPage />} />
             <Route path="reports" element={<ReportsPage />} />
             <Route path="settings" element={<SettingsPage />} />
-            <Route path="admin" element={<AdminPage />} />
-            <Route path="sales" element={<SalesPage />} />
           </Route>
 
           <Route path="/tools/invoice-maker" element={<InvoiceMaker />} />
