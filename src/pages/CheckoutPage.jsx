@@ -46,7 +46,17 @@ export default function CheckoutPage() {
   const [couponError, setCouponError] = useState('')
   const [couponBusy, setCouponBusy] = useState(false)
   const [salesOpen, setSalesOpen] = useState(false)
-  const [salesCode, setSalesCode] = useState(params.get('ref') || '')
+  // The code comes from the salesperson's link (kept on this device for 30 days) or is typed here
+  const [salesCode, setSalesCode] = useState(() => {
+    const clean = (v) => String(v || '').toUpperCase().replace(/[^A-Z0-9_-]/g, '').slice(0, 30)
+    if (params.get('ref')) return clean(params.get('ref'))
+    try {
+      const saved = JSON.parse(localStorage.getItem('zerofy-ref') || 'null')
+      if (saved && Date.now() - saved.at < 30 * 86400000) return clean(saved.code)
+    } catch { /* ignore */ }
+    return ''
+  })
+  const [salesInfo, setSalesInfo] = useState(null) // null = not checked · { valid, name }
 
   const [quote, setQuote] = useState(null)
   const [showProblems, setShowProblems] = useState(false)
@@ -59,7 +69,7 @@ export default function CheckoutPage() {
   useEffect(() => {
     if (initializing || token) return
     try { sessionStorage.setItem('zerofy-after-login', `/checkout?plan=${planId}`) } catch { /* ignore */ }
-    navigate('/', { replace: true })
+    navigate('/login', { replace: true })
   }, [initializing, token]) // eslint-disable-line
 
   useEffect(() => {
@@ -95,6 +105,17 @@ export default function CheckoutPage() {
       else if (effectiveCoupon) { setCoupon(''); setCouponError(res.data.error || 'This coupon code is not valid'); setCouponOpen(true) }
     })
   }, [token, plans, planId, mode, effectiveCoupon, b.state])
+
+  // Tell the customer whose code it is — or that it was not found — before they pay
+  useEffect(() => {
+    const code = salesCode.trim()
+    setSalesInfo(null)
+    if (!token || code.length < 3) return
+    const t = setTimeout(() => {
+      api(`/api/payment/sales-code/${encodeURIComponent(code)}`, token).then(res => { if (res.ok) setSalesInfo(res.data) })
+    }, 350)
+    return () => clearTimeout(t)
+  }, [salesCode, token])
 
   const set = (k) => (e) => setB(p => ({ ...p, [k]: e.target.value }))
   const setPhone = (e) => setB(p => ({ ...p, phone: cleanMobile(e.target.value) }))
@@ -399,6 +420,9 @@ export default function CheckoutPage() {
                       <label htmlFor="co-sales">Sales / referral code <em>(optional)</em></label>
                       <input id="co-sales" className={styles.inp} style={{ fontFamily: 'var(--mono)', textTransform: 'uppercase' }} value={salesCode} maxLength={30}
                         onChange={e => setSalesCode(e.target.value.toUpperCase().replace(/[^A-Z0-9_-]/g, ''))} placeholder="Code of the person who helped you" />
+                      {salesInfo && salesCode.trim().length >= 3 && (salesInfo.valid
+                        ? <div className={styles.hint} style={{ color: 'var(--green)' }}>✓ Referred by {salesInfo.name}</div>
+                        : <div className={styles.err}>This code was not found. Check it, or clear the box.</div>)}
                     </div>
                   ) : (
                     <div><button type="button" className={styles.linkBtn} onClick={() => setSalesOpen(true)}>Did someone refer you? Add their code</button></div>

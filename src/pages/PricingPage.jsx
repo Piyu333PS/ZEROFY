@@ -53,7 +53,7 @@ export default function PricingPage() {
       <header className={styles.top}>
         <div className={styles.topInner}>
           <Link to={token ? '/app' : '/'} className={styles.brand}><span className={styles.mark}>Z</span><span className={styles.word}>ZEROFY</span></Link>
-          <button className={styles.topBtn} onClick={() => navigate(token ? '/app' : '/')}>{token ? '‹ Back to app' : 'Log in'}</button>
+          <button className={styles.topBtn} onClick={() => navigate(token ? '/app' : '/login')}>{token ? '‹ Back to app' : 'Log in'}</button>
         </div>
       </header>
 
@@ -71,7 +71,7 @@ export default function PricingPage() {
             <div className={styles.planName}>Free</div>
             <div className={styles.priceRow}><span className={styles.price}>₹0</span><span className={styles.per}>forever</span></div>
             <p className={styles.planNote}>Try everything with your first 3 invoices.</p>
-            <button className={styles.cta} disabled={Boolean(token)} onClick={() => navigate('/')}>{token ? (isPro ? 'Included' : 'Your current plan') : 'Start free'}</button>
+            <button className={styles.cta} disabled={Boolean(token)} onClick={() => navigate('/login?signup=1')}>{token ? (isPro ? 'Included' : 'Your current plan') : 'Start free'}</button>
             <ul className={styles.list}>{FREE_FEATURES.map(f => <li key={f}>{tick}{f}</li>)}</ul>
           </section>
 
@@ -133,7 +133,7 @@ export default function PricingPage() {
           <div className={styles.dialog} role="dialog" aria-modal="true" aria-label="Log in to continue">
             <h2>Log in to continue</h2>
             <p>Log in or create a free account first. You will come straight back to checkout.</p>
-            <button className={`${styles.cta} ${styles.ctaPrimary}`} onClick={() => navigate('/')}>Log in / Create account</button>
+            <button className={`${styles.cta} ${styles.ctaPrimary}`} onClick={() => navigate('/login')}>Log in / Create account</button>
             <button className={styles.cta} onClick={() => setShowAuthPrompt(false)}>Maybe later</button>
           </div>
         </div>

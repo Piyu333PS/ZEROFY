@@ -6,7 +6,7 @@ import FindAccount from '../components/FindAccount'
 import styles from './LoginPage.module.css'
 
 export default function LoginPage() {
-  const [tab, setTab] = useState('login')
+  const [tab, setTab] = useState(() => (new URLSearchParams(window.location.search).has('signup') ? 'signup' : 'login'))
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPass, setShowPass] = useState(false)
@@ -86,10 +86,10 @@ export default function LoginPage() {
       {/* ── Left: Auth panel ── */}
       <div className={styles.formSide}>
         <div className={styles.formInner}>
-          <div className={styles.logoRow}>
+          <a href="/" className={styles.logoRow} style={{ textDecoration: 'none' }} aria-label="Zerofy home">
             <span className={styles.logoMark}>Z</span>
             <span className={styles.logoText}>ZEROFY</span>
-          </div>
+          </a>
           <p className={styles.logoSub}>Billing Software</p>
 
           <div className={styles.tabs}>

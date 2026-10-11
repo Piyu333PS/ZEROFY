@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-route
 import { useState, useEffect, useRef } from 'react'
 import Navbar from './components/Navbar'
 import LoginPage from './pages/LoginPage'
+import LandingPage from './pages/LandingPage'
 import { useAuth } from './context/AuthContext'
 import PricingPage from './pages/PricingPage'
 import CheckoutPage from './pages/CheckoutPage'
@@ -21,6 +22,8 @@ import CustomersPage from './pages/dashboard/CustomersPage'
 import ItemsPage from './pages/dashboard/ItemsPage'
 import PaymentsPage from './pages/dashboard/PaymentsPage'
 import ReportsPage from './pages/dashboard/ReportsPage'
+import AdminPage from './pages/dashboard/AdminPage'
+import SalesPage from './pages/dashboard/SalesPage'
 import SettingsPage from './pages/SettingsPage'
 import BillingPage from './pages/BillingPage'
 import RefundPage from './pages/RefundPage'
@@ -42,7 +45,9 @@ function NotFound() {
   )
 }
 
-function RootGate() {
+// `/` shows the public home page and `/login` the login form. Either way, someone who is (or becomes)
+// logged in is sent on into the app.
+function RootGate({ login = false }) {
   const { user, initializing } = useAuth()
   // Where to go after logging in: checkout (a plan was chosen first) or Settings (forgot password → Google).
   // It must be read at the moment of login, not when this page first opened — the "forgot password"
@@ -56,16 +61,25 @@ function RootGate() {
   useEffect(() => { if (user) { try { sessionStorage.removeItem('zerofy-after-login') } catch { /* ignore */ } } }, [user])
   if (initializing) return null
   if (user) return <Navigate to={nextRef.current || '/app'} replace />
-  return <LoginPage />
+  return login ? <LoginPage /> : <LandingPage />
 }
 
 function AppInner() {
   useBackButton()
   const location = useLocation()
-  const isLoginScreen = location.pathname === '/'
+  const isLoginScreen = location.pathname === '/' || location.pathname === '/login'
   // Billing app aur invoice maker ka apna shell hai — site ka navbar / marketing footer wahan nahi aate
   const isAppScreen = location.pathname.startsWith('/app') || location.pathname === '/tools/invoice-maker' || location.pathname === '/checkout' || location.pathname === '/pricing'
   const bare = isLoginScreen || isAppScreen
+
+  // A salesperson's link looks like zerofy.co.in/?ref=AMIT07. Remember the code on this device for 30 days,
+  // so it is already filled in at checkout even if the person signs up today and pays next week.
+  useEffect(() => {
+    const ref = new URLSearchParams(location.search).get('ref')
+    if (!ref) return
+    const code = ref.toUpperCase().replace(/[^A-Z0-9_-]/g, '').slice(0, 30)
+    try { if (code.length >= 3) localStorage.setItem('zerofy-ref', JSON.stringify({ code, at: Date.now() })) } catch { /* ignore */ }
+  }, [location.search])
 
   // App / login ke peeche page ka background bhi paper rahe (warna neeche dark patti dikhti thi)
   useEffect(() => {
@@ -79,6 +93,7 @@ function AppInner() {
       <main style={{ flex: 1 }}>
         <Routes>
           <Route path="/" element={<RootGate />} />
+          <Route path="/login" element={<RootGate login />} />
           <Route path="/pricing" element={<PricingPage />} />
           <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="/settings" element={<Navigate to="/app/settings" replace />} />
@@ -99,6 +114,8 @@ function AppInner() {
             <Route path="payments" element={<PaymentsPage />} />
             <Route path="reports" element={<ReportsPage />} />
             <Route path="settings" element={<SettingsPage />} />
+            <Route path="admin" element={<AdminPage />} />
+            <Route path="sales" element={<SalesPage />} />
           </Route>
 
           <Route path="/tools/invoice-maker" element={<InvoiceMaker />} />

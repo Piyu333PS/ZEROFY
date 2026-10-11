@@ -107,7 +107,7 @@ export function AuthProvider({ children }) {
     localStorage.removeItem('zerofy-token')
     localStorage.removeItem('zerofy-user')
     // Home page pe redirect karo
-    window.location.href = '/'
+    window.location.href = '/login'
   }
 
   return (

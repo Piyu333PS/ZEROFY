@@ -23,7 +23,7 @@ export default function BillingPage() {
   const [pdfBusy, setPdfBusy] = useState('')
 
   useEffect(() => {
-    if (!token) { navigate('/'); return }
+    if (!token) { navigate('/login'); return }
     fetch(`${API}/api/user/me`, {
       headers: { Authorization: `Bearer ${token}` }
     })
@@ -36,7 +36,7 @@ export default function BillingPage() {
       .catch(() => {})
   }, [token])
 
-  if (!user) { navigate('/'); return null }
+  if (!user) { navigate('/login'); return null }
 
   const planInfo = info?.lastPlanId ? PLAN_LABELS[info.lastPlanId] : null
 

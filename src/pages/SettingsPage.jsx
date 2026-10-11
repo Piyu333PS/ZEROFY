@@ -45,7 +45,7 @@ export default function SettingsPage() {
 
   // Wait for the session check before sending anyone away (a refresh used to log people out)
   useEffect(() => {
-    if (!initializing && !user) navigate('/')
+    if (!initializing && !user) navigate('/login')
   }, [initializing, user, navigate])
   if (initializing || !user) return null
 
