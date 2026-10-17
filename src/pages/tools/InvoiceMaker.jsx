@@ -1,3 +1,4 @@
+import { gstinError, validateGstin, emailError, phoneError } from '../../utils/validate'
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
@@ -52,12 +53,7 @@ function fileToLogoDataUrl(file) {
 }
 
 /* ─── Validation ─────────────────────────────────────────────── */
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
-// Standard 15-char GSTIN: 2-digit state code, 10-char PAN, 1 entity code, 'Z', 1 checksum
-const GSTIN_RE = /^\d{2}[A-Z]{5}\d{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/i
-
-const validateEmail = (v) => !v || EMAIL_RE.test(v.trim())
-const validateGstin = (v) => !v || GSTIN_RE.test(v.trim())
+const validateEmail = (v) => !emailError(v)
 
 // Small helper: red border on the input + a short message underneath,
 // but only once the user has actually left the field (so it doesn't
@@ -68,7 +64,8 @@ function FieldError({ show, message }) {
 }
 
 /* ─── GST Data ───────────────────────────────────────────────── */
-const GST_RATES = [0, 0.1, 0.25, 1.5, 3, 5, 7.5, 12, 18, 28]
+// 40% is the GST 2.0 slab (from 22 Sep 2025); 12% / 28% stay for older items and goods still at those rates
+const GST_RATES = [0, 0.1, 0.25, 1.5, 3, 5, 7.5, 12, 18, 28, 40]
 
 
 const defaultItem = () => ({ id: uid(), type: 'goods', hsnSac: '', desc: ``, qty: '', uqc: 'PCS', rate: '', gstRate: 18 })
@@ -224,7 +221,7 @@ function BizModal({ businesses, onSave, onClose }) {
                 <label className="lbl">GSTIN / PAN</label>
                 <input className={`inp ${touched.gst && !validateGstin(form.gst) ? 'inp-err' : ''}`}
                   value={form.gst} onChange={setGst('gst')} onBlur={markTouched('gst')} placeholder="22AAAAA0000A1Z5" maxLength={15} />
-                <FieldError show={touched.gst && !validateGstin(form.gst)} message="GSTIN must be 15 characters, for example 22AAAAA0000A1Z5" />
+                <FieldError show={touched.gst && !validateGstin(form.gst)} message={gstinError(form.gst)} />
               </div>
               <div className="field"><label className="lbl">Invoice Prefix</label><input className="inp" value={form.prefix} onChange={set('prefix')} placeholder="INV" /></div>
               <div className="field"><label className="lbl">Alt. Phone <span style={{ fontSize: 9, color: 'var(--text3)' }}>(optional)</span></label><input className="inp" value={form.altPhone || ''} onChange={setDigits('altPhone')} placeholder="10-digit number" maxLength={10} inputMode="numeric" pattern="[0-9]*" /></div>
@@ -262,7 +259,7 @@ function BizModal({ businesses, onSave, onClose }) {
                 if (!form.name.trim()) return setFormMsg('Business name is required.')
                 if (!validateEmail(form.email)) return setFormMsg('Email is not valid.')
                 if (!validateEmail(form.altEmail)) return setFormMsg('Alt. email is not valid.')
-                if (!validateGstin(form.gst)) return setFormMsg('GSTIN is not valid (15 characters, for example 22AAAAA0000A1Z5).')
+                if (!validateGstin(form.gst)) return setFormMsg(gstinError(form.gst))
                 if (form.phone && form.phone.length !== 10) return setFormMsg('Phone must be 10 digits.')
                 onSave({ ...form, name: form.name.trim(), id: editing === 'new' ? uid() : editing })
                 setEditing(null)
@@ -274,6 +271,13 @@ function BizModal({ businesses, onSave, onClose }) {
       </div>
     </div>
   )
+}
+
+// For a copy: keep the gap between the old document's date and its due / valid-till date
+const shiftedFromToday = (fromDate, toDate) => {
+  if (!fromDate || !toDate) return ''
+  const days = Math.round((new Date(toDate) - new Date(fromDate)) / 86400000)
+  return days >= 0 && days <= 365 ? addDays(today(), days) : ''
 }
 
 /* ─── Main Component ─────────────────────────────────────────── */
@@ -335,6 +339,7 @@ export default function InvoiceMaker() {
   const [discPct, setDiscPct] = useState(0)
   const [shipping, setShipping] = useState('')
   const [roundOff, setRoundOff] = useState(false)
+  const [shippingTaxable, setShippingTaxable] = useState(false)
   const [items, setItems] = useState([defaultItem()])
   // A new quotation or credit note starts with a number; the first invoice number is left for the owner to choose
   const [invNo, setInvNo] = useState(() => (typeParam === 'quotation' || typeParam === 'credit_note') && !editParam ? `${docInfo(typeParam).prefix}-${new Date().getFullYear()}-001` : '')
@@ -446,9 +451,10 @@ export default function InvoiceMaker() {
       clientGst: inv.clientGst || '', clientAddr: inv.clientAddr || '', placeOfSupply: inv.placeOfSupply || '',
       notes: inv.notes || '', terms: inv.terms || '', bankDetails: inv.bankDetails || '', upiId: inv.upiId || '', signatory: inv.signatory || '',
       date: asCopy ? today() : (inv.date || today()),
-      dueDate: asCopy ? '' : (inv.dueDate || ''),
+      // A copy keeps the same terms: "due in 15 days" / "valid for 7 days" counted from today
+      dueDate: asCopy ? shiftedFromToday(inv.date, inv.dueDate) : (inv.dueDate || ''),
       poNumber: asCopy ? '' : (inv.poNumber || ''),
-      validTill: asCopy ? '' : (inv.validTill || ''),
+      validTill: asCopy ? shiftedFromToday(inv.date, inv.validTill) : (inv.validTill || ''),
       reason: asCopy ? '' : (inv.reason || ''),
     })
     setItems(itemsFromInvoice(inv))
@@ -457,6 +463,7 @@ export default function InvoiceMaker() {
     setDiscPct(Number(inv.discPct) || 0)
     setShipping(Number(inv.shipping) ? String(inv.shipping) : '')
     setRoundOff(Boolean(inv.roundOff))
+    setShippingTaxable(Boolean(inv.shippingTaxable))
     setActiveBizId(inv.bizId || null)
     if (asCopy) { setEditing(null); setInvNo(genInvNo(inv.bizId || null, invoices)) }
     else { setEditing(inv); setInvNo(inv.no || '') }
@@ -618,12 +625,16 @@ export default function InvoiceMaker() {
     const match = customers.find(c => (c.name || '').trim().toLowerCase() === name.trim().toLowerCase())
     setF(p => {
       if (!match || p.clientName.trim().toLowerCase() === name.trim().toLowerCase()) return { ...p, clientName: name }
+      // A different saved client was picked: replace every client field with that client's own
+      // details. Blank stays blank — keeping the previous client's GSTIN or address would print
+      // the wrong tax details on the bill. Place of supply goes back to Auto (from the new GSTIN).
       return {
         ...p, clientName: match.name,
-        clientEmail: match.email || p.clientEmail,
-        clientPhone: String(match.phone || '').replace(/\D/g, '').slice(-10) || p.clientPhone,
-        clientGst: match.gst || p.clientGst,
-        clientAddr: match.addr || p.clientAddr,
+        clientEmail: match.email || '',
+        clientPhone: String(match.phone || '').replace(/\D/g, '').slice(-10),
+        clientGst: (match.gst || '').toUpperCase(),
+        clientAddr: match.addr || '',
+        placeOfSupply: '',
       }
     })
   }
@@ -649,7 +660,7 @@ export default function InvoiceMaker() {
   // Poora invoice object — preview, totals aur save teeno isi se bante hain
   const draftInv = useMemo(() => ({
     ...f, no: invNo.trim(), template, currency, discPct, taxPct: 18,
-    shipping: Number(shipping) || 0, roundOff,
+    shipping: Number(shipping) || 0, roundOff, shippingTaxable,
     items,
     docType,
     status: editing ? editing.status : (docType === 'credit_note' ? 'issued' : 'draft'),
@@ -657,7 +668,7 @@ export default function InvoiceMaker() {
     creditedAmount: editing ? editing.creditedAmount : 0,
     refInvoiceNo: refInvoice ? refInvoice.no : (editing ? editing.refInvoiceNo : ''),
     refInvoiceDate: refInvoice ? refInvoice.date : (editing ? editing.refInvoiceDate : ''),
-  }), [f, invNo, template, currency, discPct, shipping, roundOff, items, editing, docType, refInvoice])
+  }), [f, invNo, template, currency, discPct, shipping, roundOff, shippingTaxable, items, editing, docType, refInvoice])
   const totals = useMemo(() => calcInvoice(draftInv), [draftInv])
   const total = totals.total
 
@@ -686,15 +697,15 @@ export default function InvoiceMaker() {
     if (!invNo.trim()) p.push(`Enter ${isQuote ? 'a quotation' : isCredit ? 'a credit note' : 'an invoice'} number`)
     if (!f.bizName.trim()) p.push('Enter your business name')
     if (!f.clientName.trim()) p.push('Enter the client name')
-    if (totals.lines.length === 0) p.push('Add at least one item (with a description or rate)')
+    if (totals.lines.filter(l => !l.isCharge).length === 0) p.push('Add at least one item (with a description or rate)')
     else if (totals.lines.some(l => !(l.qty > 0))) p.push('Every item needs a quantity above 0')
     if (!validateEmail(f.bizEmail)) p.push('Business email is not valid')
     if (!validateEmail(f.bizAltEmail)) p.push('Business alt. email is not valid')
     if (!validateEmail(f.clientEmail)) p.push('Client email is not valid')
-    if (!validateGstin(f.bizGst)) p.push('Business GSTIN must be 15 characters')
-    if (!validateGstin(f.clientGst)) p.push('Client GSTIN must be 15 characters')
-    if (f.bizPhone && f.bizPhone.length !== 10) p.push('Business phone must be 10 digits')
-    if (f.clientPhone && f.clientPhone.length !== 10) p.push('Client phone must be 10 digits')
+    if (gstinError(f.bizGst)) p.push('Business GSTIN: ' + gstinError(f.bizGst))
+    if (gstinError(f.clientGst)) p.push('Client GSTIN: ' + gstinError(f.clientGst))
+    if (phoneError(f.bizPhone)) p.push('Business phone: ' + phoneError(f.bizPhone))
+    if (phoneError(f.clientPhone)) p.push('Client phone: ' + phoneError(f.clientPhone))
     if (!isQuote && !isCredit && f.dueDate && f.date && f.dueDate < f.date) p.push('Due date cannot be before the invoice date')
     if (isQuote && f.validTill && f.date && f.validTill < f.date) p.push('"Valid till" cannot be before the quotation date')
     if (isCredit && !refInvoice) p.push('Choose the invoice this credit note is for')
@@ -723,12 +734,12 @@ export default function InvoiceMaker() {
         if (!hasContent) { localStorage.removeItem(draftKey); return }
         const { bizLogo, ...fields } = f
         localStorage.setItem(draftKey, JSON.stringify({
-          at: Date.now(), f: fields, items, invNo, discPct, shipping, roundOff, template, currency, activeBizId,
+          at: Date.now(), f: fields, items, invNo, discPct, shipping, roundOff, shippingTaxable, template, currency, activeBizId,
         }))
       } catch { /* storage full or blocked — auto-save is best effort */ }
     }, 700)
     return () => clearTimeout(timer)
-  }, [f, items, invNo, discPct, shipping, roundOff, template, currency, activeBizId, editing, recovered, cloudLoaded, token, hasContent, draftKey])
+  }, [f, items, invNo, discPct, shipping, roundOff, shippingTaxable, template, currency, activeBizId, editing, recovered, cloudLoaded, token, hasContent, draftKey])
 
   // On opening a blank new invoice, offer to bring back unsaved work (kept for 7 days)
   useEffect(() => {
@@ -751,6 +762,7 @@ export default function InvoiceMaker() {
     setDiscPct(Number(d.discPct) || 0)
     setShipping(d.shipping || '')
     setRoundOff(Boolean(d.roundOff))
+    setShippingTaxable(Boolean(d.shippingTaxable))
     setTemplate(d.template || 'modern')
     setCurrency(d.currency || '₹')
     if (d.activeBizId) setActiveBizId(d.activeBizId)
@@ -797,7 +809,7 @@ export default function InvoiceMaker() {
       ...(isCredit && refInvoice ? { refInvoiceId: refInvoice._id } : {}),
       ...(fromQuote ? { fromQuotationId: fromQuote._id } : {}),
       discPct: Number(discPct) || 0, taxPct: 18,
-      shipping: Number(shipping) || 0, roundOff,
+      shipping: Number(shipping) || 0, roundOff, shippingTaxable,
       items: items
         .filter(i => i.desc || Number(i.rate))
         .map(i => ({ id: i.id, type: i.type, desc: i.desc, hsnSac: i.hsnSac, uqc: i.uqc || 'PCS', qty: Number(i.qty) || 0, rate: Number(i.rate) || 0, gstRate: Number(i.gstRate) || 0 })),
@@ -898,6 +910,13 @@ export default function InvoiceMaker() {
             </div>
           )}
 
+          {limitReached && (
+            <div className="ig-banner" style={{ background: '#FCEFD9', borderColor: 'rgba(239,160,47,0.55)', color: '#7A4605' }}>
+              You have used all {FREE_LIMIT} free invoices. You can still fill this in and <strong>save it as a draft</strong> —
+              it does not use a free invoice. To issue or print it, <button type="button" onClick={() => setShowUpgradeModal(true)}
+                style={{ background: 'none', border: 0, padding: 0, color: '#A85E08', fontWeight: 700, textDecoration: 'underline', cursor: 'pointer', font: 'inherit' }}>upgrade to Pro</button>.
+            </div>
+          )}
           {!editing && isQuote && (
             <div className="ig-banner">
               A quotation is a price offer. It is not counted in your billing or GST, and does not use up a free invoice. When the client agrees, turn it into an invoice in one click.
@@ -936,6 +955,17 @@ export default function InvoiceMaker() {
                   ? <>Invoice <strong>{refInvoice.no}</strong> is for {fmtMoney(invoiceTotal(refInvoice), refInvoice.currency || '₹')}{creditRoom !== null && creditRoom < invoiceTotal(refInvoice) - 0.01 ? <>, of which {fmtMoney(creditRoom, refInvoice.currency || '₹')} can still be credited</> : ''}. Keep only the items and quantities you are taking back or reducing — remove the rest.</>
                   : 'A credit note reduces an invoice you have already sent — for returned goods, a wrong rate, or a discount given later. The original invoice stays as it is.'}
               </div>
+              {refInvoice && (Number(refInvoice.paidAmount) || 0) > 0 && (() => {
+                // Money already received beyond what the invoice will be worth after this note
+                const owed = (Number(refInvoice.paidAmount) || 0) + (Number(refInvoice.creditedAmount) || 0) + totals.total - invoiceTotal(refInvoice)
+                return owed > 0.005 ? (
+                  <div className="field-err" style={{ color: '#7A4605', background: '#FCEFD9', borderRadius: 8, padding: '8px 10px', marginTop: 8 }}>
+                    {refInvoice.no} is already paid{(Number(refInvoice.balance) || 0) <= 0.005 ? ' in full' : ' in part'}. After this credit note the client
+                    will have paid {fmtMoney(owed, refInvoice.currency || '₹')} more than they owe — refund it, or adjust it in their next invoice.
+                    It will show as "to refund" on the overview and the client list.
+                  </div>
+                ) : null
+              })()}
             </div>
           )}
 
@@ -1042,7 +1072,7 @@ export default function InvoiceMaker() {
                   value={f.bizGst} onChange={setGst('bizGst')} onBlur={markTouched('bizGst')}
                   placeholder="22AAAAA0000A1Z5" maxLength={15}
                 />
-                <FieldError show={touched.bizGst && !validateGstin(f.bizGst)} message="GSTIN must be 15 characters, for example 22AAAAA0000A1Z5" />
+                <FieldError show={touched.bizGst && !validateGstin(f.bizGst)} message={gstinError(f.bizGst)} />
               </div>
               <div className="field"><label className="lbl">Alt. Phone <span style={{ fontSize: 9, color: 'var(--text3)' }}>(optional)</span></label><input className="inp" value={f.bizAltPhone} onChange={setPhone('bizAltPhone')} placeholder="10-digit number" maxLength={10} inputMode="numeric" pattern="[0-9]*" /></div>
               <div className="field">
@@ -1083,7 +1113,7 @@ export default function InvoiceMaker() {
                   value={f.clientGst} onChange={setGst('clientGst')} onBlur={markTouched('clientGst')}
                   placeholder="Client GSTIN" maxLength={15}
                 />
-                <FieldError show={touched.clientGst && !validateGstin(f.clientGst)} message="GSTIN must be 15 characters, for example 22AAAAA0000A1Z5" />
+                <FieldError show={touched.clientGst && !validateGstin(f.clientGst)} message={gstinError(f.clientGst)} />
               </div>
               <div className="field">
                 <label className="lbl">Place of Supply</label>
@@ -1094,6 +1124,14 @@ export default function InvoiceMaker() {
                 {sellerState && (
                   <div style={{ fontSize: 10.5, color: 'var(--text3)', marginTop: 4 }}>
                     {totals.inter ? 'Supply to another state: IGST applies' : 'Same state (or state not known): CGST + SGST apply'}
+                  </div>
+                )}
+                {f.placeOfSupply && stateCodeOf(f.clientGst) && f.placeOfSupply !== stateCodeOf(f.clientGst) && (
+                  <div className="field-err" style={{ color: '#b45309' }}>
+                    Client GSTIN is from {stateName(stateCodeOf(f.clientGst))}, but place of supply is {stateName(f.placeOfSupply)}.
+                    Keep this only if the goods are delivered there.{' '}
+                    <button type="button" className="link-btn" style={{ background: 'none', border: 0, padding: 0, color: 'inherit', textDecoration: 'underline', cursor: 'pointer', font: 'inherit' }}
+                      onClick={() => setF(p => ({ ...p, placeOfSupply: '' }))}>Use Auto</button>
                   </div>
                 )}
               </div>
@@ -1123,7 +1161,14 @@ export default function InvoiceMaker() {
                 {/* Type */}
                 <div>
                   <select className="inp" aria-label="Item type" value={it.type}
-                    onChange={e => { updateItem(it.id, 'type', e.target.value); updateItem(it.id, 'hsnSac', '') }}>
+                    onChange={e => {
+                      const type = e.target.value
+                      // services are not counted in pieces: an untouched PCS unit becomes OTH (Others), and back
+                      setItems(p => p.map(x => x.id !== it.id ? x : {
+                        ...x, type, hsnSac: '',
+                        uqc: type === 'service' && x.uqc === 'PCS' ? 'OTH' : type === 'goods' && x.uqc === 'OTH' ? 'PCS' : x.uqc,
+                      }))
+                    }}>
                     <option value="goods">Goods</option>
                     <option value="service">Service</option>
                   </select>
@@ -1251,6 +1296,19 @@ export default function InvoiceMaker() {
                   onChange={e => setShipping(e.target.value === '' ? '' : String(Math.max(0, +e.target.value)))}
                   className="pct-inp" style={{ width: 110, textAlign: 'right' }} placeholder="0.00" />
               </div>
+              {Number(shipping) > 0 && (
+                <div className="t-row">
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                    <input type="checkbox" checked={shippingTaxable} onChange={e => setShippingTaxable(e.target.checked)} />
+                    Charge GST on shipping
+                  </label>
+                  <span style={{ fontSize: 11, color: 'var(--text3)', textAlign: 'right' }}>
+                    {shippingTaxable
+                      ? `Added as a line at ${totals.lines.find(l => l.isCharge)?.gstRate ?? 18}% (rate of the main item)`
+                      : 'Usually needed when you charge the buyer for delivery'}
+                  </span>
+                </div>
+              )}
               <div className="t-row">
                 <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
                   <input type="checkbox" checked={roundOff} onChange={e => setRoundOff(e.target.checked)} />
@@ -1322,7 +1380,8 @@ export default function InvoiceMaker() {
                       You have used all {FREE_LIMIT} free invoices
                     </div>
                     <div style={{ fontSize: 12, color: '#44566B', lineHeight: 1.5, marginBottom: 10 }}>
-                      Unlimited invoices on Pro: <strong style={{ color: '#A85E08' }}>₹149 a month or ₹999 a year</strong>
+                      Unlimited invoices on Pro: <strong style={{ color: '#A85E08' }}>₹149 a month or ₹999 a year</strong>.
+                      Your work is not lost — save it as a draft below and issue it after upgrading.
                     </div>
                     <button
                       onClick={() => setShowUpgradeModal(true)}
@@ -1342,21 +1401,25 @@ export default function InvoiceMaker() {
                 )
               )}
 
-              {!limitReached && (
+              {(
                 <>
                   <div style={{ marginTop: 16, display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
-                    <button className="btn btn-accent" onClick={() => saveInvoice('final')} disabled={busy}
-                      style={{ fontSize: 14, padding: '10px 22px', opacity: busy ? 0.6 : 1, cursor: busy ? 'wait' : 'pointer' }}>
-                      {saving === 'final' ? 'Saving…' : 'Save & print'}
-                    </button>
+                    {!limitReached && (
+                      <button className="btn btn-accent" onClick={() => saveInvoice('final')} disabled={busy}
+                        style={{ fontSize: 14, padding: '10px 22px', opacity: busy ? 0.6 : 1, cursor: busy ? 'wait' : 'pointer' }}>
+                        {saving === 'final' ? 'Saving…' : 'Save & print'}
+                      </button>
+                    )}
                     <button className="btn" onClick={() => saveInvoice('draft')} disabled={busy}
                       style={{ fontSize: 13, padding: '10px 16px', opacity: busy ? 0.6 : 1, cursor: busy ? 'wait' : 'pointer' }}>
                       {saving === 'draft' ? 'Saving…' : (editing && editing.status !== 'draft' ? 'Save changes' : isCredit ? 'Save only' : 'Save as draft')}
                     </button>
                   </div>
-                  <div className="gen-note">
-                    Save &amp; print saves the {info.lower} and opens the print / PDF dialog
-                  </div>
+                  {!limitReached && (
+                    <div className="gen-note">
+                      Save &amp; print saves the {info.lower} and opens the print / PDF dialog
+                    </div>
+                  )}
                   {!editing && hasContent && plainNew && <div className="gen-note" style={{ marginTop: 4 }}>Your work is auto-saved on this device as you type</div>}
                 </>
               )}
