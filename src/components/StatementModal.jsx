@@ -78,7 +78,7 @@ export default function StatementModal({ customer, data, onClose }) {
     } catch (e) { if (e && e.name === 'AbortError') { setBusy(''); return } }
     setBusy('')
     const phone = String(customer.phone || '').replace(/\D/g, '').slice(-10)
-    window.open(`https://wa.me/${phone.length === 10 ? '91' + phone : ''}?text=${encodeURIComponent(text)}`, '_blank', 'noopener')
+    window.open(`https://api.whatsapp.com/send?${phone.length === 10 ? `phone=91${phone}&` : ''}text=${encodeURIComponent(text)}`, '_blank', 'noopener')
   }
 
   return createPortal(
