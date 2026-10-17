@@ -123,21 +123,26 @@ export default function SettingsPage() {
                 <div className={styles.label}>Email</div>
                 <div className={styles.value}>{user.email}</div>
               </div>
-              {!passwordless && <button className={styles.btn} aria-expanded={open === 'email'} onClick={() => toggle('email')}>{open === 'email' ? 'Close' : 'Change'}</button>}
+              {(!passwordless || canSet) && <button className={styles.btn} aria-expanded={open === 'email'} onClick={() => toggle('email')}>{open === 'email' ? 'Close' : 'Change'}</button>}
             </div>
-            {open === 'email' && !passwordless && (
+            {open === 'email' && (!passwordless || canSet) && (
               <form className={styles.panel} onSubmit={handleEmailChange}>
+                {canSet && (
+                  <p className={styles.note} style={{ margin: "0 0 10px", padding: 0 }}>You logged in with Google, so your password is not needed to change the email.</p>
+                )}
                 <div className={styles.fields}>
                   <div className={styles.field}>
                     <label htmlFor="set-new-email">New email</label>
                     <input id="set-new-email" type="email" required autoFocus className={styles.inp} placeholder="new@email.com"
                       value={emailForm.newEmail} onChange={e => setEmailForm(f => ({ ...f, newEmail: e.target.value }))} />
                   </div>
-                  <div className={styles.field}>
-                    <label htmlFor="set-email-pwd">Current password</label>
-                    <input id="set-email-pwd" type="password" required className={styles.inp} autoComplete="current-password"
-                      value={emailForm.password} onChange={e => setEmailForm(f => ({ ...f, password: e.target.value }))} />
-                  </div>
+                  {!canSet && (
+                    <div className={styles.field}>
+                      <label htmlFor="set-email-pwd">Current password</label>
+                      <input id="set-email-pwd" type="password" required className={styles.inp} autoComplete="current-password"
+                        value={emailForm.password} onChange={e => setEmailForm(f => ({ ...f, password: e.target.value }))} />
+                    </div>
+                  )}
                 </div>
                 <div className={styles.actions}>
                   <button type="submit" className={`${styles.btn} ${styles.primary}`} disabled={emailLoading}>{emailLoading ? 'Updating…' : 'Update email'}</button>
