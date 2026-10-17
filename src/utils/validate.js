@@ -18,14 +18,15 @@ export const gstinCheckChar = (first14) => {
   return GST_CHARS[(36 - (sum % 36)) % 36]
 }
 
-// '' when the GSTIN is fine (or empty), otherwise a message that says what is wrong
+// '' when the GSTIN is fine (or empty), otherwise a short message a user understands
 export function gstinError(raw) {
   const v = String(raw || '').trim().toUpperCase()
   if (!v) return ''
-  if (v.length !== 15) return `GSTIN must be 15 characters (you entered ${v.length})`
-  if (!GSTIN_RE.test(v)) return 'GSTIN format is not right — it looks like 22AAAAA0000A1Z5 (state code, PAN, entity code, Z, check digit)'
-  if (!validState(Number(v.slice(0, 2)))) return `"${v.slice(0, 2)}" is not a valid state code`
-  if (gstinCheckChar(v) !== v[14]) return 'This GSTIN has a typo — its last character does not match. Please check it'
+  if (v.length !== 15) return 'GSTIN must be 15 characters'
+  // wrong pattern, unknown state code or wrong last (check) character — to the user it is all one thing
+  if (!GSTIN_RE.test(v) || !validState(Number(v.slice(0, 2))) || gstinCheckChar(v) !== v[14]) {
+    return 'GSTIN is not valid. Please check the number'
+  }
   return ''
 }
 export const validateGstin = (v) => !gstinError(v)
