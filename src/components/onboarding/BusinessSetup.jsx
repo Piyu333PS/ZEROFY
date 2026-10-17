@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { api } from '../../utils/api'
 import { patchBilling } from '../../utils/billingStore'
 import { stateCodeOf, stateName } from '../../utils/invoiceCalc'
+import { gstinError, phoneError } from '../../utils/validate'
 import { cleanMobile } from '../../utils/phone'
 import styles from './BusinessSetup.module.css'
 
@@ -25,10 +26,10 @@ export default function BusinessSetup({ token, email, onLogout }) {
   const problems = useMemo(() => {
     const p = {}
     if (f.name.trim().length < 2) p.name = 'Enter your business name'
-    if (f.phone.length !== 10) p.phone = 'Enter a 10-digit mobile number'
+    if (f.phone.length !== 10 || phoneError(f.phone)) p.phone = 'Enter a 10-digit mobile number'
     if (f.email.trim() && !EMAIL_RE.test(f.email.trim())) p.email = 'Enter a valid email address'
     if (f.addr.trim().length < 5) p.addr = 'Enter your business address'
-    if (f.gst && !stateCodeOf(f.gst)) p.gst = 'GSTIN must be 15 characters, starting with the 2-digit state code'
+    if (f.gst && gstinError(f.gst)) p.gst = gstinError(f.gst)
     return p
   }, [f])
   const bad = (k) => show && problems[k]

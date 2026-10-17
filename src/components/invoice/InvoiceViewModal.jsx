@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { InvoicePreview } from './InvoicePreview'
-import { printInvoice, downloadInvoicePdf, shareViaWhatsApp, shareViaEmail } from '../../utils/invoiceShare'
+import { printInvoice, downloadInvoicePdf, shareViaWhatsApp, shareViaEmail, preparePdf } from '../../utils/invoiceShare'
 import { formatDate, docInfo } from '../../utils/invoiceCalc'
 import styles from './InvoiceViewModal.module.css'
 
@@ -30,6 +30,14 @@ export default function InvoiceViewModal({ invoice, hideBranding = false, onClos
   }, [onClose])
 
   useEffect(() => { closeRef.current?.focus() }, [])
+
+  // Build the PDF in the background as soon as the document opens, so WhatsApp / Email can
+  // attach it instantly inside the click (the browser refuses to share after a long wait)
+  useEffect(() => {
+    if (!invoice || sample) return
+    const t = setTimeout(() => preparePdf(invoice, { hideBranding }), 300)
+    return () => clearTimeout(t)
+  }, [invoice, hideBranding, sample])
 
   // Shrink the A4-wide sheet to the space available, and keep the scroll height right
   useLayoutEffect(() => {

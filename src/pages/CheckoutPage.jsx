@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { gstinError } from '../utils/validate'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { api } from '../utils/api'
@@ -133,7 +134,7 @@ export default function CheckoutPage() {
     if (b.address.trim().length < 5) p.address = 'Enter your address'
     if (!b.state) p.state = 'Choose your state'
     if (b.pincode.length !== 6) p.pincode = 'Enter a 6-digit PIN code'
-    if (b.gstin && b.gstin.length !== 15) p.gstin = 'GSTIN must be 15 characters'
+    if (b.gstin && gstinError(b.gstin)) p.gstin = gstinError(b.gstin)
     else if (b.gstin && b.state && stateCodeOf(b.gstin) !== b.state) p.gstin = 'This GSTIN does not match the state you chose'
     return p
   }, [b])
