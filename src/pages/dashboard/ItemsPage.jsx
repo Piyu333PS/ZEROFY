@@ -8,10 +8,13 @@ import ConfirmDialog from '../../components/ConfirmDialog'
 import { toast } from '../../components/ui/Toast'
 import { SkeletonRows } from '../../components/ui/Skeleton'
 import EmptyState from '../../components/ui/EmptyState'
+import { hsnError } from '../../utils/validate'
 import styles from './CustomersPage.module.css'
 
 const emptyForm = { name: '', type: 'goods', hsnSac: '', uqc: 'PCS', rate: '', gstRate: '18' }
-const GST_RATES = [0, 0.1, 0.25, 1.5, 3, 5, 7.5, 12, 18, 28]
+// 40% is the GST 2.0 slab (from 22 Sep 2025). 12% / 28% stay for older items and the few goods still at those rates.
+const GST_RATES = [0, 0.1, 0.25, 1.5, 3, 5, 7.5, 12, 18, 28, 40]
+const unitLabel = (code) => (UQC_CODES.find(u => u.code === code) || {}).label || code
 
 /* Saved items / products. Invoice banate waqt naam chunte hi rate, HSN, GST aur unit bhar jata hai.
    Invoice mein daale gaye items yahan apne aap aa jate hain; yahan se unhe theek ya delete kar sakte hain. */
@@ -50,7 +53,10 @@ export default function ItemsPage() {
     e.preventDefault()
     if (!form.name.trim()) return
     const gst = Number(form.gstRate)
-    if (isNaN(gst) || gst < 0 || gst > 100) { setError('GST % must be between 0 and 100.'); return }
+    if (form.gstRate === '' || !GST_RATES.includes(gst)) { setError(`GST % must be one of ${GST_RATES.join(', ')}.`); return }
+    if (form.rate !== '' && (isNaN(Number(form.rate)) || Number(form.rate) < 0)) { setError('Rate cannot be negative.'); return }
+    const codeMsg = hsnError(form.hsnSac, form.type)
+    if (codeMsg) { setError(codeMsg + '.'); return }
     setSaving(true)
     setError(null)
     const body = { ...form, rate: Number(form.rate) || 0, gstRate: gst }
@@ -98,18 +104,25 @@ export default function ItemsPage() {
         <form className={styles.form} onSubmit={handleSave} noValidate>
           <div className={styles.formTitle}>{editingId ? 'Edit item' : 'New item'}</div>
           <div className={styles.formGrid}>
-            <input placeholder="Item / service name *" value={form.name} maxLength={200} onChange={e => setForm({ ...form, name: e.target.value })} required autoFocus className={styles.wide} />
-            <select aria-label="Type" value={form.type} onChange={e => setForm({ ...form, type: e.target.value })}>
+            <input placeholder="Item / service name *" value={form.name} maxLength={200} onChange={e => { setForm({ ...form, name: e.target.value }); setError(null) }} required autoFocus className={styles.wide} />
+            <select aria-label="Type" value={form.type} onChange={e => {
+              const type = e.target.value
+              // Services are not counted in pieces — switch an untouched PCS unit to OTH (Others), and back
+              const uqc = type === 'service' && form.uqc === 'PCS' ? 'OTH' : type === 'goods' && form.uqc === 'OTH' ? 'PCS' : form.uqc
+              setForm({ ...form, type, uqc }); setError(null)
+            }}>
               <option value="goods">Goods</option>
               <option value="service">Service</option>
             </select>
-            <input placeholder={form.type === 'goods' ? 'HSN code' : 'SAC code'} value={form.hsnSac} maxLength={20} onChange={e => setForm({ ...form, hsnSac: e.target.value.replace(/[^0-9A-Za-z]/g, '') })} />
+            <input placeholder={form.type === 'goods' ? 'HSN code' : 'SAC code'} value={form.hsnSac} maxLength={20} onChange={e => { setForm({ ...form, hsnSac: e.target.value.replace(/\D/g, '').slice(0, 8) }); setError(null) }} />
             <select aria-label="Unit" value={form.uqc} onChange={e => setForm({ ...form, uqc: e.target.value })}>
-              {UQC_CODES.map(u => <option key={u.code} value={u.code}>{u.label}</option>)}
+              {UQC_CODES.map(u => <option key={u.code + u.label} value={u.code}>{u.label} ({u.code})</option>)}
             </select>
-            <input type="number" min="0" step="any" placeholder="Rate (excl. GST)" aria-label="Rate" value={form.rate} onChange={e => setForm({ ...form, rate: e.target.value })} />
-            <input type="number" min="0" max="100" step="any" list="zerofy-gst-rates" placeholder="GST %" aria-label="GST percent" value={form.gstRate} onChange={e => setForm({ ...form, gstRate: e.target.value })} />
-            <datalist id="zerofy-gst-rates">{GST_RATES.map(r => <option key={r} value={r} />)}</datalist>
+            <input type="number" min="0" step="any" placeholder="Rate (excl. GST)" aria-label="Rate" value={form.rate} onChange={e => { setForm({ ...form, rate: e.target.value }); setError(null) }} />
+            <select aria-label="GST percent" value={form.gstRate} onChange={e => { setForm({ ...form, gstRate: e.target.value }); setError(null) }}>
+              {GST_RATES.map(r => <option key={r} value={String(r)}>GST {r}%</option>)}
+              {form.gstRate !== '' && !GST_RATES.includes(Number(form.gstRate)) && <option value={form.gstRate}>GST {form.gstRate}% (not a standard rate)</option>}
+            </select>
           </div>
           {error && <p className={styles.error}>{error}</p>}
           <div className={styles.formActions}>
@@ -146,7 +159,7 @@ export default function ItemsPage() {
               <div className={styles.nameMain}>{it.name}</div>
               <span><span className={styles.cellLabel}>Type</span>{it.type === 'service' ? 'Service' : 'Goods'}</span>
               <span className={styles.mono}><span className={styles.cellLabel}>HSN / SAC</span>{it.hsnSac || '—'}</span>
-              <span className={styles.mono}><span className={styles.cellLabel}>Unit</span>{it.uqc || 'PCS'}</span>
+              <span className={styles.mono}><span className={styles.cellLabel}>Unit</span><span title={unitLabel(it.uqc || 'PCS')}>{it.uqc || 'PCS'}</span></span>
               <span className={styles.num}><span className={styles.cellLabel}>Rate</span>{fmtMoney(it.rate)}</span>
               <span className={styles.num}><span className={styles.cellLabel}>GST</span>{it.gstRate}%</span>
               <div className={styles.rowBtns}>

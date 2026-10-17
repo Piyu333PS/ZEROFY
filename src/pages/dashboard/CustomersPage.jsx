@@ -9,11 +9,10 @@ import StatementModal from '../../components/StatementModal'
 import { toast } from '../../components/ui/Toast'
 import { SkeletonRows } from '../../components/ui/Skeleton'
 import EmptyState from '../../components/ui/EmptyState'
+import { gstinError, phoneError, emailError } from '../../utils/validate'
 import styles from './CustomersPage.module.css'
 
 const emptyForm = { name: '', email: '', phone: '', gst: '', addr: '' }
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
-const GSTIN_RE = /^\d{2}[A-Z]{5}\d{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/i
 
 export default function CustomersPage() {
   const { token } = useAuth()
@@ -44,9 +43,28 @@ export default function CustomersPage() {
     )
   }, [customers, query])
 
-  const emailBad = Boolean(form.email.trim()) && !EMAIL_RE.test(form.email.trim())
-  const gstBad = Boolean(form.gst.trim()) && !GSTIN_RE.test(form.gst.trim())
-  const phoneBad = Boolean(form.phone) && form.phone.length !== 10
+  const emailMsg = emailError(form.email)
+  const gstMsg = gstinError(form.gst)
+  const phoneMsg = phoneError(form.phone)
+  const emailBad = Boolean(emailMsg), gstBad = Boolean(gstMsg), phoneBad = Boolean(phoneMsg)
+
+  // Same client twice (same name, or same GSTIN) makes statements and reports split one
+  // client's bills across two rows — stop it here and point at the existing one.
+  const duplicateOf = useMemo(() => {
+    const name = form.name.trim().toLowerCase()
+    const gst = form.gst.trim().toUpperCase()
+    return customers.find(c => c._id !== editingId && (
+      (name && (c.name || '').trim().toLowerCase() === name) ||
+      (gst && (c.gst || '').trim().toUpperCase() === gst)
+    )) || null
+  }, [customers, form.name, form.gst, editingId])
+  const dupMsg = duplicateOf
+    ? (form.gst.trim() && (duplicateOf.gst || '').toUpperCase() === form.gst.trim().toUpperCase()
+        ? `"${duplicateOf.name}" already has this GSTIN. Edit that client instead.`
+        : `A client named "${duplicateOf.name}" already exists. Edit that client, or use a different name.`)
+    : ''
+  // Any edit clears the old "fix the fields" message, so it never hangs around once things are fixed
+  const setField = (k, v) => { setForm(f => ({ ...f, [k]: v })); setError(null) }
 
   const openAdd = () => { setEditingId(null); setForm(emptyForm); setError(null); setShowForm(true) }
   const openEdit = (c) => {
@@ -62,6 +80,7 @@ export default function CustomersPage() {
     e.preventDefault()
     if (!form.name.trim()) return
     if (emailBad || gstBad || phoneBad) { setError('Fix the fields marked in red, then save.'); return }
+    if (dupMsg) { setError(dupMsg); return }
     setSaving(true)
     setError(null)
     const res = editingId
@@ -168,11 +187,11 @@ export default function CustomersPage() {
         <div className={styles.importSummary}>
           <p>
             ✅ {importResult.createdCount} client{importResult.createdCount === 1 ? '' : 's'} imported
-            {importResult.skippedCount > 0 && `, ${importResult.skippedCount} skipped (name was missing)`}.
+            {importResult.skippedCount > 0 && `, ${importResult.skippedCount} skipped`}.
           </p>
           {importResult.errors?.length > 0 && (
             <p className={styles.importErrors}>
-              Skipped rows: {importResult.errors.map(e => `Row ${e.row}`).join(', ')}
+              Skipped rows: {importResult.errors.map(e => `Row ${e.row}${e.reason ? ` (${e.reason})` : ''}`).join(', ')}
             </p>
           )}
           <button className={styles.closeSummary} onClick={() => setImportResult(null)}>Close</button>
@@ -185,26 +204,27 @@ export default function CustomersPage() {
         <form className={styles.form} onSubmit={handleSave} noValidate>
           <div className={styles.formTitle}>{editingId ? 'Edit client' : 'New client'}</div>
           <div className={styles.formGrid}>
-            <input placeholder="Name *" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required autoFocus />
+            <input placeholder="Name *" value={form.name} onChange={e => setField('name', e.target.value)} required autoFocus
+              className={duplicateOf ? styles.fieldErr : ''} />
             <input placeholder="Phone (10 digits)" inputMode="numeric" value={form.phone}
               className={phoneBad ? styles.fieldErr : ''}
-              onChange={e => setForm({ ...form, phone: e.target.value.replace(/\D/g, '').slice(0, 10) })} />
+              onChange={e => setField('phone', e.target.value.replace(/\D/g, '').slice(0, 10))} />
             <input placeholder="Email" type="email" value={form.email}
               className={emailBad ? styles.fieldErr : ''}
-              onChange={e => setForm({ ...form, email: e.target.value })} />
+              onChange={e => setField('email', e.target.value)} />
             <input placeholder="GSTIN" value={form.gst} maxLength={15}
               className={gstBad ? styles.fieldErr : ''}
-              onChange={e => setForm({ ...form, gst: e.target.value.toUpperCase().replace(/[^0-9A-Z]/g, '').slice(0, 15) })} />
-            <input placeholder="Address" value={form.addr} onChange={e => setForm({ ...form, addr: e.target.value })} className={styles.wide} />
+              onChange={e => setField('gst', e.target.value.toUpperCase().replace(/[^0-9A-Z]/g, '').slice(0, 15))} />
+            <input placeholder="Address" value={form.addr} onChange={e => setField('addr', e.target.value)} className={styles.wide} />
           </div>
-          {(emailBad || gstBad || phoneBad) && (
+          {(emailBad || gstBad || phoneBad || dupMsg) && (
             <p className={styles.hint}>
-              {[phoneBad && 'Phone must be 10 digits', emailBad && 'Email is not valid', gstBad && 'GSTIN must be 15 characters (for example 22AAAAA0000A1Z5)'].filter(Boolean).join(' · ')}
+              {[phoneMsg, emailMsg, gstMsg, dupMsg].filter(Boolean).join(' · ')}
             </p>
           )}
-          {error && <p className={styles.error}>{error}</p>}
+          {error && error !== dupMsg && <p className={styles.error}>{error}</p>}
           <div className={styles.formActions}>
-            <button type="submit" className={styles.primaryBtn} disabled={saving || !form.name.trim()}>
+            <button type="submit" className={styles.primaryBtn} disabled={saving || !form.name.trim() || Boolean(duplicateOf)}>
               {saving ? 'Saving...' : editingId ? 'Update client' : 'Save client'}
             </button>
             <button type="button" className={styles.secondaryBtn} onClick={closeForm}>Cancel</button>
@@ -242,7 +262,9 @@ export default function CustomersPage() {
               <span className={styles.mono}><span className={styles.cellLabel}>GSTIN</span>{c.gst || '—'}</span>
               <span className={styles.num}><span className={styles.cellLabel}>Invoices</span>{c.invoiceCount || 0}</span>
               <span className={styles.num}><span className={styles.cellLabel}>Billed</span>{fmtMoney(c.billed)}</span>
-              <span className={`${styles.num} ${c.outstanding > 0 ? styles.due : ''}`}><span className={styles.cellLabel}>Outstanding</span>{fmtMoney(c.outstanding)}</span>
+              <span className={`${styles.num} ${c.outstanding > 0 ? styles.due : ''}`}><span className={styles.cellLabel}>Outstanding</span>{fmtMoney(c.outstanding)}
+                {c.refundDue > 0.005 && <span className={styles.nameSub} title="Paid in full, then reduced by a credit note">{fmtMoney(c.refundDue)} to refund</span>}
+              </span>
               <div className={styles.rowBtns}>
                 <button className={styles.linkBtn} onClick={() => setStatementFor(c)}>Statement</button>
                 <button className={styles.linkBtn} onClick={() => navigate(`/tools/invoice-maker?client=${c._id}`)}>New invoice</button>

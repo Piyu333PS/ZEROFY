@@ -34,6 +34,7 @@ const FILTERS = {
     { key: 'all', label: 'All' },
     { key: 'draft', label: 'Draft', match: ['draft'] },
     { key: 'unpaid', label: 'Unpaid', match: ['sent', 'partial', 'overdue'] },
+    { key: 'partial', label: 'Part paid', match: ['partial'] },
     { key: 'overdue', label: 'Overdue', match: ['overdue'] },
     { key: 'paid', label: 'Paid', match: ['paid', 'credited'] },
     { key: 'cancelled', label: 'Cancelled', match: ['cancelled'] },
@@ -84,6 +85,7 @@ export default function InvoicesPage({ docType = 'invoice' }) {
   const [working, setWorking] = useState(false)
 
   const [query, setQuery] = useState('')
+  const [menuUp, setMenuUp] = useState(false)
   const [statusFilter, setStatusFilter] = useState('all')
   const [page, setPage] = useState(1)
 
@@ -92,6 +94,7 @@ export default function InvoicesPage({ docType = 'invoice' }) {
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
+    const amountQ = /^[₹\d,.\s]+$/.test(q) ? q.replace(/[₹,\s]/g, '').replace(/\.0+$/, '') : ''
     const match = filters.find(f => f.key === statusFilter)?.match
     return invoices.filter(inv => {
       if (match && !match.includes(displayStatus(inv))) return false
@@ -100,7 +103,9 @@ export default function InvoicesPage({ docType = 'invoice' }) {
         (inv.no || '').toLowerCase().includes(q) ||
         (inv.clientName || '').toLowerCase().includes(q) ||
         (inv.bizName || '').toLowerCase().includes(q) ||
-        (inv.refInvoiceNo || '').toLowerCase().includes(q)
+        (inv.refInvoiceNo || '').toLowerCase().includes(q) ||
+        // amounts: "8597", "8,597" or "8597.00" all find ₹8,597.00
+        (amountQ && String(Math.round(totalOf(inv) * 100) / 100).replace(/\.0+$/, '').startsWith(amountQ))
       )
     })
   }, [invoices, query, statusFilter])
@@ -108,12 +113,22 @@ export default function InvoicesPage({ docType = 'invoice' }) {
   const summary = useMemo(() => {
     const live = filtered.filter(i => !['draft', 'cancelled'].includes(i.status))
     if (isQuote) {
-      const open = live.filter(i => ['sent', 'accepted'].includes(displayStatus(i)))
-      return { total: live.reduce((s, i) => s + totalOf(i), 0), outstanding: open.reduce((s, i) => s + totalOf(i), 0) }
+      // Waiting = sent and not answered yet. Accepted ones are no longer waiting — they are ready to invoice.
+      const waiting = live.filter(i => displayStatus(i) === 'sent')
+      const accepted = live.filter(i => displayStatus(i) === 'accepted')
+      return {
+        total: live.reduce((s, i) => s + totalOf(i), 0),
+        outstanding: waiting.reduce((s, i) => s + totalOf(i), 0),
+        accepted: accepted.reduce((s, i) => s + totalOf(i), 0),
+      }
     }
+    if (!isInvoice) return { total: live.reduce((s, i) => s + totalOf(i), 0), outstanding: 0 }
+    // Billed is after credit notes, the same figure the overview and the client list use
+    const credited = (i) => Number(i.creditedAmount) || 0
     return {
-      total: live.reduce((s, i) => s + totalOf(i), 0),
+      total: live.reduce((s, i) => s + Math.max(0, totalOf(i) - credited(i)), 0),
       outstanding: live.reduce((s, i) => s + (i.balance !== undefined ? Number(i.balance) : totalOf(i)), 0),
+      refundDue: live.reduce((s, i) => s + Math.max(0, (Number(i.paidAmount) || 0) + credited(i) - totalOf(i)), 0),
     }
   }, [filtered, isQuote])
 
@@ -171,7 +186,7 @@ export default function InvoicesPage({ docType = 'invoice' }) {
             {loading ? 'Loading…' : `${filtered.length} ${noun(filtered.length)}${statusFilter !== 'all' || query ? ' (filtered)' : ''}`}
           </p>
         </div>
-        {!isInvoice && (
+        {(
           <button className={styles.primaryBtn} onClick={() => navigate(NEW_URL[docType])}>
             {icons.plus} New {info.lower}
           </button>
@@ -207,7 +222,9 @@ export default function InvoicesPage({ docType = 'invoice' }) {
         <div className={styles.summary}>
           <span>{isInvoice ? 'Billed' : isQuote ? 'Quoted' : 'Credited'}: <strong>{fmtMoney(summary.total)}</strong></span>
           {isInvoice && <span>Outstanding: <strong>{fmtMoney(summary.outstanding)}</strong></span>}
+          {isInvoice && summary.refundDue > 0.005 && <span>To refund / adjust: <strong>{fmtMoney(summary.refundDue)}</strong></span>}
           {isQuote && <span>Waiting for a reply: <strong>{fmtMoney(summary.outstanding)}</strong></span>}
+          {isQuote && summary.accepted > 0 && <span>Accepted, not invoiced yet: <strong>{fmtMoney(summary.accepted)}</strong></span>}
         </div>
       )}
 
@@ -290,7 +307,12 @@ export default function InvoicesPage({ docType = 'invoice' }) {
                     className={styles.actionBtn}
                     title="More actions"
                     aria-label={`More actions for ${inv.no}`}
-                    onClick={() => setMenuId(id => id === inv._id ? null : inv._id)}
+                    onClick={(e) => {
+                      // Near the bottom of the screen the menu opens upwards, so no item is cut off
+                      const r = e.currentTarget.getBoundingClientRect()
+                      setMenuUp(window.innerHeight - r.bottom < 300 && r.top > 300)
+                      setMenuId(id => id === inv._id ? null : inv._id)
+                    }}
                   >
                     {icons.more}
                   </button>
@@ -298,7 +320,7 @@ export default function InvoicesPage({ docType = 'invoice' }) {
                   {menuId === inv._id && (
                     <>
                       <div className={styles.menuOverlay} onClick={() => setMenuId(null)} />
-                      <div className={styles.rowMenu}>
+                      <div className={`${styles.rowMenu} ${menuUp ? styles.rowMenuUp : ''}`}>
                         <button onClick={act(() => navigate(`/tools/invoice-maker?edit=${inv._id}`))}>Edit</button>
                         {!isCredit && <button onClick={act(() => navigate(`/tools/invoice-maker?copy=${inv._id}`))}>Duplicate</button>}
                         {canPay && <button onClick={act(() => navigate(`/app/payments?invoice=${inv._id}`))}>Record payment</button>}

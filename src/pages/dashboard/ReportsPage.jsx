@@ -40,9 +40,13 @@ function periodKey(date, period) {
   const y = date.getFullYear()
   const m = date.getMonth() // 0-11
   if (period === 'monthly') return `${y}-${String(m + 1).padStart(2, '0')}`
-  if (period === 'quarterly') return `${y}-Q${Math.floor(m / 3) + 1}`
-  return `${y}`
+  // Quarters and years follow the Indian financial year (April to March), as GST returns and
+  // books do: Q1 = Apr–Jun, Q2 = Jul–Sep, Q3 = Oct–Dec, Q4 = Jan–Mar
+  const fy = m >= 3 ? y : y - 1
+  if (period === 'quarterly') return `${fy}-Q${Math.floor(((m + 9) % 12) / 3) + 1}`
+  return `${fy}`
 }
+const fyName = (fy) => `FY ${String(fy).slice(2)}-${String(Number(fy) + 1).slice(2)}`
 
 function periodLabel(key, period) {
   if (period === 'monthly') {
@@ -50,8 +54,8 @@ function periodLabel(key, period) {
     const d = new Date(Number(y), Number(m) - 1, 1)
     return d.toLocaleDateString('en-IN', { month: 'short', year: '2-digit' })
   }
-  if (period === 'quarterly') return key.replace('-', ' ')
-  return key
+  if (period === 'quarterly') { const [fy, q] = key.split('-'); return `${q} ${fyName(fy)}` }
+  return fyName(key)
 }
 
 // Builds the last N period buckets ending at the current period, in order
@@ -62,7 +66,7 @@ function buildBuckets(period, count) {
     let d
     if (period === 'monthly') d = new Date(now.getFullYear(), now.getMonth() - i, 1)
     else if (period === 'quarterly') d = new Date(now.getFullYear(), now.getMonth() - i * 3, 1)
-    else d = new Date(now.getFullYear() - i, 0, 1)
+    else d = new Date((now.getMonth() >= 3 ? now.getFullYear() : now.getFullYear() - 1) - i, 3, 1)
     const key = periodKey(d, period)
     buckets.push({ key, name: periodLabel(key, period), invoiced: 0, received: 0 })
   }
@@ -89,7 +93,8 @@ export default function ReportsPage() {
     const totalInvoiced = billable.reduce((s, i) => s + Math.max(0, invoiceTotal(i) - (Number(i.creditedAmount) || 0)), 0)
     const totalReceived = payments.filter(p => billableIds.has(p.invoiceId)).reduce((s, p) => s + (p.amount || 0), 0)
     const pending = billable.reduce((s, i) => s + (i.balance !== undefined ? Number(i.balance) : invoiceTotal(i)), 0)
-    const collectionRate = totalInvoiced > 0 ? (totalReceived / totalInvoiced) * 100 : 0
+    // Capped at 100%: after a credit note on a paid invoice, received can be more than billed
+    const collectionRate = totalInvoiced > 0 ? Math.min(100, (totalReceived / totalInvoiced) * 100) : 0
     const avgInvoice = billable.length > 0 ? totalInvoiced / billable.length : 0
     return { totalInvoiced, totalReceived, pending, collectionRate, avgInvoice }
   }, [invoices, payments])
@@ -315,7 +320,7 @@ export default function ReportsPage() {
                       cy="50%"
                       innerRadius={50}
                       outerRadius={80}
-                      paddingAngle={2}
+                      paddingAngle={statusBreakdown.length > 1 ? 2 : 0}
                     >
                       {statusBreakdown.map((s, i) => (
                         <Cell key={i} fill={STATUS_COLORS[s.status] || CHART_COLORS[i % CHART_COLORS.length]} />

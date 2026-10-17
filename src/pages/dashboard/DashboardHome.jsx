@@ -42,7 +42,8 @@ export default function DashboardHome() {
   const recentInvoices = useMemo(() => invoices.slice(0, RECENT_COUNT), [invoices])
 
   // Naam: business ka naam ho to wahi, warna email ka pehla hissa
-  const bizName = invoices.find(i => i.bizName)?.bizName
+  // Same name the sidebar shows: the business profile first, then the name on the latest invoice
+  const bizName = data?.businesses?.[0]?.name || invoices.find(i => i.bizName)?.bizName
   const greetName = bizName || (user?.email ? user.email.split('@')[0] : 'there')
   const today = new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
 
@@ -67,7 +68,13 @@ export default function DashboardHome() {
   const overdue = invoices.filter(i => displayStatus(i) === 'overdue')
   const overdueAmount = overdue.reduce((sum, i) => sum + (Number(i.balance) || 0), 0)
   const drafts = invoices.filter(i => i.status === 'draft').length
-  const collected = stats && stats.totalInvoiced > 0 ? Math.round((stats.received / stats.totalInvoiced) * 100) : 0
+  // Money owed back to clients: paid in full, then reduced by a credit note
+  const refundDue = stats?.refundDue !== undefined
+    ? Number(stats.refundDue) || 0
+    : invoices.filter(i => !['draft', 'cancelled'].includes(i.status))
+        .reduce((sum, i) => sum + Math.max(0, (Number(i.paidAmount) || 0) + (Number(i.creditedAmount) || 0) - (Number(i.grandTotal) || 0)), 0)
+  // Received can be more than billed after a credit note — never show more than 100%
+  const collected = stats && stats.totalInvoiced > 0 ? Math.min(100, Math.round((stats.received / stats.totalInvoiced) * 100)) : 0
 
   // Numbers count up when they first appear or change
   const pendingShown = useCountUp(stats?.pending)
@@ -112,7 +119,9 @@ export default function DashboardHome() {
             <div className={styles.meter} aria-hidden="true"><span style={{ width: `${collectedShown}%` }} /></div>
             <p className={styles.heroNote}>
               {stats.totalInvoiced > 0
-                ? `${collected}% collected — ${fmt(stats.received)} of ${fmt(stats.totalInvoiced)} billed`
+                ? refundDue > 0.005
+                  ? `${fmt(stats.received)} received on ${fmt(stats.totalInvoiced)} billed (after credit notes) — ${fmt(refundDue)} to refund or adjust for clients`
+                  : `${collected}% collected — ${fmt(stats.received)} of ${fmt(stats.totalInvoiced)} billed`
                 : 'Your numbers will appear here once you create an invoice'}
             </p>
           </div>
