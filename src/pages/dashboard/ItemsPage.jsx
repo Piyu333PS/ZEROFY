@@ -53,7 +53,7 @@ export default function ItemsPage() {
     e.preventDefault()
     if (!form.name.trim()) return
     const gst = Number(form.gstRate)
-    if (form.gstRate === '' || !GST_RATES.includes(gst)) { setError(`GST % must be one of ${GST_RATES.join(', ')}.`); return }
+    if (form.gstRate === '' || !GST_RATES.includes(gst)) { setError(`GST rate is not valid. Use one of: ${GST_RATES.join('%, ')}%.`); return }
     if (form.rate !== '' && (isNaN(Number(form.rate)) || Number(form.rate) < 0)) { setError('Rate cannot be negative.'); return }
     const codeMsg = hsnError(form.hsnSac, form.type)
     if (codeMsg) { setError(codeMsg + '.'); return }
