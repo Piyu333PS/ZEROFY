@@ -97,7 +97,7 @@ export default function DashboardLayout() {
   const msLeft = isPro && status.proExpiry && !status.autoRenew ? new Date(status.proExpiry).getTime() - Date.now() : null
   const renewIn = msLeft !== null && msLeft < 7 * 86400000 ? Math.max(0, Math.ceil(msLeft / 86400000)) : null
   const bizName = data?.businesses?.[0]?.name
-  const initial = (bizName || user.email || '?').trim()[0]?.toUpperCase() || '?'
+  const initial = data ? ((bizName || user.email || '?').trim()[0]?.toUpperCase() || '?') : ''
   const linkClass = ({ isActive }) => (isActive ? `${styles.navLink} ${styles.active}` : styles.navLink)
 
   return (
@@ -157,7 +157,9 @@ export default function DashboardLayout() {
           <div className={styles.account}>
             <span className={styles.avatar}>{initial}</span>
             <div className={styles.accountText}>
-              <div className={styles.accountName}>{bizName || user.email?.split('@')[0]}</div>
+              {/* Wait for the business name instead of flashing the email prefix first
+                  (on a fresh load of Settings the email name showed, then changed to the business name) */}
+              <div className={styles.accountName}>{data ? (bizName || user.email?.split('@')[0]) : '\u00a0'}</div>
               <div className={styles.accountMail}>{isPro ? 'Pro plan' : user.email}</div>
             </div>
             <button className={styles.logoutBtn} onClick={logout} title="Log out" aria-label="Log out">{icons.logout}</button>
